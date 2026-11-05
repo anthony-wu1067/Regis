@@ -7,8 +7,8 @@ const version = fs.readFileSync(path.join(proj, 'VERSION'), 'utf8').trim();
 fs.rmSync(dist, { recursive: true, force: true }); fs.mkdirSync(dist, { recursive: true });
 const sha = (b) => crypto.createHash('sha256').update(b).digest('hex');
 
-const touchCss = '<style id="touch">body{padding-top:calc(22px + env(safe-area-inset-top,0px));padding-bottom:calc(64px + env(safe-area-inset-bottom,0px));-webkit-text-size-adjust:100%;overscroll-behavior-y:none}' +
-  '@media (pointer:coarse){.btn,button,summary,[data-act]{min-height:40px}.btn.sm,button.sm{min-height:36px;padding-top:8px;padding-bottom:8px}.chk{min-width:30px;min-height:30px}input,select,textarea{font-size:16px!important}input[type=checkbox],input[type=radio]{min-width:22px;min-height:22px}.cd .addv,.dn,.md{min-height:0}}</style>';
+const touchCss = '<style id="touch">body{-webkit-text-size-adjust:100%;overscroll-behavior-y:none}' +
+  '@media (pointer:coarse){.btn,summary{min-height:40px}.btn.sm{min-height:34px}.chk{min-width:30px;min-height:30px}input,select,textarea{font-size:16px!important}input[type=checkbox],input[type=radio]{min-width:22px;min-height:22px}.cd .addv,.dn,.md{min-height:0}}</style>';
 (async () => {
   await esbuild.build({ entryPoints: [path.join(root, 'src/entry.js')], bundle: true, minify: true, format: 'iife', platform: 'browser', target: ['safari15'], outfile: path.join(dist, 'regis-lib.js'),
     alias: { crypto: path.join(root, 'src/stub.js'), http: path.join(root, 'src/stub.js') }, logLevel: 'error' });
