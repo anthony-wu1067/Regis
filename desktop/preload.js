@@ -10,6 +10,13 @@ contextBridge.exposeInMainWorld('regisBridge', {
   notify: (title, body) => call('app:notify', title, body),
   saveUpdateUrl: (u) => call('app:saveUpdateUrl', u), updateCheck: () => call('app:updateCheck'), updateApply: () => call('app:updateApply'),
   onUpdate: (cb) => { ipcRenderer.on('update:ready', (_e, v) => { try { cb(String(v)); } catch (_) {} }); },
+  browser: {
+    state: () => call('browser:state'), open: (u) => call('browser:open', u), close: (id) => call('browser:close', id), activate: (id) => call('browser:activate', id),
+    go: (id, text) => call('browser:go', id, text), back: (id) => call('browser:back', id), forward: (id) => call('browser:forward', id), reload: (id) => call('browser:reload', id), stop: (id) => call('browser:stop', id),
+    fill: (id, user, pass) => call('browser:fill', id, user, pass), onCred: (cb) => { ipcRenderer.on('browser:cred', (_e, c) => { try { cb(c); } catch (_) {} }); },
+    bounds: (b) => call('browser:bounds', b), show: (v) => call('browser:show', v), shield: (on) => call('browser:shield', on),
+    onState: (cb) => { ipcRenderer.on('browser:state', (_e, s) => { try { cb(s); } catch (_) {} }); }
+  },
   setMini: (on) => call('app:mini', on), getMini: () => call('app:miniState'),
   onMini: (cb) => { ipcRenderer.on('mini:state', (_e, on) => { try { cb(!!on); } catch (_) {} }); },
   onCapture: (cb) => { ipcRenderer.on('capture:add', (_e, list) => { (Array.isArray(list) ? list : []).forEach((t) => { try { cb(String(t)); } catch (_) {} }); }); }

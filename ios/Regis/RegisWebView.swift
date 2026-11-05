@@ -20,6 +20,9 @@ struct RegisWebView: UIViewRepresentable {
         web.backgroundColor = UIColor(red: 0.043, green: 0.039, blue: 0.071, alpha: 1)
         web.scrollView.contentInsetAdjustmentBehavior = .never
         web.scrollView.bounces = false
+        web.scrollView.minimumZoomScale = 1
+        web.scrollView.maximumZoomScale = 1
+        web.scrollView.pinchGestureRecognizer?.isEnabled = false
         web.allowsBackForwardNavigationGestures = false
         web.navigationDelegate = context.coordinator
         web.uiDelegate = context.coordinator

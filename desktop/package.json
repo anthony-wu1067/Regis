@@ -1,6 +1,6 @@
 {
   "name": "regis",
-  "version": "1.3.3",
+  "version": "1.6.1",
   "description": "Regis — your personal command center for mail, calendar, Drive and daily plan",
   "main": "main.js",
   "author": "Regis",
@@ -10,7 +10,8 @@
     "start": "node scripts/make-index.js && electron .",
     "test": "node test/run.js && node test/sync.test.js && node test/shim.test.js",
     "dist": "node scripts/make-index.js && electron-builder",
-    "shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-shortcut.ps1"
+    "shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-shortcut.ps1",
+    "test:browser": "xvfb-run -a electron --no-sandbox test/browser.test.js"
   },
   "devDependencies": {
     "electron": "^45.0.0",

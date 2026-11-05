@@ -30,7 +30,7 @@ async function device(browser, opts, base, calls) {
   const ctx = await browser.newContext(opts); await mockGoogle(ctx, calls);
   await ctx.addInitScript((sec) => { try { if (!localStorage.getItem('regis-sec')) localStorage.setItem('regis-sec', JSON.stringify(sec)); } catch (_) {} }, SEC);
   const page = await ctx.newPage(); const errs = []; page.on('pageerror', (e) => errs.push(e.message));
-  await page.goto(base); await page.waitForSelector('#p-setup', { timeout: 15000 }); await page.waitForTimeout(800);
+  await page.goto(base); await page.waitForSelector('#p-setup', { state: 'attached', timeout: 15000 }); await page.evaluate(() => window.regisApp && 0); await page.evaluate(() => { try { localStorage.setItem('regis-view','work'); } catch (_) {} }); await page.reload(); await page.waitForSelector('#p-setup', { state: 'visible', timeout: 15000 }); await page.waitForTimeout(800);
   return { ctx, page, errs };
 }
 (async () => {
@@ -75,7 +75,7 @@ async function device(browser, opts, base, calls) {
   // returning from Google: ?code=…&state=… completes sign-in and stores the refresh token
   { const ctx = await browser.newContext(); await mockGoogle(ctx);
     await ctx.addInitScript(() => { try { if (!localStorage.getItem('regis-sec')) { localStorage.setItem('regis-sec', JSON.stringify({ gClientId: 'cid', gSecret: 'sec' })); localStorage.setItem('regis-pkce', JSON.stringify({ verifier: 'v', state: 'w:xyz', redirect: location.origin + '/callback.html' })); } } catch (_) {} });
-    const pg = await ctx.newPage(); await pg.goto(base + '?code=abc&state=w:xyz'); await pg.waitForSelector('#p-setup'); await pg.waitForTimeout(1500);
+    const pg = await ctx.newPage(); await pg.goto(base + '?code=abc&state=w:xyz'); await pg.waitForSelector('#p-setup',{state:'attached'}); await pg.waitForTimeout(1500);
     const sec = await pg.evaluate(() => JSON.parse(localStorage.getItem('regis-sec')));
     ok(sec.gRefresh === 'RT' && sec.gEmail === 'me@example.com' && !(await pg.evaluate(() => location.search)), 'sign-in redirect completes, token saved, URL cleaned');
     const bad = await ctx.newPage(); await bad.goto(base + '?code=abc&state=WRONG'); await bad.waitForTimeout(800); ok(true, 'wrong state does not crash'); }

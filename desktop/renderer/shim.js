@@ -57,6 +57,6 @@
     syncSet: function (on) { return ready().then(function () { meta.syncOn = !!on; flush(); if (on) return engine.start(60000).catch(function () {}).then(function () { return fullStatus(); }); engine.stop(); return fullStatus(); }); },
     syncNow: function () { return ready().then(function () { return engine.sync().then(function () { return fullStatus(); }); }); },
     onSync: function (cb) { syncCbs.push(cb); },
-    snapshot: B.snapshot, saveUpdateUrl: B.saveUpdateUrl, updateCheck: B.updateCheck, updateApply: B.updateApply, onUpdate: B.onUpdate, openExternal: B.openExternal
+    snapshot: B.snapshot, saveUpdateUrl: B.saveUpdateUrl, updateCheck: B.updateCheck, updateApply: B.updateApply, onUpdate: B.onUpdate, openExternal: B.openExternal, browser: B.browser || null
   };
 })();

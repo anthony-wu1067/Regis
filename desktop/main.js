@@ -7,8 +7,9 @@ const { Anthropic } = require('./lib/anthropic');
 const { Canvas, normHost } = require('./lib/canvas');
 const { Mini } = require('./lib/mini');
 const { Updater } = require('./lib/updater');
+const { BrowserHost } = require('./lib/browser');
 
-let runningVersion = null;
+let runningVersion = null, browserHost = null;
 let win = null, tray = null, quitting = false, capWin = null, mini = null, updater = null;
 const BUNDLED_PAGE = path.join(__dirname, 'renderer', 'index.html');
 const MINI_KEY = 'CommandOrControl+Shift+M';
@@ -126,6 +127,22 @@ app.whenReady().then(() => {
   ipcMain.handle('app:saveUpdateUrl', wrap((u) => { store.setMeta('updateUrl', String(u || '').trim()); return true; }));
   ipcMain.handle('app:updateCheck', wrap(() => runCheck()));
   ipcMain.handle('app:updateApply', wrap(() => { const st = updater.current(); if (!st || !win) return false; runningVersion = st.version; win.loadFile(path.join(st.dir, 'index.html')); return true; }));
+  browserHost = new BrowserHost({ getWin: () => win, onCred: (c) => { if (win && !win.isDestroyed()) win.webContents.send('browser:cred', c); }, shield: store.getMeta('bwShield', '1') !== '0', onPersist: (urls) => store.setMeta('bwTabs', JSON.stringify(urls)) });
+  const bw = browserHost;
+  ipcMain.handle('browser:state', wrap(() => { if (!bw.tabs.length) { let urls = []; try { urls = JSON.parse(store.getMeta('bwTabs', '[]') || '[]'); } catch (_) {} bw.init(); if (urls.length) bw.restore(urls); else bw.open(''); } return bw.snapshot(); }));
+  ipcMain.handle('browser:open', wrap((u) => bw.open(u)));
+  ipcMain.handle('browser:close', wrap((id) => bw.close(+id)));
+  ipcMain.handle('browser:activate', wrap((id) => bw.activate(+id)));
+  ipcMain.handle('browser:go', wrap((id, text) => bw.go(+id, text)));
+  ipcMain.handle('browser:back', wrap((id) => bw.back(+id)));
+  ipcMain.handle('browser:forward', wrap((id) => bw.forward(+id)));
+  ipcMain.handle('browser:reload', wrap((id) => bw.reload(+id)));
+  ipcMain.handle('browser:stop', wrap((id) => bw.stop(+id)));
+  ipcMain.handle('browser:bounds', wrap((b) => bw.setBounds(b || {})));
+  ipcMain.handle('browser:show', wrap((v) => bw.show(!!v)));
+  ipcMain.on('bw:cred', (e, d) => { try { bw.cred(e.sender, d); } catch (_) {} });
+  ipcMain.handle('browser:fill', wrap((id, user, pass) => bw.fill(+id, user, pass)));
+  ipcMain.handle('browser:shield', wrap((on) => { store.setMeta('bwShield', on ? '1' : '0'); return bw.setShield(!!on); }));
   ipcMain.handle('app:mini', wrap((on) => setMini(!!on)));
   ipcMain.handle('app:miniState', wrap(() => !!(mini && mini.on)));
   ipcMain.handle('app:notify', wrap((title, body) => {
@@ -147,7 +164,7 @@ app.whenReady().then(() => {
   } catch (_) { /* tray unsupported: closing the window will still just hide it */ }
   try { globalShortcut.register(MINI_KEY, () => { showWindow(); setMini(!(mini && mini.on)); }); } catch (_) { /* shortcut unsupported */ }
   try { if (!globalShortcut.register(CAPTURE_KEY, openCapture)) console.warn('Quick capture shortcut is taken by another app.'); } catch (_) { /* shortcut unsupported */ }
-  app.on('before-quit', () => { quitting = true; globalShortcut.unregisterAll(); store.flush(); });
+  app.on('before-quit', () => { quitting = true; try { browserHost && browserHost.destroy(); } catch (_) {} globalShortcut.unregisterAll(); store.flush(); });
   app.on('activate', showWindow);
 });
 app.on('window-all-closed', () => { /* stay alive in tray */ });

@@ -66,3 +66,20 @@ Open **Setup → Sync across my devices** on every device, signed in to the same
 
 ## Developing
 `cd desktop && npm install && npm test` (desktop + sync + runtime tests) · `cd web && npm install && node build.js && node test/e2e.js` (needs Playwright's Chromium) · the page tests live with the page source.
+
+
+## 1.4 features
+- **Views**: Home (executive dial), Workspace, Browser. Keys H / W / T (TV).
+- **TV mode**: Home view -> TV button, or open the web app with `?tv=1`. Cast the browser tab / screen via Chromecast, AirPlay or HDMI; Esc exits.
+- **.ics import**: Calendar -> Import .ics, name + colour. Pencil icon renames/removes.
+- **Idle pause**: Appearance -> Performance. Animations pause after N idle minutes.
+- **Browser** (desktop app only): own tab strip, shield counter, Google sign-in persisted. Needs the desktop installer re-run once (main.js/preload.js changed).
+
+## 1.5 customisation
+Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & chrome, Colour & glow, Time & format, Motion & effects and Phone sections, plus a search box and "Reset customisations". Settings are stored on the device (`regis-opts`).
+
+## 1.6 look, Vault and browser
+- **Look**: Appearance → Panels & chrome has *Design style* (Refined is the quieter default, Expressive keeps the neon), *Depth* (Layered 3D or Flat), *Depth strength*, *Tilt on hover*, and the Regis constellation switches and brightness.
+- **Vault** (Connect & Setup → Vault, or the Vault button in the header): logins and private notes encrypted in the page with a key made from your master password (PBKDF2 250,000 rounds, then AES-GCM). Only scrambled text is saved to the synced `vault` collection. The master password is never stored; if it is forgotten the Vault cannot be recovered. Auto-lock time is in Appearance → Vault & privacy.
+- **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
+- Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
