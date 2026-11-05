@@ -67,7 +67,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1280, height: 860, minWidth: 420, minHeight: 600, backgroundColor: '#0a0713', title: 'Regis', autoHideMenuBar: true,
     icon: path.join(__dirname, 'assets', 'icon.png'),
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: true }
   });
   const staged = updater && updater.current();      // a newer interface downloaded over the air, if any
   win.loadFile(staged ? path.join(staged.dir, 'index.html') : BUNDLED_PAGE);

@@ -1,7 +1,7 @@
 {
   "name": "regis",
-  "version": "1.0.0",
-  "description": "Regis \u2014 your personal command center for mail, calendar, Drive and daily plan",
+  "version": "1.0.3",
+  "description": "Regis — your personal command center for mail, calendar, Drive and daily plan",
   "main": "main.js",
   "author": "Regis",
   "license": "UNLICENSED",

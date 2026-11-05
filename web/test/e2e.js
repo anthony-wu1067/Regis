@@ -82,7 +82,7 @@ async function device(browser, opts, base, calls) {
   // over-the-air: the site publishes a newer version.json -> the app notices and offers a reload
   { const D = await device(browser, { viewport: { width: 1000, height: 800 } }, base); A.page = D.page;
     const stat = await A.page.evaluate(async () => (await window.regisBridge.getStatus()).version);
-    ok(stat === '1.0.0', 'web app knows its version (' + stat + ')');
+    ok(stat === require('fs').readFileSync(__dirname + '/../../VERSION','utf8').trim(), 'web app knows its version (' + stat + ')');
     const cur = await A.page.evaluate(() => window.regisBridge.updateCheck()); ok(cur.status === 'current', 'no update when versions match');
     const vf = path.join(dist, 'version.json'), orig = fs.readFileSync(vf, 'utf8'); fs.writeFileSync(vf, JSON.stringify({ version: '9.9.9', files: {} }));
     const nu = await A.page.evaluate(() => window.regisBridge.updateCheck()); fs.writeFileSync(vf, orig); ok(nu.status === 'staged' && nu.version === '9.9.9', 'newer version detected');
