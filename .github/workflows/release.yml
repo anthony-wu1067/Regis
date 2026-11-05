@@ -1,0 +1,91 @@
+name: Build Regis (iPhone/iPad app + web + update feed)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: regis-release
+  cancel-in-progress: false
+
+jobs:
+  ipa:
+    name: Build the .ipa (macOS)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: v
+        run: echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Point the app at your site
+        run: |
+          OWNER_LC=$(echo "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          sed -i '' "s|__REGIS_URL__|https://${OWNER_LC}.github.io/${REPO_NAME}/|" ios/Regis/Info.plist
+          grep -A1 RegisURL ios/Regis/Info.plist
+      - name: Generate the Xcode project
+        working-directory: ios
+        run: xcodegen generate
+      - name: Build (unsigned, AltStore signs it on your device)
+        working-directory: ios
+        run: |
+          xcodebuild -project Regis.xcodeproj -scheme Regis -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$PWD/build/Regis.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            archive | tail -n 40
+      - name: Package Regis.ipa
+        working-directory: ios
+        run: |
+          rm -rf Payload Regis.ipa && mkdir Payload
+          cp -R build/Regis.xcarchive/Products/Applications/Regis.app Payload/
+          test -d Payload/Regis.app/PlugIns/RegisWidget.appex
+          zip -qry Regis.ipa Payload
+          ls -la Regis.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Regis-ipa
+          path: ios/Regis.ipa
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.v.outputs.version }}
+          name: Regis ${{ steps.v.outputs.version }}
+          files: ios/Regis.ipa
+          make_latest: true
+
+  site:
+    name: Publish web app + update feed
+    needs: ipa
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/download-artifact@v4
+        with: { name: Regis-ipa, path: ipa }
+      - name: Build the web app and the desktop update bundle
+        working-directory: web
+        run: npm install --no-audit --no-fund && node build.js
+      - name: Write the AltStore source
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          IPA: ipa/Regis.ipa
+          OUT: web/dist/altstore.json
+        run: node scripts/make-altstore.js
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: web/dist }
+      - id: deploy
+        uses: actions/deploy-pages@v4
