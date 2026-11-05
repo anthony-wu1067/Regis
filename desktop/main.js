@@ -8,6 +8,7 @@ const { Canvas, normHost } = require('./lib/canvas');
 const { Mini } = require('./lib/mini');
 const { Updater } = require('./lib/updater');
 
+let runningVersion = null;
 let win = null, tray = null, quitting = false, capWin = null, mini = null, updater = null;
 const BUNDLED_PAGE = path.join(__dirname, 'renderer', 'index.html');
 const MINI_KEY = 'CommandOrControl+Shift+M';
@@ -70,13 +71,15 @@ function createWindow() {
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: true }
   });
   const staged = updater && updater.current();      // a newer interface downloaded over the air, if any
+  runningVersion = staged ? staged.version : app.getVersion();
   win.loadFile(staged ? path.join(staged.dir, 'index.html') : BUNDLED_PAGE);
-  if (staged) win.webContents.once('did-fail-load', () => { updater.clear(); if (win && !win.isDestroyed()) win.loadFile(BUNDLED_PAGE); });
+  if (staged) win.webContents.once('did-fail-load', () => { updater.clear(); if (win && !win.isDestroyed()) win.loadFile(BUNDLED_PAGE); runningVersion = app.getVersion(); });
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
   win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('file:')) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
   win.on('close', (e) => { if (!quitting) { e.preventDefault(); win.hide(); } }); // keep running in the tray so autopilot + scheduled sends continue
   win.webContents.on('did-finish-load', () => { if (pendingCaptures.length) win.webContents.send('capture:add', pendingCaptures.splice(0)); });
   win.on('closed', () => { win = null; if (mini) mini.reset(); });
+  win.webContents.on('did-finish-load', () => { if (updater && runningVersion) { const p = updater.pending(runningVersion); if (p) win.webContents.send('update:ready', p.version); } });
   win.webContents.on('did-finish-load', () => { if (mini && mini.on) win.webContents.send('mini:state', true); });
 }
 
@@ -88,7 +91,8 @@ app.whenReady().then(() => {
   const canvas = new Canvas({ creds: () => ({ host: store.getMeta('cvHost', ''), token: store.getSecret('cvToken') }) });
   updater = new Updater({ dir: path.join(app.getPath('userData'), 'bundle'), bundledVersion: app.getVersion() });
   const updateUrl = () => store.getMeta('updateUrl', '') || '';
-  const runCheck = async () => { const r = await updater.check(updateUrl()); if (r.status === 'staged' && win && !win.isDestroyed()) win.webContents.send('update:ready', r.version); return r; };
+  const notifyPending = () => { const p = updater.pending(runningVersion); if (p && win && !win.isDestroyed()) win.webContents.send('update:ready', p.version); return p; };
+  const runCheck = async () => { let r = await updater.check(updateUrl()); const p = notifyPending(); if (p) r = { status: 'staged', version: p.version }; return r; };
   const claude = new Anthropic({ getKey: () => store.getSecret('anthropicKey'), onUsage: (t) => store.addUsage(t) });
 
   session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) => cb(perm === 'media'));
@@ -105,7 +109,7 @@ app.whenReady().then(() => {
     googleConfigured: !!(store.getMeta('gClientId', '') && store.getSecret('gSecret')), googleConnected: !!store.getSecret('gRefresh'),
     googleEmail: store.getMeta('gEmail', ''), anthropicKey: !!store.getSecret('anthropicKey'), usage: store.monthUsage(),
     canvasConnected: !!(store.getMeta('cvHost', '') && store.getSecret('cvToken')), canvasHost: (store.getMeta('cvHost', '') || '').replace(/^https?:\/\//, ''),
-    openAtLogin: app.getLoginItemSettings().openAtLogin, voice: true, version: (updater.current() || { version: app.getVersion() }).version, updateUrl: updateUrl()
+    openAtLogin: app.getLoginItemSettings().openAtLogin, voice: true, version: runningVersion || app.getVersion(), updateUrl: updateUrl()
   })));
   ipcMain.handle('app:saveGoogle', wrap(({ clientId, clientSecret }) => {
     if (clientId) store.setMeta('gClientId', String(clientId).trim()); if (clientSecret) store.setSecret('gSecret', String(clientSecret).trim()); return true; }));
@@ -121,7 +125,7 @@ app.whenReady().then(() => {
   ipcMain.handle('app:saveKey', wrap((k) => { store.setSecret('anthropicKey', String(k || '').trim()); return true; }));
   ipcMain.handle('app:saveUpdateUrl', wrap((u) => { store.setMeta('updateUrl', String(u || '').trim()); return true; }));
   ipcMain.handle('app:updateCheck', wrap(() => runCheck()));
-  ipcMain.handle('app:updateApply', wrap(() => { const st = updater.current(); if (!st || !win) return false; win.loadFile(path.join(st.dir, 'index.html')); return true; }));
+  ipcMain.handle('app:updateApply', wrap(() => { const st = updater.current(); if (!st || !win) return false; runningVersion = st.version; win.loadFile(path.join(st.dir, 'index.html')); return true; }));
   ipcMain.handle('app:mini', wrap((on) => setMini(!!on)));
   ipcMain.handle('app:miniState', wrap(() => !!(mini && mini.on)));
   ipcMain.handle('app:notify', wrap((title, body) => {

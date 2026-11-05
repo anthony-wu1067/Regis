@@ -23,6 +23,8 @@ class Updater {
       return { version: meta.version, dir: d };
     } catch (_) { return null; }
   }
+  /* a downloaded bundle newer than the interface currently on screen (or null) */
+  pending(running) { const c = this.current(); return c && cmp(c.version, running) > 0 ? c : null; }
   clear() { try { fs.rmSync(path.join(this.dir, 'current.json'), { force: true }); } catch (_) {} }
   async check(baseUrl) {
     if (!baseUrl) throw err('no_url', 'Add your Regis site address to receive updates.');

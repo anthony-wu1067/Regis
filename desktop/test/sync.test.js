@@ -90,6 +90,7 @@ function device(name, legacy) {
     ok((await up.check('https://x.github.io/regis/')).status === 'staged' && up.current().version === '1.0.1', 'newer bundle is downloaded and verified');
     ok(fs.readFileSync(path.join(up.current().dir, 'index.html'), 'utf8') === '<html>v1.0.1</html>', 'files written');
     ok((await up.check('https://x.github.io/regis/')).status === 'current', 'same version: nothing to do');
+    ok(up.pending('1.0.0') && up.pending('1.0.0').version === '1.0.1' && up.pending('1.0.1') === null, 'a downloaded bundle is still reported as pending until it is on screen');
     served = mk('1.0.2'); served.files['shim.js'].sha256 = '0'.repeat(64);
     let bad = null; try { await up.check('https://x.github.io/regis'); } catch (e) { bad = e; } ok(bad && bad.code === 'bad_hash' && up.current().version === '1.0.1', 'tampered bundle refused, old one kept');
     served = mk('1.1.0', { minShell: 2 }); ok((await up.check('https://x.github.io/regis/')).status === 'needs_installer', 'bundle needing a newer shell is not installed');
