@@ -1,0 +1,9 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Regis sign-in</title>
+<body style="font:16px system-ui;background:#0b0a12;color:#eee;display:grid;place-items:center;height:100vh;margin:0"><p>Finishing sign-in…</p>
+<script>
+/* Google sends you back here. The iPhone/iPad app hands the code to the app; a browser goes back to Regis. */
+(function () {
+  var q = location.search, st = new URLSearchParams(q).get('state') || '';
+  if (st.indexOf('n:') === 0) location.replace('regis://auth' + q); else location.replace('./' + q);
+})();
+</script>

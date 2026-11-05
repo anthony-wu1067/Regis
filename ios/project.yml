@@ -1,0 +1,43 @@
+name: Regis
+options:
+  bundleIdPrefix: app.regis
+  deploymentTarget: { iOS: "16.0" }
+  createIntermediateGroups: true
+settings:
+  base:
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "10000"
+    SWIFT_VERSION: "5.9"
+    TARGETED_DEVICE_FAMILY: "1,2"
+targets:
+  Regis:
+    type: application
+    platform: iOS
+    sources:
+      - { path: Regis, excludes: ["Info.plist"] }
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.regis.mobile
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_FILE: Regis/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+    dependencies:
+      - target: RegisWidget
+        embed: true
+  RegisWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - { path: RegisWidget, excludes: ["Info.plist"] }
+      - Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.regis.mobile.widget
+        INFOPLIST_FILE: RegisWidget/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        SKIP_INSTALL: YES
+schemes:
+  Regis:
+    build: { targets: { Regis: all, RegisWidget: all } }
+    archive: { config: Release }

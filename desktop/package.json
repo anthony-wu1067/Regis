@@ -1,0 +1,51 @@
+{
+  "name": "regis",
+  "version": "1.0.0",
+  "description": "Regis \u2014 your personal command center for mail, calendar, Drive and daily plan",
+  "main": "main.js",
+  "author": "Regis",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build:page": "node scripts/make-index.js",
+    "start": "node scripts/make-index.js && electron .",
+    "test": "node test/run.js && node test/sync.test.js && node test/shim.test.js",
+    "dist": "node scripts/make-index.js && electron-builder",
+    "shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-shortcut.ps1"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.0.0",
+    "jsdom": "^26.0.0"
+  },
+  "build": {
+    "appId": "app.regis.desktop",
+    "productName": "Regis",
+    "files": [
+      "main.js",
+      "preload.js",
+      "capture-preload.js",
+      "lib/**",
+      "renderer/**",
+      "assets/**"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.png"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Regis"
+    }
+  }
+}
