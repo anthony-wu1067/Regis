@@ -84,6 +84,16 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.7.6 iPhone overhaul, folder multi-select, playlist songs fix
+
+- **iPhone layout:** the four pages (Home, Workspace, Music, Browser) now switch from an iOS-style bottom tab bar, so nothing important sits under the camera notch. The top is just a bell and a menu button (Daily brief and Appearance moved into the menu). Titles are large and left-aligned, Workspace sections are quiet pills, the Browser address bar sits clear of the notch, and Music has a slim Apple-Music-style mini player.
+- **Folder multi-select:** in the Music library, tap the tick button, pick playlists (or use Unsorted / All, or the circle on a folder), then Move to… a folder or a new one.
+
+### Playlist songs fix
+
+- Spotify renamed its playlist-songs endpoint in 2026 and only lets personal apps read playlists you own or collaborate on. Regis now uses the new endpoint (with the old one as a fallback), loads up to 500 songs, and explains clearly when a playlist belongs to someone else.
+- Play commands are de-duplicated so a double tap can't restart a song. The web player now reports playback errors and blocked autoplay instead of failing silently.
+
 ## 1.7.5 (continued) Lyrics card and Spotify audio inside Regis
 
 - **Lyrics** now live in a small card in the right-hand column of Music (five lines, the current one highlighted). The expand button (or the lyrics button in the player bar) opens the full lyrics page in the main pane, time-synced; click a line to jump there. On phones the player bar button opens that page directly.
