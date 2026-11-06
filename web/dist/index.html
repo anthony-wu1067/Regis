@@ -2064,6 +2064,72 @@ html.lite .bw-lay i{filter:none!important;translate:none!important}
   html.mob .sp-sc{padding:4px 16px 32px}
   html.mob .sp-nav{padding:4px;gap:2px;border-radius:14px}html.mob .sp-nav button{padding:8px 10px;font-size:13px;border-radius:10px}
 }
+
+/* 1.7.7: fixed page switcher, bookmarks bar, sidebar folders, sidebar editor */
+html:not(.mob):not(.tv) #vsw{position:fixed;top:6px;right:calc(max(14px,env(safe-area-inset-right,0px)) + 100% - 100vw);z-index:30;margin:0;height:34px;box-sizing:border-box;padding:3px;align-items:center;box-shadow:0 6px 20px -10px rgba(0,0,0,.6)}
+html:not(.mob):not(.tv) #vsw button{min-height:0;height:28px;padding:0 14px;display:inline-flex;align-items:center}
+html:not(.mob):not(.tv):not([data-view="music"]):not([data-view="browser"]) .top .right{padding-top:34px}
+html.tv #vsw{display:none!important}
+.bw-bm{display:flex;align-items:center;gap:2px;padding:3px 10px;min-height:30px;box-sizing:border-box;background:var(--bg);border-bottom:1px solid var(--line);flex:none;overflow:hidden}
+html.x-bwbm .bw-bm,html.mob .bw-bm{display:none}
+.bw-bm .bm-w{position:relative;display:inline-flex;flex:none;max-width:180px}
+.bw-bm .bm{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:7px;max-width:180px;height:24px;padding:0 9px;border-radius:7px;color:var(--fg2);font:500 12px/1 var(--f-body);cursor:pointer;white-space:nowrap;flex:none;transition:background .15s,color .15s}
+.bw-bm .bm:hover,.bw-bm .bm[aria-expanded="true"],.bw-bm .bm[aria-pressed="true"]{background:color-mix(in srgb,var(--fg) 10%,transparent);color:var(--fg)}
+.bw-bm .bm:focus-visible,.bw-bmpop button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.bw-bm .bm span{overflow:hidden;text-overflow:ellipsis}
+.bw-bm .bm i,.bw-bmpop i{flex:none;width:16px;height:16px;border-radius:4px;display:grid;place-items:center;font:700 9.5px/1 var(--f-body);font-style:normal;color:#14101f;background:var(--c,var(--accent))}
+.bw-bm .bm svg,.bw-bmpop svg{flex:none;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
+.bw-bm .bm.fd svg,.bw-bmpop .fd svg{color:#ffcf6b;fill:color-mix(in srgb,#ffcf6b 22%,transparent)}
+.bw-bm .bm.tool{color:var(--fg3);padding:0 8px}
+.bw-bm .bm-x{position:absolute;right:-3px;top:-2px;width:15px;height:15px;border:0;border-radius:50%;background:var(--bad);color:#fff;font:700 10px/15px var(--f-body);padding:0;cursor:pointer;z-index:2}
+.bw-bm .bm-e{color:var(--fg3);font:12px var(--f-body);padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.bw-bm .grow{flex:1;min-width:8px}
+.bw-bmpop{position:fixed;z-index:70;min-width:230px;max-width:340px;max-height:min(60vh,520px);overflow:auto;padding:6px;border-radius:12px;background:var(--bg);border:1px solid var(--line2);box-shadow:0 18px 50px -12px rgba(0,0,0,.75)}
+.bw-bmpop button{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px;border-radius:8px;color:var(--fg);font:13px/1.2 var(--f-body);cursor:pointer}
+.bw-bmpop button:hover{background:var(--accent-soft)}
+.bw-bmpop button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bw-bmpop small{color:var(--fg3);font-size:11px;flex:none;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bw-bmpop hr{border:0;border-top:1px solid var(--line);margin:5px 4px}
+.bw-bmpop .bmp-e{margin:6px 10px;color:var(--fg3);font-size:12.5px}
+/* sidebar folders: a clean folder glyph that opens into a tray of its shortcuts */
+.bw-sf{display:flex;flex-direction:column;align-items:center;gap:0;border-radius:15px;transition:background .25s}
+.bw-sf.open{background:color-mix(in srgb,var(--fg) 6%,transparent);box-shadow:inset 0 0 0 1px var(--line)}
+.bw-ic.bw-sfb b{background:none!important;color:#ffcf6b}
+.bw-ic.bw-sfb b svg{width:62%;height:62%;fill:color-mix(in srgb,#ffcf6b 20%,transparent);stroke:#ffcf6b;stroke-width:1.6}
+.bw-sf.open .bw-ic.bw-sfb{border-color:color-mix(in srgb,#ffcf6b 55%,transparent)}
+.bw-sfb .bw-chev{position:absolute;left:50%;bottom:2px;width:5px;height:5px;margin-left:-3px;border-right:1.5px solid var(--fg3);border-bottom:1.5px solid var(--fg3);transform:rotate(45deg);transition:transform .25s}
+.bw-sf.open .bw-sfb .bw-chev{transform:translateY(2px) rotate(225deg)}
+.bw-sfl{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s cubic-bezier(.2,.7,.2,1)}
+.bw-sf.open .bw-sfl{grid-template-rows:1fr}
+.bw-sfl>div{overflow:hidden;min-height:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+.bw-sf.open .bw-sfl>div{padding:6px 0 4px}
+.bw-sfl .bw-mk{width:36px}
+.bw-sfl .bw-ic{width:36px;height:36px;min-height:0;border-radius:11px;padding:0}
+.bw-sfl .bw-ic small{display:none!important}
+.bw-sfl .bw-ic b{font-size:12.5px}
+.bw-sfe svg{stroke:var(--fg3)}
+html.o-bwlbl .bw-sf{width:62px}
+/* sidebar editor */
+.bws .note{margin:0 0 12px}
+.bws-l{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.bws-r{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:var(--inset);border:1px solid var(--line)}
+.bws-r.in{margin-left:26px}
+.bws-r .btn{flex:none;padding:0 9px}
+.bws-g{flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font:700 12px var(--f-display);font-style:normal;color:var(--c,var(--accent));background:color-mix(in srgb,var(--fg) 7%,transparent)}
+.bws-g svg,.bws-g span{width:60%;height:60%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:grid;place-items:center}
+.bws-r.f .bws-g{color:#ffcf6b}
+.bws-x{flex:1;min-width:0;display:flex;flex-direction:column}
+.bws-x b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bws-x small{color:var(--fg3);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bws-fn{flex:1;min-width:0}
+.bws-to{flex:none;max-width:130px}
+.bws-h{display:block;font-size:13px;margin:4px 0 8px}
+.bws-gr{display:grid;grid-template-columns:1fr 1.4fr .9fr;gap:8px;align-items:end}
+.bws-gr.one{grid-template-columns:1fr auto}
+.bws-f{margin-top:8px;padding-top:12px;border-top:1px solid var(--line)}
+.bws-fav{margin:12px 0 4px}
+.bws-fav>div{display:flex;flex-wrap:wrap;gap:6px}
+@media (max-width:640px){.bws-gr{grid-template-columns:1fr}.bws-to{max-width:96px}}
 </style>
 
 <div class="scan" aria-hidden="true"></div><div class="xgrid" aria-hidden="true"></div>
@@ -2230,12 +2296,8 @@ html.lite .bw-lay i{filter:none!important;translate:none!important}
     <aside class="bw-side" id="bw-side" aria-label="Quick sites">
       <button class="bw-ic bw-home" data-act="view" data-v="home" title="Back to Home" aria-label="Back to Home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg><small>Home</small></button>
       <span class="bw-sep"></span>
-      <div class="bw-q bw-qs" id="bw-qs"></div>
-      <span class="bw-sep"></span>
-      <div class="bw-marks" id="bw-marks" aria-label="Bookmarks"></div>
-      <button class="bw-ic bw-add" data-act="bw-mark" title="Bookmark this page" aria-label="Bookmark this page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><small>Save</small></button>
-      <button class="bw-ic bw-add" data-act="bw-newfold" title="New bookmark folder" aria-label="New bookmark folder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2H10l2 2.5h6.5a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2zM12 11v5M9.5 13.5h5"/></svg><small>Folder</small></button>
-      <button class="bw-ic bw-edit" data-act="bw-markedit" id="bw-markedit" title="Remove bookmarks" aria-label="Edit bookmarks" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg><small>Edit</small></button>
+      <div class="bw-q bw-qs" id="bw-qs" aria-label="Sidebar shortcuts"></div>
+      <button class="bw-ic bw-add bw-sbe" data-act="bws-edit" title="Choose what is in the sidebar" aria-label="Edit sidebar shortcuts"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><small>Edit</small></button>
       <span class="grow"></span>
       <button class="bw-ic" data-act="bw-shield" id="bw-shield" title="Shield: blocks ad and tracker requests" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 2.9 8.2 7 10 4.1-1.8 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg><small>Shield</small><em id="bw-blocked"></em></button>
     </aside>
@@ -2247,6 +2309,7 @@ html.lite .bw-lay i{filter:none!important;translate:none!important}
         <button class="bw-nb" data-act="bw-reload" id="bw-reload" aria-label="Reload" title="Reload"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5"/></svg></button>
         <form id="bw-form" class="bw-addr" autocomplete="off"><span class="bw-lock" id="bw-lock" aria-hidden="true"></span><input id="bw-addr" aria-label="Address" placeholder="Search Google or type a web address" spellcheck="false" autocapitalize="off" autocorrect="off"><button class="bw-look" type="button" data-act="bw-look" title="Open Appearance settings for the browser" aria-label="Appearance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span>Appearance</span></button><button class="bw-go bw-key" type="button" data-act="bw-vkey" id="bw-vkey" title="Saved passwords" aria-label="Saved passwords"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="3.5"/><path d="m10.5 12.5 8-8M15 7l2.5 2.5M13 9.5l2 2"/></svg></button><button class="bw-go bw-star" type="button" data-act="bw-mark" id="bw-star" title="Bookmark this page" aria-label="Bookmark this page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 2.4 5 5.4.7-4 3.8 1 5.4L12 16.2 7.2 18.9l1-5.4-4-3.8 5.4-.7z"/></svg></button><button class="bw-go" type="submit" aria-label="Go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></form>
       </div>
+      <div class="bw-bm" id="bw-bm" role="toolbar" aria-label="Bookmarks bar"></div>
       <div class="vt-bar" id="vt-bar" hidden></div>
       <div class="bw-stage" id="bw-stage">
         <div class="bw-lay" id="bw-lay" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -2259,6 +2322,7 @@ html.lite .bw-lay i{filter:none!important;translate:none!important}
         </div>
       </div>
     </div>
+    <div class="bw-bmpop" id="bw-bmpop" role="menu" aria-label="Bookmark folder" hidden></div>
   </section>
 
   <form class="cmd" id="cmd-form" autocomplete="off">
@@ -3763,7 +3827,7 @@ async function spApi(m,path,body,again){var o={method:m,headers:{Authorization:"
   var r=await fetch("https://api.spotify.com/v1"+path,o);if(r.status===204||r.status===202)return null;
   if(r.status===401&&!again){SP.tok.e=0;return spApi(m,path,body,1)}
   var j=await r.json().catch(function(){return null});
-  if(!r.ok){var e=new Error((j&&j.error&&j.error.message)||("Spotify error "+r.status));e.status=r.status;e.reason=j&&j.error&&j.error.reason;if(r.status===429)e.message="Spotify asks for a short pause. Try again in a moment.";throw e}
+  if(!r.ok){spLog("api "+r.status,m+" "+path.split("?")[0]);var e=new Error((j&&j.error&&j.error.message)||("Spotify error "+r.status));e.status=r.status;e.reason=j&&j.error&&j.error.reason;if(r.status===429){var ra=+r.headers.get("Retry-After")||5;SP.holdUntil=Date.now()+ra*1000;e.message="Spotify asks for a short pause ("+ra+"s). Try again in a moment."}throw e}
   return j}
 function spErr(e){var m=(e&&e.message)||"Spotify didn’t answer.";if(e&&e.reason==="PREMIUM_REQUIRED")m="Spotify Premium is needed to control playback.";else if(e&&(e.reason==="NO_ACTIVE_DEVICE"||e.status===404&&/device/i.test(m)))m=spDesk()&&!SP.drm?"No speaker found. This copy of Regis can’t play audio itself yet: run “Enable Spotify audio” in the Regis folder, or open the Spotify app on this computer or your phone and pick it with the device button.":"No speaker found. Open Spotify on a device, or pick “Regis in this browser” with the device button.";toast(m,"bad")}
 function spOut(){SP.hist=[];SP.hi=-1;SP.lc={};SP.rpId=null;SP.tok=null;SP.me=null;SP.st=null;SP.pl=null;SP.opened=0;lsw("regis-sp-tok",null);clearInterval(SP.tickT);SP.tickT=0;clearInterval(SP.lyT);SP.lyT=0;spShow()}
@@ -3864,11 +3928,11 @@ async function spPage(v){var g=function(p){return spApi("GET",p).catch(function(
     try{var pg,off=0,ep="items";while(off<500){try{pg=await spApi("GET","/playlists/"+v.id+"/"+ep+"?limit=50&offset="+off+"&additional_types=track")}catch(e1){if(off===0&&ep==="items"&&(e1.status===404||e1.status===400)){ep="tracks";pg=await spApi("GET","/playlists/"+v.id+"/tracks?limit=50&offset=0");}else throw e1}
         (pg.items||[]).forEach(function(x){var t=x&&(x.item||x.track);if(t&&t.uri&&t.type!=="episode"&&t.artists)ts.push(t)});if(!pg.next||!(pg.items||[]).length)break;off+=50}}
     catch(e){if(e.status===403||e.status===404){why=e}else throw e}
-    tot=(pl.items&&pl.items.total)||(pl.tracks&&pl.tracks.total)||ts.length;
+    tot=(pl.items&&pl.items.total)||(pl.tracks&&pl.tracks.total)||ts.length;SP.ctxN=tot;SP.ctxU=pl.uri;
     var hd=spHead(pl.name,esc((pl.owner&&pl.owner.display_name)||"")+" · "+tot+" songs",spImg(pl.images,300),pl.uri,ts.map(function(t){return t.uri}).slice(0,100),0,"Playlist");
     if(why&&!ts.length)return hd+'<div class="empty">'+(mine||pl.collaborative?"Spotify wouldn’t send the songs of this playlist. Try signing out and back in from the Music menu, then open it again.":"Spotify only lets personal apps like Regis see the songs of playlists you made or collaborate on. This one belongs to "+esc((pl.owner&&pl.owner.display_name)||"someone else")+". Press play to listen to it, or add it to a playlist of your own in Spotify.")+'</div>';
     return hd+'<div class="sp-tl">'+spTh(1)+ts.map(function(t,i){return spTrackRow(t,i,pl.uri,1)}).join("")+'</div>'+(tot>ts.length?'<p class="note" style="margin:14px 0">Showing the first '+ts.length+' of '+tot+' songs.</p>':'')}
-  if(v.t==="album"){var al=await spApi("GET","/albums/"+v.id),ats=(al.tracks&&al.tracks.items)||[];ats.forEach(function(t){t.album={id:al.id,name:al.name,images:al.images}});
+  if(v.t==="album"){var al=await spApi("GET","/albums/"+v.id),ats=(al.tracks&&al.tracks.items)||[];SP.ctxN=al.total_tracks;SP.ctxU=al.uri;ats.forEach(function(t){t.album={id:al.id,name:al.name,images:al.images}});
     return spHead(al.name,spArts(al.artists)+" · "+esc((al.release_date||"").slice(0,4))+" · "+al.total_tracks+" songs",spImg(al.images,300),al.uri,[],0,"Album")+'<div class="sp-tl">'+spTh(0)+ats.map(function(t,i){return spTrackRow(t,i,al.uri,0)}).join("")+'</div>'}
   if(v.t==="artist"){var ar=await spApi("GET","/artists/"+v.id),res2=await Promise.all([g("/artists/"+v.id+"/top-tracks?market=from_token"),g("/artists/"+v.id+"/albums?include_groups=album,single&limit=12")]);
     var tt=(res2[0]&&res2[0].tracks)||null;if(!tt){var sr=await g("/search?q="+encodeURIComponent("artist:"+ar.name)+"&type=track&limit=10");tt=(sr&&sr.tracks&&sr.tracks.items)||[]}
@@ -3917,9 +3981,9 @@ function spSgPick(i){var it=SP.sg.items[i];if(!it)return;spSgClose();
   else if(it.k==="track")spPlay({uris:[it.x.uri]});
   else spOpen({t:it.k,id:it.x.id})}
 /* player */
-async function spPoll(){if(!spOn()||document.hidden)return;try{var r=await spApi("GET","/me/player");SP.st=r;SP.at=Date.now();SP.base=r?r.progress_ms:0;spNP()}catch(e){if(e.status===401)spOut()}}
+async function spPoll(){if(!spOn()||document.hidden||Date.now()<(SP.holdUntil||0))return;try{var r=await spApi("GET","/me/player");SP.st=r;SP.at=Date.now();SP.base=r?r.progress_ms:0;spNP()}catch(e){if(e.status===401)spOut()}}
 function spTick(){if(!spOn()||document.hidden)return;var np=$("#sp-np");if(!np||np.hidden)return;SP.pollN=(SP.pollN+1)%5;if(!SP.pollN)spPoll();else if(SP.st&&SP.st.is_playing&&SP.st.item){var p=Math.min(SP.st.item.duration_ms,(SP.base||0)+Date.now()-SP.at);spBar(p)}}
-function spBar(p){var d=SP.st&&SP.st.item?SP.st.item.duration_ms:0,sk=$("#sp-seek");if(sk&&!SP.drag)sk.value=d?Math.round(p/d*1000):0;if(sk)sk.style.setProperty("--p",(sk.value/10)+"%");$("#sp-t0").textContent=spDur(p);$("#sp-t1").textContent=spDur(d)}
+function spBar(p){if(SP.seeking&&Date.now()-SP.seeking<1500)return;var d=SP.st&&SP.st.item?SP.st.item.duration_ms:0,sk=$("#sp-seek");if(sk&&!SP.drag)sk.value=d?Math.round(p/d*1000):0;if(sk)sk.style.setProperty("--p",(sk.value/10)+"%");$("#sp-t0").textContent=spDur(p);$("#sp-t1").textContent=spDur(d)}
 function spNP(){var st=SP.st,t=st&&st.item;$("#sp-nm").textContent=t?t.name:"Nothing playing";var ar=$("#sp-ar");ar.textContent=t?(t.artists||[]).map(function(a){return a.name}).join(", "):"Pick something to play";ar.dataset.id=t&&t.artists&&t.artists[0]?t.artists[0].id:"";ar.dataset.t="artist";$("#sp-nm").dataset.t=t&&t.album?"album":"queue";$("#sp-nm").dataset.id=t&&t.album?t.album.id:"";
   var im=t&&t.album?spImg(t.album.images,64):"";var a=$("#sp-art");a.style.visibility=im?"visible":"hidden";if(im&&a.src!==im)a.src=im;
   $("#sp-pp").setAttribute("aria-label",st&&st.is_playing?"Pause":"Play");$("#sp-ppi").innerHTML=st&&st.is_playing?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>';
@@ -3940,7 +4004,9 @@ async function spPlay(body,dev){var key=JSON.stringify(body||0);if(SP.playBusy&&
 async function spPlay2(body,dev){var q=dev?"?device_id="+dev:(SP.st&&SP.st.device?"":(SP.sdkDev?"?device_id="+SP.sdkDev:(SP.devs[0]?"?device_id="+SP.devs[0].id:"")));try{await spApi("PUT","/me/player/play"+q,body);setTimeout(spPoll,500)}catch(e){if(e.status===404){var d=await spDevices();if(d.length){try{await spApi("PUT","/me/player",{device_ids:[d[0].id],play:false});await spApi("PUT","/me/player/play?device_id="+d[0].id,body);setTimeout(spPoll,600);return}catch(e2){spErr(e2);return}}}spErr(e)}}
 async function spDevices(){try{var r=await spApi("GET","/me/player/devices");SP.devs=(r&&r.devices)||[]}catch(_){SP.devs=[]}return SP.devs}
 async function spCtl(k){if(!SP.st&&k!=="toggle"){await spPoll()}
-  try{if(k==="toggle"){if(SP.st&&SP.st.is_playing)await spApi("PUT","/me/player/pause");else await spPlay(undefined)}
+  try{spLog("ctl",k+(spLocal()?" local":" api"));
+    if(spLocal()&&(k==="toggle"||k==="next"||k==="prev")){if(k==="toggle")await SP.sdk.togglePlay();else if(k==="next")await SP.sdk.nextTrack();else await SP.sdk.previousTrack();setTimeout(spPoll,350);return}
+    if(k==="toggle"){if(SP.st&&SP.st.is_playing)await spApi("PUT","/me/player/pause");else await spPlay(undefined)}
     else if(k==="next")await spApi("POST","/me/player/next");else if(k==="prev")await spApi("POST","/me/player/previous");
     else if(k==="shuffle")await spApi("PUT","/me/player/shuffle?state="+!(SP.st&&SP.st.shuffle_state));
     else if(k==="repeat")await spApi("PUT","/me/player/repeat?state="+((SP.st&&SP.st.repeat_state)==="off"?"context":(SP.st&&SP.st.repeat_state)==="context"?"track":"off"));
@@ -3950,23 +4016,54 @@ async function spDevMenu(){var m=$("#sp-devs");if(!m.hidden){m.hidden=true;retur
   if(SP.sdkDev)list.unshift('<button data-act="sp-xfer" data-id="'+esc(SP.sdkDev)+'">Regis in this browser<small>Web player</small></button>');
   else if(spPlayerOK())list.push('<button data-act="sp-sdk">Play in this browser<small>Turn on the Regis web player</small></button>');
   if(spDesk()&&!SP.drm)list.push('<button data-act="sp-drmhelp">Play inside Regis<small>Needs a one-time setup</small></button>');
-  m.innerHTML=list.join("")||'<div class="note" style="padding:10px">No Spotify devices found. Open Spotify on your phone or computer, then try again.</div>';m.hidden=false}
+  list.push('<button data-act="sp-diag">Playback report<small>If audio stops or stutters</small></button>');m.innerHTML=list.join("")+(SP.devs.length||SP.sdkDev?"":'<div class="note" style="padding:10px">No Spotify devices found. Open Spotify on your phone or computer, then try again.</div>');m.hidden=false}
+/* playback diagnostics: a small ring of what the player and API did, for the Playback report */
+function spLog(ev,x){try{SP.dg=SP.dg||[];SP.dg.push({t:Date.now(),ev:ev,x:x===undefined?"":(typeof x==="string"?x:JSON.stringify(x)).slice(0,220)});if(SP.dg.length>80)SP.dg.shift()}catch(_){}}
+function spLocal(){return !!(SP.sdk&&SP.sdkDev&&SP.st&&SP.st.device&&SP.st.device.id===SP.sdkDev)}
+function spSeekTo(ms){ms=Math.max(0,Math.round(ms));SP.seeking=Date.now();spLog("seek",ms+(spLocal()?" local":" api"));
+  var done=function(){SP.base=ms;SP.at=Date.now();setTimeout(function(){SP.drag=0;SP.seeking=0;spPoll()},700)};
+  if(spLocal()&&SP.sdk.seek)return SP.sdk.seek(ms).then(done).catch(function(e){SP.drag=0;SP.seeking=0;spErr(e)});
+  return spApi("PUT","/me/player/seek?position_ms="+ms).then(done).catch(function(e){SP.drag=0;SP.seeking=0;spErr(e)})}
+function spShuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function spReport(){var st=SP.st,d=st&&st.device,t=st&&st.item,L=[];
+  L.push("Regis playback report  "+new Date().toISOString());L.push("Browser: "+navigator.userAgent);L.push("Desktop app: "+(spDesk()?"yes":"no")+"   Widevine-capable app build: "+(SP.drm?"yes":"no")+"   Web player: "+(SP.sdk?"started":"not started")+"   Regis device id: "+(SP.sdkDev||"none"));
+  L.push("Active device: "+(d?d.name+" ("+d.type+", "+d.id+")":"none")+"   Playing here: "+(spLocal()?"yes":"no"));
+  L.push("Track: "+(t?t.name+" - "+(t.artists||[]).map(function(a){return a.name}).join(", "):"none")+"   Shuffle: "+(st?st.shuffle_state:"?")+"   Repeat: "+(st?st.repeat_state:"?"));
+  L.push("Widevine probe: "+(SP.wv||"(not run)"));L.push("");L.push("Recent events (newest last):");
+  (SP.dg||[]).forEach(function(r){L.push(new Date(r.t).toISOString().slice(11,23)+"  "+r.ev+"  "+r.x)});return L.join("\n")}
+function spDrmProbe(){return Promise.race([spDrmProbe0(),new Promise(function(r){setTimeout(function(){r("no")},3000)})])}
+function spDrmProbe0(){if(!navigator.requestMediaKeySystemAccess)return Promise.resolve("no");try{return navigator.requestMediaKeySystemAccess("com.widevine.alpha",[{initDataTypes:["cenc"],audioCapabilities:[{contentType:'audio/mp4;codecs="mp4a.40.2"'}]}]).then(function(){return "ok"},function(){return "no"})}catch(_){return Promise.resolve("no")}}
+/* Spotify skips to the next song after each failure, so a bad player makes a chain of errors. Stop the chain and say why, once. */
+function spPbErr(e){var now=Date.now();SP.pbE=(SP.pbE||[]).filter(function(t){return now-t<10000});SP.pbE.push(now);if(SP.pbE.length<2||now-(SP.pbT||0)<30000)return;SP.pbT=now;
+  try{SP.sdk&&SP.sdk.pause()}catch(_){}spApi("PUT","/me/player/pause").catch(function(){});
+  spDrmProbe().then(function(r){var m;if(r!=="ok")m="This browser can’t play protected audio here (Widevine isn’t available). Use Chrome, Edge or Safari, or choose another device from the speaker button.";
+    else if(spDesk()&&SP.drm)m="Spotify refused to play inside Regis. This usually means the audio build isn’t signed yet: close Regis and run “Enable Spotify audio” again (it now signs Regis for Spotify; one free castlabs account the first time). Until then, choose another device from the speaker button.";
+    else m="Spotify’s web player failed on several songs in a row, so I stopped it. Turn off ad blockers for this site, press play once more, or choose another device from the speaker button.";
+    toast(m,"bad")})}
 function spSdk(){if(SP.sdk||SP.sdkTried||!spPlayerOK())return;SP.sdkTried=1;var sc=document.createElement("script");sc.src="https://sdk.scdn.co/spotify-player.js";sc.async=true;document.head.appendChild(sc);
-  window.onSpotifyWebPlaybackSDKReady=function(){try{SP.sdk=new Spotify.Player({name:"Regis",getOAuthToken:function(cb){spFresh().then(cb)},volume:.6});SP.sdk.addListener("ready",function(x){SP.sdkDev=x.device_id;spPoll().then(function(){if(!SP.st||!SP.st.device){spApi("PUT","/me/player",{device_ids:[x.device_id],play:false}).then(function(){setTimeout(spPoll,500)}).catch(function(){})}})});SP.sdk.addListener("authentication_error",function(){toast("Spotify needs you to sign in again.","bad")});SP.sdk.addListener("account_error",function(){toast("The web player needs Spotify Premium.","bad")});SP.sdk.addListener("playback_error",function(e){toast("Spotify couldn’t play that: "+((e&&e.message)||"playback error")+". Try pressing play again.","bad")});SP.sdk.addListener("autoplay_failed",function(){toast("Your browser blocked autoplay. Press play once.","bad")});SP.sdk.addListener("not_ready",function(){SP.sdkDev=null});SP.sdk.addListener("initialization_error",function(){toast("This browser can’t play Spotify here.","bad")});SP.sdk.connect()}catch(_){}}}
+  window.onSpotifyWebPlaybackSDKReady=function(){try{SP.sdk=new Spotify.Player({name:"Regis",getOAuthToken:function(cb){spFresh().then(cb)},volume:.6});SP.sdk.addListener("ready",function(x){SP.sdkDev=x.device_id;spLog("ready",x.device_id);spPoll().then(function(){if(!SP.st||!SP.st.device){spApi("PUT","/me/player",{device_ids:[x.device_id],play:false}).then(function(){setTimeout(spPoll,500)}).catch(function(){})}})});SP.sdk.addListener("authentication_error",function(e){spLog("authentication_error",e&&e.message);toast("Spotify needs you to sign in again.","bad")});SP.sdk.addListener("account_error",function(e){spLog("account_error",e&&e.message);toast("The web player needs Spotify Premium.","bad")});SP.sdk.addListener("playback_error",function(e){spLog("playback_error",e&&e.message);spPbErr(e)});
+    SP.sdk.addListener("player_state_changed",function(x){if(!x)return;var c=x.track_window&&x.track_window.current_track;spLog("state",{pos:x.position,paused:x.paused,loading:x.loading,track:c&&c.name,shuf:x.shuffle,rs:x.repeat_mode,why:x.disallows&&Object.keys(x.disallows).filter(function(k){return x.disallows[k]}).join("+")});
+      if(SP.st&&SP.st.device&&SP.st.device.id===SP.sdkDev&&!SP.seeking){SP.base=x.position;SP.at=Date.now();SP.st.is_playing=!x.paused}clearTimeout(SP.evT);SP.evT=setTimeout(spPoll,350)});
+    SP.sdk.addListener("autoplay_failed",function(){spLog("autoplay_failed")});SP.sdk.addListener("autoplay_failed",function(){toast("Your browser blocked autoplay. Press play once.","bad")});SP.sdk.addListener("not_ready",function(){spLog("not_ready");SP.sdkDev=null});SP.sdk.addListener("initialization_error",function(e){spLog("initialization_error",e&&e.message);toast("This browser can’t play Spotify here.","bad")});SP.sdk.connect()}catch(_){}}}
 async function spAct(b){var a=b.dataset.act,d=b.dataset;if(SP.sdk&&SP.sdk.activateElement&&(a==="sp-play"||a==="sp-ctl"))try{SP.sdk.activateElement()}catch(_){}
   if(a==="sp-nav"){var v={t:d.t,id:d.id};if(d.t==="library")v.tab=d.tab;if(d.t==="liked")v.off=+d.off||0;if(d.t==="search")v.q="";if(!d.t||(d.t==="artist"&&!d.id)||(d.t==="album"&&!d.id))return;if(S.view!=="music")setView("music",true);spOpen(v);if(d.t==="search"){var qi=$("#sp-q");if(qi)setTimeout(function(){qi.focus()},30)}}
-  else if(a==="sp-play"){var body=d.uri?(d.ctx?{context_uri:d.ctx,offset:{uri:d.uri}}:{uris:[d.uri]}):d.uris&&!d.ctx?{uris:d.uris.split(",")}:{context_uri:d.ctx};spPlay(body)}
+  else if(a==="sp-play"){var body=d.uri?(d.ctx?{context_uri:d.ctx,offset:{uri:d.uri}}:{uris:[d.uri]}):d.uris&&!d.ctx?{uris:d.uris.split(",")}:{context_uri:d.ctx};
+    /* starting a whole playlist/album/liked list with shuffle on: begin somewhere random every time, so Spotify's order is never the same one twice */
+    if(!d.uri&&SP.st&&SP.st.shuffle_state){if(body.uris&&body.uris.length>1)body.uris=spShuf(body.uris);else if(body.context_uri&&SP.ctxN>1&&SP.ctxU===body.context_uri)body.offset={position:Math.floor(Math.random()*SP.ctxN)}}
+    spPlay(body)}
   else if(a==="sp-ctl")spCtl(d.k);
   else if(a==="sp-like"){var id=d.id||(SP.st&&SP.st.item&&SP.st.item.id);if(!id)return;var on=!SP.liked[id];try{await spApi(on?"PUT":"DELETE","/me/tracks?ids="+id);SP.liked[id]=on;$$('.sp-heart[data-id="'+id+'"]').forEach(function(x){x.setAttribute("aria-pressed",String(on))});if(SP.st&&SP.st.item&&SP.st.item.id===id)$("#sp-lk").setAttribute("aria-pressed",String(on))}catch(e){spErr(e)}}
   else if(a==="sp-queue"){try{await spApi("POST","/me/player/queue?uri="+encodeURIComponent(d.uri));toast("Added to your queue.","good")}catch(e){spErr(e)}}
   else if(a==="sp-dev")spDevMenu();
   else if(a==="sp-xfer"){$("#sp-devs").hidden=true;try{await spApi("PUT","/me/player",{device_ids:[d.id],play:!!(SP.st&&SP.st.is_playing)});setTimeout(spPoll,600)}catch(e){spErr(e)}}
+  else if(a==="sp-diag"){spDrmProbe().then(function(r){SP.wv=r;var tx=spReport();openModal("Playback report","<p class=\"note\">If playback stutters or stops, press Copy and send me this.</p><pre id=\"sp-rep\" style=\"white-space:pre-wrap;font:11.5px/1.5 var(--f-mono);user-select:all;max-height:50vh;overflow:auto\"></pre><button class=\"btn sm\" data-act=\"sp-repcopy\">Copy report</button>",true);$("#sp-rep").textContent=tx})}
+  else if(a==="sp-repcopy"){var rt=($("#sp-rep")||{}).textContent||"";try{navigator.clipboard.writeText(rt).then(function(){toast("Report copied.","good")},function(){toast("Select the text and copy it.","bad")})}catch(_){toast("Select the text and copy it.","bad")}}
   else if(a==="sp-sdk"){$("#sp-devs").hidden=true;spSdk();toast("Starting the web player…")}
   else if(a==="sp-out")spOut();
   else if(a==="sp-look")lookOpenPage("Music","Spotify");
   else if(a==="sp-lyx"){spOpen({t:"lyrics"})}
   else if(a==="sp-drmhelp"){$("#sp-devs").hidden=true;toast("To play Spotify inside Regis: close Regis, open the Regis folder, double-click “Enable Spotify audio”, then start Regis again.")}
-  else if(a==="sp-seekto"){var ms=+d.ms;if(ms>=0)spApi("PUT","/me/player/seek?position_ms="+ms).then(function(){SP.base=ms;SP.at=Date.now();setTimeout(spPoll,300)}).catch(spErr)}
+  else if(a==="sp-seekto"){var ms=+d.ms;if(ms>=0)spSeekTo(ms)}
   else if(a==="sp-sgp")spSgPick(+d.i);
   else if(a==="sp-fnew"){var f=$("#sp-fnf");f.hidden=!f.hidden;if(!f.hidden)$("#sp-fn").focus()}
   else if(a==="sp-ftog"){var fo=SP.fo.f.find(function(x){return x.id===d.id});if(fo){fo.o=!fo.o;spFoSave();spPls()}}
@@ -3990,8 +4087,8 @@ document.addEventListener("input",function(e){var t=e.target;if(!t||!t.id)return
   if(t.id==="sp-seek"){SP.drag=1;var dd=SP.st&&SP.st.item?SP.st.item.duration_ms:0;$("#sp-t0").textContent=spDur(t.value/1000*dd)}
   else if(t.id==="sp-q"){clearTimeout(SP.qt);SP.qt=setTimeout(function(){var q=t.value.trim();if(q.length>=2)spSgFetch(q);else spSgClose()},200)}
   else if(t.id==="sp-lq")spPls();
-  else if(t.id==="sp-vol"){t.style.setProperty("--p",t.value+"%");SP.vdrag=1;clearTimeout(SP.vt);SP.vt=setTimeout(function(){spApi("PUT","/me/player/volume?volume_percent="+t.value).catch(spErr);SP.vdrag=0},250)}});
-document.addEventListener("change",function(e){var t=e.target;if(t&&t.id==="sp-seek"){var dd=SP.st&&SP.st.item?SP.st.item.duration_ms:0,ms=Math.round(t.value/1000*dd);spApi("PUT","/me/player/seek?position_ms="+ms).then(function(){SP.base=ms;SP.at=Date.now();SP.drag=0}).catch(function(e2){SP.drag=0;spErr(e2)})}});
+  else if(t.id==="sp-vol"){t.style.setProperty("--p",t.value+"%");SP.vdrag=1;clearTimeout(SP.vt);SP.vt=setTimeout(function(){if(spLocal()&&SP.sdk.setVolume)SP.sdk.setVolume(t.value/100).catch(spErr);else spApi("PUT","/me/player/volume?volume_percent="+t.value).catch(spErr);SP.vdrag=0},250)}});
+document.addEventListener("change",function(e){var t=e.target;if(t&&t.id==="sp-seek"){var dd=SP.st&&SP.st.item?SP.st.item.duration_ms:0,ms=Math.round(t.value/1000*dd);spSeekTo(ms)}});
 document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches)return;
   if(f.matches("[data-actsubmit=sp-save]")){e.preventDefault();var c=$("#sp-cid").value.trim();if(!/^[0-9a-f]{32}$/i.test(c)){toast("A Spotify Client ID is 32 letters and numbers.","bad");return}SP.cid=c;lsw("regis-sp-cid",c);spAuth()}
   else if(f.matches("[data-actsubmit=sp-fnew]")){e.preventDefault();var nm=$("#sp-fn").value.trim();if(!nm)return;var id="f"+Date.now().toString(36);SP.fo.f.push({id:id,n:nm.slice(0,40),o:true});if(SP.fpend){[].concat(SP.fpend).forEach(function(i){SP.fo.m[i]=id});if(Array.isArray(SP.fpend))SP.sel.ids={};SP.fpend=""}spFoSave();$("#sp-fn").value="";f.hidden=true;spPls()}
@@ -4108,10 +4205,10 @@ function bwResolve(t){t=String(t||"").trim();if(!t)return "";if(/^https?:\/\/\S+
   if(!/\s/.test(t)&&/^[^\s/]+\.[a-z]{2,}([/:?#]|$)/i.test(t))return "https://"+t;
   return bwEngine()+encodeURIComponent(t)}
 function bwActive(){return BW.st.tabs.find(function(t){return t.id===BW.st.active})||null}
-function bwOverlay(){var m=$("#modal"),l=$("#look"),a=$("#alert-pop"),mp=$("#more-pop");return !!((m&&!m.hidden)||(l&&!l.hidden)||(a&&!a.hidden)||(mp&&!mp.hidden))}
+function bwOverlay(){var m=$("#modal"),l=$("#look"),a=$("#alert-pop"),mp=$("#more-pop"),bp=$("#bw-bmpop");return !!((m&&!m.hidden)||(l&&!l.hidden)||(a&&!a.hidden)||(mp&&!mp.hidden)||(bp&&!bp.hidden))}
 var bwBR=0,bwBK="";
 function bwBounds(){if(bwBR)return;bwBR=requestAnimationFrame(function(){bwBR=0;if(!bwNative()||S.view!=="browser")return;var st=$("#bw-stage");if(!st)return;var r=st.getBoundingClientRect(),k=[r.left,r.top,r.width,r.height].map(Math.round).join();if(k===bwBK)return;bwBK=k;APP.browser.bounds({x:r.left,y:r.top,width:r.width,height:r.height}).catch(function(){})})}
-function bwLayout(){var tp=document.querySelector(".top");if(tp){var b=Math.ceil(tp.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty("--bwtop",b+"px");var rt=tp.querySelector(".right");if(rt){var l=Math.floor(rt.getBoundingClientRect().left);if(l>0)document.documentElement.style.setProperty("--bwr",Math.max(120,innerWidth-l+12)+"px")}}bwBounds()}
+function bwLayout(){var tp=document.querySelector(".top");if(tp){var b=Math.ceil(tp.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty("--bwtop",b+"px");var rt=document.getElementById("vsw");if(!rt||!rt.offsetWidth)rt=tp.querySelector(".right");if(rt){var l=Math.floor(rt.getBoundingClientRect().left);if(l>0)document.documentElement.style.setProperty("--bwr",Math.max(120,innerWidth-l+12)+"px")}}try{bwBmFit()}catch(_){}bwBounds()}
 function bwSync(){if(!bwNative())return;bwBK="";APP.browser.show(S.view==="browser"&&!bwOverlay()).then(bwBounds).catch(function(){})}
 function bwRender(st){if(st)BW.st=st;var s2=BW.st,act=bwActive(),nat=bwNative();
   setH($("#bw-tabs"),nat?tgTabsHtml(s2.tabs,s2.active)+'<button class="bw-new" data-act="bw-new" aria-label="New tab" title="New tab">+</button>':"");
@@ -4130,13 +4227,6 @@ function bwHost(u){try{return new URL(u).hostname.replace(/^www\./,"")}catch(_){
 function bwTagQuick(){bwSites();return;$$("#bw-side>.bw-ic[data-act=\"bw-go\"]").forEach(function(b){b.classList.add("bw-q")})}
 function bwMkBtn(m){var h=bwHost(m.url),L=(m.title||h||"?").trim().charAt(0).toUpperCase(),hue=0;for(var i=0;i<h.length;i++)hue=(hue*31+h.charCodeAt(i))%360;
   return '<span class="bw-mk"><button class="bw-ic" data-act="bw-go" data-u="'+esc(m.url)+'" title="'+esc((m.title||h)+" · "+h)+'" aria-label="'+esc(m.title||h)+'"><b style="--c:hsl('+hue+' 85% 70%)">'+esc(L)+'</b><small>'+esc(short(m.title||h,9))+'</small></button>'+(BW.edit?'<button class="bw-rm" data-act="bw-markdel" data-id="'+esc(m.id)+'" aria-label="Remove bookmark" title="Remove">×</button>':'')+'</span>'}
-function bwMarks(){var el=$("#bw-marks");if(!el)return;var ms=(S.marks||[]).slice().sort(function(a,b){return String(a.ts||"").localeCompare(String(b.ts||""))}),fs=(S.mfold||[]).slice().sort(function(a,b){return String(a.ts||"").localeCompare(String(b.ts||""))}),ids={};
-  fs.forEach(function(f){ids[f.id]=1});
-  var h=fs.map(function(f){var n=ms.filter(function(m){return m.folder===f.id}).length;return '<span class="bw-mk"><button class="bw-ic bw-fold" data-act="bw-fold" data-id="'+esc(f.id)+'" title="'+esc(f.name+" · "+n+(n===1?" bookmark":" bookmarks"))+'" aria-label="Folder '+esc(f.name)+'"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2H10l2 2.5h6.5a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg></b><small>'+esc(short(f.name,9))+'</small></button></span>'}).join("");
-  h+=ms.filter(function(m){return !m.folder||!ids[m.folder]}).map(bwMkBtn).join("");
-  setH(el,h);
-  var e=$("#bw-markedit");if(e){e.setAttribute("aria-pressed",String(!!BW.edit));e.hidden=!ms.length}
-  var act=bwActive(),st=$("#bw-star");if(st){var on=!!(act&&!act.blank&&ms.some(function(m){return m.url===act.url}));st.classList.toggle("on",on)}}
 function bwMarkAdd(){var act=bwActive(),u=act&&!act.blank?act.url:"",t=act&&!act.blank?(act.title||""):"";
   if(!u){var q=$("#bw-addr"),v=q&&q.value?bwResolve(q.value):"";if(v){u=v}}
   if(!u){toast("Open a page first, then bookmark it.");return}
@@ -4145,8 +4235,72 @@ function bwMarkAdd(){var act=bwActive(),u=act&&!act.blank?act.url:"",t=act&&!act
   BW.pendMark={url:u,title:short(t||bwHost(u),24)};
   openModal("Save bookmark",'<form data-vt-form="mark" class="vt-f"><label>Name<input id="bm-name" value="'+esc(BW.pendMark.title)+'" maxlength="40"></label><label>Folder<select id="bm-fold"><option value="">No folder</option>'+fs.map(function(f){return '<option value="'+esc(f.id)+'">'+esc(f.name)+'</option>'}).join("")+'</select></label><div class="fbar"><button class="btn pri" type="submit">Save</button><button class="btn ghost" type="button" data-act="modal-close">Cancel</button></div></form>');bwSync();return Promise.resolve()}
 function bwFoldOpen(id){var f=(S.mfold||[]).find(function(x){return x.id===id});if(!f)return;var ms=(S.marks||[]).filter(function(m){return m.folder===id});
-  openModal(f.name,'<div class="vt-list">'+(ms.length?ms.map(function(m){return '<div class="vt-row"><button class="vt-main" data-act="bw-go" data-u="'+esc(m.url)+'"><b>'+esc(m.title||bwHost(m.url))+'</b><small>'+esc(bwHost(m.url))+'</small></button><button class="btn sm ghost" data-act="bw-unfold" data-id="'+esc(m.id)+'">Take out</button><button class="btn sm ghost" data-act="bw-markdel" data-id="'+esc(m.id)+'" data-re="'+esc(id)+'">Delete</button></div>'}).join(""):'<p class="note">Empty. Bookmark a page and choose this folder, or drag nothing: use the star in the address bar.</p>')+'</div><form data-vt-form="foldren" class="vt-f" data-id="'+esc(id)+'"><label>Folder name<input id="fd-name" value="'+esc(f.name)+'" maxlength="24"></label><div class="fbar"><button class="btn pri" type="submit">Rename</button><button class="btn danger" type="button" data-act="bw-folddel" data-id="'+esc(id)+'">Delete folder</button></div></form>');bwSync()}
+  openModal(f.name,'<div class="vt-list">'+(ms.length?ms.map(function(m){return '<div class="vt-row"><button class="vt-main" data-act="bw-go" data-u="'+esc(m.url)+'"><b>'+esc(m.title||bwHost(m.url))+'</b><small>'+esc(bwHost(m.url))+'</small></button><button class="btn sm ghost" data-act="bw-unfold" data-id="'+esc(m.id)+'">Take out</button><button class="btn sm ghost" data-act="bw-markdel" data-id="'+esc(m.id)+'" data-re="'+esc(id)+'">Delete</button></div>'}).join(""):'<p class="note">Empty. Open a page, press the ☆ star in the address bar and pick this folder.</p>')+'</div><form data-vt-form="foldren" class="vt-f" data-id="'+esc(id)+'"><label>Folder name<input id="fd-name" value="'+esc(f.name)+'" maxlength="24"></label><div class="fbar"><button class="btn pri" type="submit">Rename</button><button class="btn danger" type="button" data-act="bw-folddel" data-id="'+esc(id)+'">Delete folder</button></div></form>');bwSync()}
 function bwNewFold(){openModal("New bookmark folder",'<form data-vt-form="fold" class="vt-f"><label>Folder name<input id="fd-name" maxlength="24" placeholder="School, Work, Reading…" autofocus></label><div class="fbar"><button class="btn pri" type="submit">Create</button><button class="btn ghost" type="button" data-act="modal-close">Cancel</button></div></form>');bwSync()}
+
+/* Sidebar shortcuts (1.7.7): only what you choose, kept on this device. Items are sites {t:"s"} or folders {t:"f",items:[sites]}. */
+var SB=[];function sbLoad(){var v=lsj("regis-bwside2",null);if(Array.isArray(v))return v.filter(function(x){return x&&(x.t==="f"||x.u)});
+  return BWS.map(function(u){var x=BWF.find(function(f){return f.u===u});return x?{t:"s",n:x.n,u:x.u,c:x.c,g:x.g}:null}).filter(Boolean)}
+var SBF='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2H10l2 2.5h6.5a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg>';
+function sbSave(){lsw("regis-bwside2",SB)}
+function sbHue(s){s=String(s||"");var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))%360;return h}
+function sbSite(n,u,c,g){return {t:"s",n:String(n||bwHost(u)||"Site").slice(0,24),u:u,c:c||"hsl("+sbHue(bwHost(u)||n)+" 80% 70%)",g:g||""}}
+function sbHas(u){return SB.some(function(x){return x.t==="f"?(x.items||[]).some(function(y){return y.u===u}):x.u===u})}
+function sbDrop(u){SB=SB.filter(function(x){return x.t==="f"||x.u!==u});SB.forEach(function(x){if(x.t==="f")x.items=(x.items||[]).filter(function(y){return y.u!==u})})}
+function sbPath(p){var a=String(p).split(".").map(Number);if(a.length===1)return SB[a[0]]?{l:SB,i:a[0]}:null;var f=SB[a[0]];return f&&f.t==="f"&&(f.items||[])[a[1]]?{l:f.items,i:a[1]}:null}
+function sbBtn(x){return '<span class="bw-mk"><button class="bw-ic" data-act="bw-go" data-u="'+esc(x.u)+'" title="'+esc(x.n+" · "+bwHost(x.u))+'" aria-label="'+esc(x.n)+'"><b style="--c:'+esc(x.c||"var(--accent)")+'">'+bwGlyph(x)+'</b><small>'+esc(short(x.n,9))+'</small></button></span>'}
+function sbRender(){var q=$("#bw-qs");if(!q)return;
+  q.innerHTML=SB.map(function(x,i){if(x.t!=="f")return sbBtn(x);var its=x.items||[],o=!!x.open;
+    return '<div class="bw-sf'+(o?" open":"")+'"><button class="bw-ic bw-sfb" data-act="bws-tog" data-i="'+i+'" aria-expanded="'+o+'" title="'+esc(x.n)+" · "+its.length+(its.length===1?" shortcut":" shortcuts")+'" aria-label="Folder '+esc(x.n)+'"><b>'+SBF+'</b><small>'+esc(short(x.n,9))+'</small><i class="bw-chev" aria-hidden="true"></i></button><div class="bw-sfl"'+(o?"":" inert")+'><div>'+
+      (its.length?its.map(sbBtn).join(""):'<button class="bw-ic bw-sfe" data-act="bws-edit" title="Add shortcuts to '+esc(x.n)+'" aria-label="Add shortcuts to '+esc(x.n)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button>')+'</div></div></div>'}).join("")}
+function sbRow(x,p,top){var fold=x.t==="f",cur=top?"":String(p).split(".")[0];
+  var nm=fold?'<input class="bws-fn" data-p="'+p+'" value="'+esc(x.n)+'" maxlength="20" aria-label="Folder name">':'<span class="bws-x"><b>'+esc(x.n)+'</b><small>'+esc(bwHost(x.u))+'</small></span>';
+  var mv=fold?"":'<select class="bws-to" data-p="'+p+'" aria-label="Where '+esc(x.n)+' goes"><option value="">Sidebar</option>'+SB.map(function(f,i){return f.t==="f"?'<option value="'+i+'"'+(String(i)===cur?" selected":"")+'>'+esc(f.n)+'</option>':""}).join("")+'</select>';
+  return '<div class="bws-r'+(fold?" f":"")+(top?"":" in")+'"><i class="bws-g" style="--c:'+esc(x.c||"var(--accent)")+'">'+(fold?SBF:bwGlyph(x))+'</i>'+nm+mv+
+    '<button class="btn sm ghost" data-act="bws-mv" data-p="'+p+'" data-d="-1" aria-label="Move up" title="Move up">↑</button><button class="btn sm ghost" data-act="bws-mv" data-p="'+p+'" data-d="1" aria-label="Move down" title="Move down">↓</button><button class="btn sm ghost" data-act="bws-del" data-p="'+p+'" aria-label="Remove '+esc(x.n)+'">'+(fold?"Delete":"Remove")+'</button></div>'}
+function sbEditHtml(){var a=bwActive(),cu=a&&!a.blank&&/^https?:/i.test(a.url||"")?a.url:"",ct=cu?short(a.title||bwHost(cu),24):"",rows=[];
+  SB.forEach(function(x,i){rows.push(sbRow(x,String(i),true));if(x.t==="f")(x.items||[]).forEach(function(y,j){rows.push(sbRow(y,i+"."+j,false))})});
+  var fav=BWF.filter(function(f){return !sbHas(f.u)}),fo=SB.map(function(f,i){return f.t==="f"?'<option value="'+i+'">'+esc(f.n)+'</option>':""}).join("");
+  return '<p class="note">Choose exactly what lives in the sidebar. This is separate from your bookmarks, which sit in the bar under the address bar.</p>'+
+    '<div class="bws-l">'+(rows.join("")||'<p class="note">The sidebar is empty. Add a shortcut or a folder below.</p>')+'</div>'+
+    '<form data-vt-form="bwsadd" class="vt-f bws-f" autocomplete="off"><b class="bws-h">Add a shortcut'+(cu?" (filled in with this page)":"")+'</b><div class="bws-gr"><label>Name<input id="bws-n" maxlength="24" value="'+esc(ct)+'" placeholder="YouTube"></label><label>Address<input id="bws-u" value="'+esc(cu)+'" placeholder="https://…" spellcheck="false" autocapitalize="off"></label><label>Put in<select id="bws-to"><option value="">Sidebar</option>'+fo+'</select></label></div><div class="fbar"><button class="btn pri" type="submit">Add shortcut</button></div></form>'+
+    (fav.length?'<div class="bws-fav"><b class="bws-h">Quick add from your favourites</b><div>'+fav.map(function(f){return '<button class="btn sm ghost" data-act="bws-fav" data-u="'+esc(f.u)+'">+ '+esc(f.n)+'</button>'}).join("")+'</div></div>':"")+
+    '<form data-vt-form="bwsfold" class="vt-f bws-f" autocomplete="off"><b class="bws-h">New folder</b><div class="bws-gr one"><label>Folder name<input id="bws-fname" maxlength="20" placeholder="School, Work, Games…"></label><button class="btn" type="submit">Create folder</button></div></form>'}
+function sbEdit(){openModal("Sidebar shortcuts",'<div id="bws-body" class="bws">'+sbEditHtml()+'</div>',true);bwSync()}
+function sbRe(){sbSave();sbRender();var b=$("#bws-body");if(b)b.innerHTML=sbEditHtml()}
+function sbMove(p,d){var at=sbPath(p);if(!at)return;var j=at.i+d;if(j<0||j>=at.l.length)return;var t=at.l[at.i];at.l[at.i]=at.l[j];at.l[j]=t;sbRe()}
+function sbDel(p){var at=sbPath(p);if(!at)return;var x=at.l[at.i];if(x&&x.t==="f"&&(x.items||[]).length)Array.prototype.splice.apply(SB,[at.i+1,0].concat(x.items));at.l.splice(at.i,1);sbRe()}
+function sbTo(p,to){var at=sbPath(p);if(!at)return;var x=at.l[at.i];if(!x||x.t==="f")return;var f=to===""?null:SB[+to],dest=to===""?SB:(f&&f.t==="f"?(f.items=f.items||[]):null);if(!dest||dest===at.l)return;at.l.splice(at.i,1);dest.push(x);if(f)f.open=true;sbRe()}
+document.addEventListener("change",function(e){var t=e.target;if(!t||!t.classList)return;
+  if(t.classList.contains("bws-to"))sbTo(t.dataset.p,t.value);
+  else if(t.classList.contains("bws-fn")){var at=sbPath(t.dataset.p);if(at&&at.l[at.i]){at.l[at.i].n=t.value.trim().slice(0,20)||"Folder";sbSave();sbRender()}}});
+/* Bookmarks bar (like Chrome or Opera): bookmarks and folders in one row; folders open a menu; what doesn't fit goes under » */
+function bwMkIc(m){var h=bwHost(m.url),L=(m.title||h||"?").trim().charAt(0).toUpperCase();return '<i style="--c:hsl('+sbHue(h)+' 85% 70%)" aria-hidden="true">'+esc(L)+'</i>'}
+function bwMarks(){var el=$("#bw-bm");if(!el)return;var bySort=function(a,b){return String(a.ts||"").localeCompare(String(b.ts||""))},ms=(S.marks||[]).slice().sort(bySort),fs=(S.mfold||[]).slice().sort(bySort),ids={},ed=!!BW.edit,h="";
+  fs.forEach(function(f){ids[f.id]=1});BW.bmList=[];
+  fs.forEach(function(f){var c=ms.filter(function(m){return m.folder===f.id}).length;BW.bmList.push({f:f});
+    h+='<span class="bm-w"><button class="bm fd" data-act="bw-bmf" data-id="'+esc(f.id)+'" aria-haspopup="menu" aria-expanded="false" title="'+esc(f.name+" · "+c+(c===1?" bookmark":" bookmarks"))+'">'+SBF+'<span>'+esc(f.name)+'</span></button>'+(ed?'<button class="bm-x" data-act="bw-fold" data-id="'+esc(f.id)+'" aria-label="Edit folder '+esc(f.name)+'" title="Edit folder">✎</button>':'')+'</span>'});
+  ms.filter(function(m){return !m.folder||!ids[m.folder]}).forEach(function(m){BW.bmList.push({m:m});
+    h+='<span class="bm-w"><button class="bm" data-act="bw-go" data-u="'+esc(m.url)+'" title="'+esc((m.title||bwHost(m.url))+" · "+bwHost(m.url))+'">'+bwMkIc(m)+'<span>'+esc(m.title||bwHost(m.url))+'</span></button>'+(ed?'<button class="bm-x" data-act="bw-markdel" data-id="'+esc(m.id)+'" aria-label="Remove bookmark" title="Remove">×</button>':'')+'</span>'});
+  if(!BW.bmList.length)h='<span class="bm-e">Press the ☆ star in the address bar and your bookmarks appear here.</span>';
+  h+='<button class="bm tool" id="bw-bmmore" data-act="bw-bmmore" aria-haspopup="menu" aria-expanded="false" title="More bookmarks" aria-label="More bookmarks" hidden>»</button><span class="grow"></span>'+
+    '<button class="bm tool" data-act="bw-newfold" title="New bookmark folder" aria-label="New bookmark folder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2H10l2 2.5h6.5a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2zM12 11v5M9.5 13.5h5"/></svg></button>'+
+    (BW.bmList.length?'<button class="bm tool" data-act="bw-markedit" id="bw-markedit" aria-pressed="'+ed+'">'+(ed?"Done":"Edit")+'</button>':'');
+  setH(el,h);bwBmFit();
+  var act=bwActive(),st=$("#bw-star");if(st){var on=!!(act&&!act.blank&&ms.some(function(m){return m.url===act.url}));st.classList.toggle("on",on)}}
+function bwBmFit(){var el=$("#bw-bm"),mo=$("#bw-bmmore");if(!el||!mo)return;var its=$$("#bw-bm .bm-w");its.forEach(function(e){e.hidden=false});mo.hidden=true;BW.bmHid=[];
+  if(!el.offsetWidth||el.scrollWidth<=el.clientWidth+1)return;mo.hidden=false;for(var i=its.length-1;i>=0&&el.scrollWidth>el.clientWidth+1;i--){its[i].hidden=true;BW.bmHid.unshift(i)}}
+function bwBmFolderHtml(id){var f=(S.mfold||[]).find(function(x){return x.id===id});if(!f)return "";var ms=(S.marks||[]).filter(function(m){return m.folder===id}).sort(function(a,b){return String(a.ts||"").localeCompare(String(b.ts||""))});
+  return (ms.length?ms.map(function(m){return '<button role="menuitem" data-act="bw-go" data-u="'+esc(m.url)+'" title="'+esc(m.url)+'">'+bwMkIc(m)+'<span>'+esc(m.title||bwHost(m.url))+'</span><small>'+esc(bwHost(m.url))+'</small></button>'}).join(""):'<p class="bmp-e">Empty. Press the ☆ star on a page and choose “'+esc(f.name)+'”.</p>')+
+    '<hr>'+(ms.length>1?'<button role="menuitem" data-act="bw-bmall" data-id="'+esc(id)+'"><span>Open all '+ms.length+' in new tabs</span></button>':'')+'<button role="menuitem" data-act="bw-fold" data-id="'+esc(id)+'"><span>Edit folder…</span></button>'}
+function bwBmMoreHtml(){return (BW.bmHid||[]).map(function(i){var x=(BW.bmList||[])[i];if(!x)return "";if(x.f)return '<button role="menuitem" class="fd" data-act="bw-bmf" data-in="1" data-id="'+esc(x.f.id)+'">'+SBF+'<span>'+esc(x.f.name)+'</span><small>›</small></button>';
+  return '<button role="menuitem" data-act="bw-go" data-u="'+esc(x.m.url)+'">'+bwMkIc(x.m)+'<span>'+esc(x.m.title||bwHost(x.m.url))+'</span></button>'}).join("")}
+function bwBmPop(btn,h){var p=$("#bw-bmpop");if(!p||!btn)return;var key=btn.dataset.act+"|"+(btn.dataset.id||""),was=!p.hidden&&BW.popFor===key;bwBmClose();if(was||!h)return;
+  p.innerHTML=h;p.hidden=false;BW.popFor=key;btn.setAttribute("aria-expanded","true");var r=btn.getBoundingClientRect();p.style.top=Math.round(r.bottom+4)+"px";p.style.left=Math.round(Math.max(8,Math.min(innerWidth-p.offsetWidth-8,r.left)))+"px";
+  var f=p.querySelector("button");if(f)try{f.focus()}catch(_){}}
+function bwBmClose(){var p=$("#bw-bmpop");if(!p||p.hidden)return;p.hidden=true;p.innerHTML="";BW.popFor="";$$('#bw-bm [aria-expanded="true"]').forEach(function(b){b.setAttribute("aria-expanded","false")})}
+document.addEventListener("click",function(e){var p=$("#bw-bmpop");if(!p||p.hidden)return;var t=e.target;if(t&&t.closest&&t.closest('[data-act="bw-bmf"],[data-act="bw-bmmore"]'))return;setTimeout(bwBmClose,0)},true);
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){var p=$("#bw-bmpop");if(p&&!p.hidden){e.stopPropagation();bwBmClose()}}},true);
 /* tab groups (kept on this device) */
 var TG=(function(){var o={g:[],m:{}};try{o=JSON.parse(localStorage.getItem("regis-tg"))||o}catch(_){}if(!o.g)o.g=[];if(!o.m)o.m={};return o})();
 var TGC=["#7aa2ff","#ff7a90","#ffd166","#5be3a0","#c58bff","#4fd6e0"];
@@ -4162,7 +4316,7 @@ function tgTabsHtml(tabs,active){var live={};tabs.forEach(function(t){live[t.id]
   return out.join("")}
 function bwTabGroup(id){var gs=TG.g;openModal("Group this tab",'<form data-vt-form="tgrp" class="vt-f" data-id="'+id+'"><label>Add to a group<select id="tg-sel"><option value="">No group</option>'+gs.map(function(g){return '<option value="'+esc(g.id)+'"'+(TG.m[id]===g.id?" selected":"")+'>'+esc(g.n)+'</option>'}).join("")+'<option value="+">New group…</option></select></label><label>New group name<input id="tg-name" maxlength="18" placeholder="Homework, Research…"></label><div class="fbar"><button class="btn pri" type="submit">Done</button><button class="btn ghost" type="button" data-act="modal-close">Cancel</button></div></form>');bwSync()}
 /* Vault: everything is encrypted in the page with a key made from your master password (PBKDF2 then AES-GCM). Only the scrambled text is saved and synced. */
-var VT={key:null,raw:null,code:null,forgot:false,items:[],tab:"login",timer:0,pend:null,filled:{},show:{},busy:false,edit:""};
+var VT={key:null,raw:null,code:null,forgot:false,items:[],tab:"login",timer:0,pend:null,filled:{},show:{},busy:false,edit:"",seen:false,dev:false,devTried:false};
 function vtB64(u){var s="";for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
 function vtUn(b){var s=atob(b),u=new Uint8Array(s.length);for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
 function vtSub(){return (window.crypto&&window.crypto.subtle)||null}
@@ -4171,8 +4325,8 @@ async function vtEnc(key,obj){var iv=crypto.getRandomValues(new Uint8Array(12)),
 async function vtDec(key,blob){var p=String(blob).split(".");var pt=await vtSub().decrypt({name:"AES-GCM",iv:vtUn(p[0])},key,vtUn(p[1]));return JSON.parse(new TextDecoder().decode(pt))}
 function vtMeta(){return (S.vault||[]).find(function(x){return x.id==="meta"})||null}
 function vtRows(){return (S.vault||[]).filter(function(x){return x.id!=="meta"&&x.c})}
-function vtTouch(){clearTimeout(VT.timer);var m=+opGet("vlock");if(VT.key&&m>0)VT.timer=setTimeout(vtLock,m*60000)}
-function vtLock(){VT.key=null;VT.raw=null;VT.code=null;VT.forgot=false;VT.pend=null;VT.items=[];VT.show={};VT.edit="";clearTimeout(VT.timer);vtRender();vtBar()}
+function vtTouch(){clearTimeout(VT.timer);var m=+opGet("vlock");if(VT.key&&VT.seen&&m>0)VT.timer=setTimeout(vtLock,m*60000)}
+function vtLock(){VT.seen=false;VT.code=null;VT.forgot=false;VT.show={};VT.edit="";clearTimeout(VT.timer);if(!VT.dev){VT.key=null;VT.raw=null;VT.pend=null;VT.items=[]}vtRender();vtBar()}
 async function vtLoad(){var out=[],rows=vtRows();for(var i=0;i<rows.length;i++){try{var d=await vtDec(VT.key,rows[i].c);out.push({id:rows[i].id,kind:rows[i].kind,d:d,ts:rows[i].ts})}catch(_){}}VT.items=out}
 var VTA="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 function vtCode(){var a=crypto.getRandomValues(new Uint8Array(20)),o="";for(var i=0;i<20;i++){o+=VTA[a[i]&31];if(i%4===3&&i<19)o+="-"}return o}
@@ -4182,69 +4336,75 @@ async function vtKeyOf(raw){return vtSub().importKey("raw",raw,{name:"AES-GCM"},
 async function vtWrap(raw,secret){var salt=crypto.getRandomValues(new Uint8Array(16)),k=await vtDerive(secret,salt);return {salt:vtB64(salt),blob:await vtEnc(k,{k:vtB64(raw)})}}
 async function vtUnwrap(blob,saltB64,secret){var k=await vtDerive(secret,vtUn(saltB64)),r=await vtDec(k,blob);return vtUn(r.k)}
 function vtSetKey(raw){VT.raw=raw;return vtKeyOf(raw).then(function(k){VT.key=k})}
-async function vtMetaWrite(m){await wr("vault/meta",function(r){return r.set(Object.assign({v:2,ts:new Date().toISOString()},m))})}
+async function vtMetaWrite(m){if(!("kc" in m)){var c0=vtMeta();if(c0&&c0.kc)m.kc=c0.kc}await wr("vault/meta",function(r){return r.set(Object.assign({v:2,ts:new Date().toISOString()},m))})}
+function vtDevOk(){return !!(APP&&APP.vaultKey&&opGet("vdev"))}
+/* remember the data key on this computer, protected by the operating system (Windows DPAPI / macOS Keychain) */
+async function vtEnroll(){if(!vtDevOk()||!VT.raw)return;try{var m=vtMeta();if(m&&!m.kc){m=Object.assign({},m);await vtMetaWrite({salt:m.salt,wk:m.wk,rsalt:m.rsalt,rk:m.rk,mail:m.mail||"",kc:await vtEnc(VT.key,{ok:1})})}if(await APP.vaultKey.set(vtB64(VT.raw)))VT.dev=true}catch(_){}}
+async function vtDev(){var m=vtMeta();if(VT.key||VT.devTried||!m||m.v!==2||!m.kc||!vtDevOk())return;VT.devTried=true;
+  try{var b=await APP.vaultKey.get();if(!b||VT.key)return;var raw=vtUn(b),K=await vtKeyOf(raw),ok=false;try{var r=await vtDec(K,m.kc);ok=!!(r&&r.ok===1)}catch(_){}
+    if(!ok){APP.vaultKey.set("").catch(function(){});return}VT.raw=raw;VT.key=K;VT.dev=true;VT.seen=false;await vtLoad();vtRender();vtBar()}catch(_){}}
 /* make a new vault: a random data key, locked once by the password and once by a recovery code */
-async function vtCreate(pw,mail){if(!vtSub())throw new Error("This browser can’t do encryption here.");var raw=crypto.getRandomValues(new Uint8Array(32)),code=vtCode(),w=await vtWrap(raw,pw),r=await vtWrap(raw,vtNorm(code));
-  await vtMetaWrite({salt:w.salt,wk:w.blob,rsalt:r.salt,rk:r.blob,mail:String(mail||"").trim()});await vtSetKey(raw);VT.items=[];vtTouch();return code}
+async function vtCreate(pw,mail){if(!vtSub())throw new Error("This browser can’t do encryption here.");var raw=crypto.getRandomValues(new Uint8Array(32)),code=vtCode(),w=await vtWrap(raw,pw),r=await vtWrap(raw,vtNorm(code)),kc=await vtEnc(await vtKeyOf(raw),{ok:1});
+  await vtMetaWrite({salt:w.salt,wk:w.blob,rsalt:r.salt,rk:r.blob,mail:String(mail||"").trim(),kc:kc});await vtSetKey(raw);VT.items=[];VT.seen=true;vtTouch();await vtEnroll();return code}
 async function vtOpen(pw){var m=vtMeta();if(!m)throw new Error("No Vault yet.");
   if(m.v!==2){ /* vault from version 1.6.0: unlock the old way, then move everything onto a data key and a recovery code */
     var old=await vtDerive(pw,vtUn(m.salt));try{var r0=await vtDec(old,m.chk);if(!r0||r0.ok!==1)throw 0}catch(_){throw new Error("That password isn’t right.")}
     var rows=vtRows(),plain=[];for(var i=0;i<rows.length;i++){try{plain.push([rows[i].id,await vtDec(old,rows[i].c)])}catch(_){}}
     var raw=crypto.getRandomValues(new Uint8Array(32)),code=vtCode(),w=await vtWrap(raw,pw),rr=await vtWrap(raw,vtNorm(code)),K=await vtKeyOf(raw);
     for(var j=0;j<plain.length;j++){var c=await vtEnc(K,plain[j][1]);await wr("vault/"+plain[j][0],function(rf){return rf.update({c:c})})}
-    await vtMetaWrite({salt:w.salt,wk:w.blob,rsalt:rr.salt,rk:rr.blob,mail:m.mail||""});await vtSetKey(raw);await vtLoad();VT.code=code;vtTouch();return}
+    await vtMetaWrite({salt:w.salt,wk:w.blob,rsalt:rr.salt,rk:rr.blob,mail:m.mail||"",kc:await vtEnc(K,{ok:1})});await vtSetKey(raw);await vtLoad();VT.code=code;VT.seen=true;vtTouch();await vtEnroll();return}
   var rw;try{rw=await vtUnwrap(m.wk,m.salt,pw)}catch(_){throw new Error("That password isn’t right.")}
-  await vtSetKey(rw);await vtLoad();vtTouch()}
+  await vtSetKey(rw);await vtLoad();VT.seen=true;vtTouch();await vtEnroll()}
 async function vtSave(kind,d,id){if(!VT.key)return;var c=await vtEnc(VT.key,d);if(id){await wr("vault/"+id,function(r){return r.update({c:c,ts:new Date().toISOString()})});var it=VT.items.find(function(x){return x.id===id});if(it)it.d=d}
-  else{var nid=await create("vault",{kind:kind,c:c,ts:new Date().toISOString()});if(nid)VT.items.push({id:nid,kind:kind,d:d})}vtTouch()}
+  else{var nid=await create("vault",{kind:kind,c:c,ts:new Date().toISOString()});if(nid&&!VT.items.some(function(x){return x.id===nid}))VT.items.push({id:nid,kind:kind,d:d})}vtTouch()}
 /* change the password: only the lock on the data key changes, nothing is re-encrypted */
 async function vtChange(oldp,newp){var m=vtMeta();try{await vtUnwrap(m.wk,m.salt,oldp)}catch(_){throw new Error("The current password isn’t right.")}
   var w=await vtWrap(VT.raw,newp);await vtMetaWrite({salt:w.salt,wk:w.blob,rsalt:m.rsalt,rk:m.rk,mail:m.mail||""});vtTouch()}
 /* forgot the password: the emailed recovery code unlocks the data key, then a new password and a new code are set */
 async function vtRecover(code,newp){var m=vtMeta();if(!m||m.v!==2)throw new Error("Recovery needs a Vault made in version 1.7 or later.");var raw;try{raw=await vtUnwrap(m.rk,m.rsalt,vtNorm(code))}catch(_){throw new Error("That recovery code isn’t right.")}
-  var nc=vtCode(),w=await vtWrap(raw,newp),r=await vtWrap(raw,vtNorm(nc));await vtMetaWrite({salt:w.salt,wk:w.blob,rsalt:r.salt,rk:r.blob,mail:m.mail||""});await vtSetKey(raw);await vtLoad();vtTouch();return nc}
+  var nc=vtCode(),w=await vtWrap(raw,newp),r=await vtWrap(raw,vtNorm(nc));await vtMetaWrite({salt:w.salt,wk:w.blob,rsalt:r.salt,rk:r.blob,mail:m.mail||""});await vtSetKey(raw);await vtLoad();VT.seen=true;vtTouch();await vtEnroll();return nc}
 async function vtNewCode(){var m=vtMeta(),nc=vtCode(),r=await vtWrap(VT.raw,vtNorm(nc));await vtMetaWrite({salt:m.salt,wk:m.wk,rsalt:r.salt,rk:r.blob,mail:m.mail||""});return nc}
 async function vtSetMail(mail){var m=vtMeta();await vtMetaWrite({salt:m.salt,wk:m.wk,rsalt:m.rsalt,rk:m.rk,mail:String(mail||"").trim()})}
 async function vtMailCode(code){var m=vtMeta(),to=m&&m.mail;if(!vtMailOk(to))throw new Error("Add a recovery email address first.");if(!S.mcp||!S.conn||!S.conn.gmail||S.conn.gmail.st!=="ok")throw new Error("Connect Gmail in Connect & Setup first so Regis can email the code. Write it down for now.");
   await gm("send_message",{to:[to],subject:"Your Regis Vault recovery code",body:"Your Regis Vault recovery code is:\n\n"+code+"\n\nOn the Vault screen choose “Forgot password?” and type this code to set a new master password. Keep this email private. Anyone who has both this code and access to your synced Regis data can open your Vault. If you did not ask for this, ignore it.\n"});return to}
-async function vtWipe(){var rows=(S.vault||[]).slice();for(var i=0;i<rows.length;i++)await remove("vault",rows[i].id);VT.key=null;VT.raw=null;VT.items=[];VT.code=null}
-function vtData(){if(VT.key){vtLoad().then(function(){vtRender()}).catch(function(){})}else vtRender();vtBar()}
-function vtLogins(host){return VT.items.filter(function(i){return i.kind==="login"&&i.d&&bwHost(i.d.url||"")===host})}
-function vtStatusHtml(){var m=vtMeta();return m?(VT.key?"Unlocked. Locks itself after "+({"0":"you close Regis","5":"5 minutes","15":"15 minutes","60":"1 hour"}[opGet("vlock")]||"15 minutes")+" of no use.":"Set up and locked."):"Not set up yet. Choose a master password to start."}
+async function vtWipe(){var rows=(S.vault||[]).slice();for(var i=0;i<rows.length;i++)await remove("vault",rows[i].id);VT.key=null;VT.raw=null;VT.items=[];VT.code=null;VT.seen=false;VT.dev=false;VT.devTried=false;try{if(APP&&APP.vaultKey)await APP.vaultKey.set("")}catch(_){}}
+function vtData(){if(VT.key){vtLoad().then(function(){vtRender();vtBar()}).catch(function(){})}else{vtRender();vtDev()}vtBar()}
+function vtLogins(host){var seen={};return VT.items.filter(function(i){if(seen[i.id])return false;seen[i.id]=1;return i.kind==="login"&&i.d&&bwHost(i.d.url||"")===host})}
+function vtStatusHtml(){var m=vtMeta();return m?(VT.key&&!VT.seen?"Locked. Saved logins still fill and save on this computer; your master password is only needed to see them.":VT.key?"Unlocked. Locks itself after "+({"0":"you close Regis","5":"5 minutes","15":"15 minutes","60":"1 hour"}[opGet("vlock")]||"15 minutes")+" of no use.":"Set up and locked."):"Not set up yet. Choose a master password to start."}
 function vtRender(){
-  var vbx=$("#vault-box"),vch=vbx&&vbx.querySelector("summary .chip");if(vch)vch.textContent=!vtMeta()?"set up":VT.key?"unlocked":"locked";
+  var vbx=$("#vault-box"),vch=vbx&&vbx.querySelector("summary .chip");if(vch)vch.textContent=!vtMeta()?"set up":VT.seen?"unlocked":"locked";
   var st=$("#vt-status");if(st)st.textContent=vtStatusHtml();
   var sp=$("#vt-setup");if(sp){var m=vtMeta(),h="";
     if(VT.code)h='<div class="vt-code"><b>Your recovery code</b><code>'+esc(VT.code)+'</code><p class="note">Keep this safe. It is the only way back in if you forget your master password. It is not stored in Regis.</p><div class="fbar"><button class="btn pri" data-act="vt-mailcode">Email it to '+esc((m&&m.mail)||"me")+'</button><button class="btn" data-act="vt-copycode">Copy</button><button class="btn ghost" data-act="vt-codedone">I saved it</button></div></div>';
     else if(!m)h='<form data-vt-form="setup" class="vt-f"><label>Master password<input type="password" id="vs-a" autocomplete="new-password" minlength="8" placeholder="At least 8 characters"></label><label>Type it again<input type="password" id="vs-b" autocomplete="new-password"></label><label>Recovery email<input type="email" id="vs-m" autocomplete="email" value="jwu.anthony@gmail.com"></label><p class="note">If you forget the password, a recovery code is the only way back in. Regis makes one now and can email it to this address. The master password itself is never saved anywhere.</p><div class="fbar"><button class="btn pri" type="submit">Create Vault</button></div></form>';
-    else h='<div class="fbar">'+(VT.key?'<button class="btn" data-act="vt-lock">Lock now</button>':'<button class="btn pri" data-act="vt-open">Unlock</button>')+'<button class="btn ghost" data-act="vt-open">Open Vault</button></div><details class="vt-more"><summary>Password, recovery and erase</summary>'+(VT.key?'<form data-vt-form="change" class="vt-f"><label>Current password<input type="password" id="vc-o" autocomplete="current-password"></label><label>New password<input type="password" id="vc-n" autocomplete="new-password" minlength="8"></label><div class="fbar"><button class="btn" type="submit">Change password</button></div></form><form data-vt-form="mail" class="vt-f"><label>Recovery email<input type="email" id="vm-m" autocomplete="email" value="'+esc(m.mail||"")+'"></label><div class="fbar"><button class="btn" type="submit">Save address</button><button class="btn" type="button" data-act="vt-newcode">Make and email a new recovery code</button></div></form>':'<p class="note">Unlock the Vault to change the password or make a new recovery code. Forgot it? Use Forgot password on the unlock screen.</p>')+'<div class="fbar"><button class="btn danger" data-act="vt-wipe">Erase the Vault</button></div></details>';
+    else h='<div class="fbar">'+(VT.seen?'<button class="btn" data-act="vt-lock">Lock now</button>':'<button class="btn pri" data-act="vt-open">Unlock</button>')+'<button class="btn ghost" data-act="vt-open">Open Vault</button></div><details class="vt-more"><summary>Password, recovery and erase</summary>'+(VT.seen?'<form data-vt-form="change" class="vt-f"><label>Current password<input type="password" id="vc-o" autocomplete="current-password"></label><label>New password<input type="password" id="vc-n" autocomplete="new-password" minlength="8"></label><div class="fbar"><button class="btn" type="submit">Change password</button></div></form><form data-vt-form="mail" class="vt-f"><label>Recovery email<input type="email" id="vm-m" autocomplete="email" value="'+esc(m.mail||"")+'"></label><div class="fbar"><button class="btn" type="submit">Save address</button><button class="btn" type="button" data-act="vt-newcode">Make and email a new recovery code</button></div></form>':'<p class="note">Unlock the Vault to change the password or make a new recovery code. Forgot it? Use Forgot password on the unlock screen.</p>')+'<div class="fbar"><button class="btn danger" data-act="vt-wipe">Erase the Vault</button></div></details>';
     if(sp.dataset.h!==h){sp.dataset.h=h;sp.innerHTML=h}}
   var mdl=$("#modal");if(mdl&&!mdl.hidden&&$("#mdl-t").textContent==="Vault"&&!VT.busy)vtModalBody()}
 function vtModalBody(){var b=$("#mdl-b"),m=vtMeta(),h;
   if(!m)h='<div class="vt-lock"><p>You have not set up a Vault yet.</p><p class="note">Make a master password in Connect &amp; Setup, then your logins and private notes live here, locked.</p><div class="fbar"><button class="btn pri" data-act="vt-gosetup">Go to setup</button></div></div>';
-  else if(!VT.key&&VT.forgot)h='<div class="vt-lock"><form data-vt-form="recover" class="vt-f"><p>Type the recovery code Regis made when you set up the Vault. It was emailed to <b>'+esc(m.mail||"your recovery address")+'</b> if Gmail was connected.</p><label>Recovery code<input id="vr-c" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" autofocus></label><label>New master password<input type="password" id="vr-a" autocomplete="new-password" minlength="8"></label><label>Type it again<input type="password" id="vr-b" autocomplete="new-password"></label><div class="fbar"><button class="btn pri" type="submit">Reset password</button><button class="btn ghost" type="button" data-act="vt-back">Back</button></div><p class="note" id="vu-e" role="alert"></p><details class="vt-more"><summary>I can’t find the code</summary><p class="note">Search your email for “Regis Vault recovery code”. If it is gone, nothing can unlock the saved items, because only your password and that code hold the key. You can erase the Vault and start fresh.</p><div class="fbar"><button type="button" class="btn danger" data-act="vt-wipe">Erase the Vault</button></div></details></form></div>';
-  else if(!VT.key)h='<div class="vt-lock"><form data-vt-form="unlock" class="vt-f"><label>Master password<input type="password" id="vu-p" autocomplete="current-password" autofocus></label><div class="fbar"><button class="btn pri" type="submit">Unlock</button><button class="btn ghost" type="button" data-act="vt-forgot">Forgot password?</button></div><p class="note" id="vu-e" role="alert"></p></form></div>';
+  else if(!VT.seen&&VT.forgot)h='<div class="vt-lock"><form data-vt-form="recover" class="vt-f"><p>Type the recovery code Regis made when you set up the Vault. It was emailed to <b>'+esc(m.mail||"your recovery address")+'</b> if Gmail was connected.</p><label>Recovery code<input id="vr-c" autocomplete="off" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX" autofocus></label><label>New master password<input type="password" id="vr-a" autocomplete="new-password" minlength="8"></label><label>Type it again<input type="password" id="vr-b" autocomplete="new-password"></label><div class="fbar"><button class="btn pri" type="submit">Reset password</button><button class="btn ghost" type="button" data-act="vt-back">Back</button></div><p class="note" id="vu-e" role="alert"></p><details class="vt-more"><summary>I can’t find the code</summary><p class="note">Search your email for “Regis Vault recovery code”. If it is gone, nothing can unlock the saved items, because only your password and that code hold the key. You can erase the Vault and start fresh.</p><div class="fbar"><button type="button" class="btn danger" data-act="vt-wipe">Erase the Vault</button></div></details></form></div>';
+  else if(!VT.seen)h='<div class="vt-lock"><form data-vt-form="unlock" class="vt-f">'+(VT.dev?'<p class="note">Autofill and saving work without this. Type your master password to see what is inside.</p>':'')+'<label>Master password<input type="password" id="vu-p" autocomplete="current-password" autofocus></label><div class="fbar"><button class="btn pri" type="submit">Unlock</button><button class="btn ghost" type="button" data-act="vt-forgot">Forgot password?</button></div><p class="note" id="vu-e" role="alert"></p></form></div>';
   else{var its=VT.items.filter(function(i){return i.kind===VT.tab}).sort(function(a,c){return String((a.d.site||a.d.title||"")).localeCompare(String(c.d.site||c.d.title||""))});
     h='<div class="vt-top"><div class="tabs" role="tablist"><button class="tab" role="tab" data-act="vt-tab" data-v="login" aria-selected="'+(VT.tab==="login")+'">Logins</button><button class="tab" role="tab" data-act="vt-tab" data-v="note" aria-selected="'+(VT.tab==="note")+'">Private notes</button></div><span class="grow"></span><button class="btn sm" data-act="vt-new">+ Add</button><button class="btn sm ghost" data-act="vt-lock">Lock</button></div>';
     if(VT.edit!==""){var cur=VT.edit==="new"?{}:((VT.items.find(function(i){return i.id===VT.edit})||{}).d||{});
       h+=VT.tab==="login"?'<form data-vt-form="item" class="vt-f"><label>Website<input id="vi-site" value="'+esc(cur.site||"")+'" placeholder="example.com"></label><label>Username or email<input id="vi-user" value="'+esc(cur.user||"")+'" autocomplete="off"></label><label>Password<input id="vi-pass" type="text" value="'+esc(cur.pass||"")+'" autocomplete="off" spellcheck="false"></label><div class="fbar"><button class="btn pri" type="submit">Save</button><button class="btn ghost" type="button" data-act="vt-gen">Make a strong one</button><button class="btn ghost" type="button" data-act="vt-cancel">Cancel</button></div></form>':'<form data-vt-form="item" class="vt-f"><label>Title<input id="vi-title" value="'+esc(cur.title||"")+'" maxlength="60"></label><label>Note<textarea id="vi-body" rows="9">'+esc(cur.body||"")+'</textarea></label><div class="fbar"><button class="btn pri" type="submit">Save</button><button class="btn ghost" type="button" data-act="vt-cancel">Cancel</button></div></form>'}
     else h+='<div class="vt-list">'+(its.length?its.map(function(i){var d=i.d;return VT.tab==="login"?'<div class="vt-row"><span class="vt-main"><b>'+esc(d.site||bwHost(d.url||""))+'</b><small>'+esc(d.user||"")+'</small><code>'+(VT.show[i.id]||opGet("vshow")?esc(d.pass||""):"••••••••••")+'</code></span><button class="btn sm ghost" data-act="vt-show" data-id="'+i.id+'">'+(VT.show[i.id]?"Hide":"Show")+'</button><button class="btn sm ghost" data-act="vt-copy" data-id="'+i.id+'">Copy</button><button class="btn sm ghost" data-act="vt-edit" data-id="'+i.id+'">Edit</button><button class="btn sm ghost" data-act="vt-del" data-id="'+i.id+'">Delete</button></div>':'<div class="vt-row"><span class="vt-main"><b>'+esc(d.title||"Untitled")+'</b><small>'+esc(short((d.body||"").replace(/\s+/g," "),80))+'</small></span><button class="btn sm ghost" data-act="vt-edit" data-id="'+i.id+'">Open</button><button class="btn sm ghost" data-act="vt-del" data-id="'+i.id+'">Delete</button></div>'}).join(""):'<p class="note">'+(VT.tab==="login"?"No saved logins. Sign in to a site in the Browser and Regis will offer to keep it, or press Add.":"No notes yet. Press Add to write one. Everything here is encrypted.")+'</p>')+'</div>'}
-  b.innerHTML='<div class="vt-wrap">'+h+'</div>';var f=b.querySelector("input[autofocus],input,textarea");if(f&&!VT.key)try{f.focus()}catch(_){}}
+  b.innerHTML='<div class="vt-wrap">'+h+'</div>';var f=b.querySelector("input[autofocus],input,textarea");if(f&&!VT.seen)try{f.focus()}catch(_){}}
 function vtOpenModal(){openModal("Vault","",true);vtModalBody();bwSync()}
 function vtGen(){var a=new Uint8Array(18);crypto.getRandomValues(a);var cs="abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789-_!?",o="";for(var i=0;i<a.length;i++)o+=cs[a[i]%cs.length];return o}
 /* browser side: save prompt and autofill */
 function vtBar(){var el=$("#vt-bar");if(!el)return;var h="",act=bwActive(),host=act&&!act.blank?bwHost(act.url):"",m=vtMeta();
   if(VT.pend&&opGet("vsave")){var c=VT.pend,ex=VT.key?vtLogins(c.host).find(function(i){return i.d.user===c.user}):null;
     if(!m)h='<span>Save this login in Regis? Set up the Vault first.</span><button class="btn sm" data-act="vt-gosetup">Set up</button><button class="btn sm ghost" data-act="vt-skip">Not now</button>';
-    else if(!VT.key)h='<span>Save the password for <b>'+esc(c.host)+'</b>? Unlock the Vault to keep it.</span><button class="btn sm pri" data-act="vt-open">Unlock</button><button class="btn sm ghost" data-act="vt-skip">Not now</button>';
+    else if(!VT.key)h='<span>Save the password for <b>'+esc(c.host)+'</b>? Unlock the Vault once on this computer and it saves by itself from then on.</span><button class="btn sm pri" data-act="vt-open">Unlock</button><button class="btn sm ghost" data-act="vt-skip">Not now</button>';
     else if(ex&&ex.d.pass===c.pass){VT.pend=null;h=""}
     else h='<span>'+(ex?"Update":"Save")+' the password for <b>'+esc(c.user||c.host)+'</b> on '+esc(c.host)+'?</span><button class="btn sm pri" data-act="vt-savecred">'+(ex?"Update":"Save")+'</button><button class="btn sm ghost" data-act="vt-skip">Not now</button><button class="btn sm ghost" data-act="vt-never">Never for this site</button>'}
-  else if(act&&act.login&&host&&m&&opGet("vfill")){
-    if(!VT.key)h='<span>This page has a sign-in. Unlock the Vault to fill it.</span><button class="btn sm" data-act="vt-open">Unlock</button>';
+  else if(act&&act.login&&!act.loading&&host&&m&&opGet("vfill")){
+    if(!VT.key)h='<span>This page has a sign-in. Unlock the Vault once on this computer and it fills by itself from then on.</span><button class="btn sm" data-act="vt-open">Unlock</button>';
     else{var ls=vtLogins(host);if(ls.length>1)h='<span>Fill sign-in for <b>'+esc(host)+'</b>:</span>'+ls.map(function(i){return '<button class="btn sm" data-act="vt-fill" data-id="'+i.id+'">'+esc(i.d.user||"login")+'</button>'}).join("");
-      else if(ls.length===1){var k=act.id+"|"+act.url;if(!/^https:\/\//i.test(act.url)&&!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?([/?#]|$)/i.test(act.url))h='<span>This page isn’t secure (no https), so Regis won’t fill your saved login.</span>';else{if(!VT.filled[k]){VT.filled[k]=1;vtFill(ls[0])}h=""}}}}
+      else if(ls.length===1){var k=act.id+"|"+act.url;if(!/^https:\/\//i.test(act.url)&&!/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?([/?#]|$)/i.test(act.url))h='<span>This page isn’t secure (no https), so Regis won’t fill your saved login.</span>';else{if(!VT.filled[k]){VT.filled[k]=1;vtFill(ls[0],k)}h=""}}}}
   var sig=h;if(el.dataset.h===sig)return;el.dataset.h=sig;el.innerHTML=h;el.hidden=!h;if(window.ResizeObserver==null)bwBounds()}
-function vtFill(it){var act=bwActive();if(!bwNative()||!act||!it)return;APP.browser.fill(act.id,it.d.user||"",it.d.pass||"").then(function(){toast("Filled your saved login.","good")}).catch(function(){})}
+function vtFill(it,k){var act=bwActive();if(!bwNative()||!act||!it)return;APP.browser.fill(act.id,it.d.user||"",it.d.pass||"").then(function(r){if(r&&r.pass)toast("Filled your saved login.","good");else if(k)setTimeout(function(){delete VT.filled[k]},1500)}).catch(function(){if(k)delete VT.filled[k]})}
 async function vtSubmit(f){var k=f.dataset.vtForm;
   try{
   if(k==="mark"){var fs=$("#bm-fold").value;await create("marks",{url:BW.pendMark.url,title:$("#bm-name").value.trim()||BW.pendMark.title,folder:fs||"",ts:new Date().toISOString()});closeModal();bwSync();toast("Bookmarked.","good")}
@@ -4253,6 +4413,9 @@ async function vtSubmit(f){var k=f.dataset.vtForm;
   else if(k==="tgrp"){var id=+f.dataset.id,v=$("#tg-sel").value,nm=$("#tg-name").value.trim();
     if(nm||v==="+"){var g={id:"g"+Date.now().toString(36),n:nm||"Group",c:TGC[TG.g.length%TGC.length],k:0};TG.g.push(g);TG.m[id]=g.id}else if(v)TG.m[id]=v;else delete TG.m[id];
     tgSave();closeModal();bwSync();bwRender()}
+  else if(k==="bwsadd"){var sn=$("#bws-n").value.trim(),su=$("#bws-u").value.trim(),sto=$("#bws-to").value;if(!su){toast("Add the web address.","bad");return}if(!/^https?:\/\//i.test(su))su="https://"+su;try{su=new URL(su).href}catch(_){toast("That address doesn’t look right.","bad");return}if(!/^https?:/i.test(su)){toast("Use a web address (https://…).","bad");return}
+    var fvx=BWF.find(function(x){return x.u===su}),sit=sbSite(sn,su,fvx&&fvx.c,fvx&&fvx.g),sfd=sto===""?null:SB[+sto];if(sfd&&sfd.t==="f"){(sfd.items=sfd.items||[]).push(sit);sfd.open=true}else SB.push(sit);sbRe();toast("Added to the sidebar.","good")}
+  else if(k==="bwsfold"){var sfn=$("#bws-fname").value.trim();if(!sfn)return;SB.push({t:"f",id:"f"+Date.now().toString(36),n:sfn.slice(0,20),open:true,items:[]});sbRe()}
   else if(k==="setup"){var a=$("#vs-a").value,b=$("#vs-b").value,ml=$("#vs-m").value.trim();if(a.length<8){toast("Use at least 8 characters.","bad");return}if(a!==b){toast("The two passwords don’t match.","bad");return}if(!vtMailOk(ml)){toast("Add a valid recovery email.","bad");return}
     VT.busy=true;VT.code=await vtCreate(a,ml);VT.busy=false;vtRender();vtBar();toast("Vault created. Save your recovery code.","good");try{await vtMailCode(VT.code);toast("Recovery code emailed to "+ml+".","good")}catch(e){toast(e.message,"bad")}}
   else if(k==="unlock"){var p=$("#vu-p").value;VT.busy=true;try{await vtOpen(p);VT.busy=false;vtModalBody();vtRender();vtBar();if(VT.code)toast("Vault updated. Your new recovery code is in Connect & Setup.","good")}catch(e){VT.busy=false;var er=$("#vu-e");if(er)er.textContent=e.message;$("#vu-p").value=""}}
@@ -4273,18 +4436,21 @@ var BWI={mail:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height=
 var BWD=[["Google","https://www.google.com","#8ab4ff","G"],["Gmail","https://mail.google.com","#ff8272","@mail"],["Drive","https://drive.google.com","#ffcf6b","@drive"],["Calendar","https://calendar.google.com","#6be0b0","31"],["Docs","https://docs.google.com","#7fd8ff","@docs"],["YouTube","https://www.youtube.com","#ff6b6b","@play"],["Spotify","https://open.spotify.com","#1db954","@note"],["Discord","https://discord.com/app","#7289ff","@chat"],["Maps","https://maps.google.com","#9be37d","@pin"],["Photos","https://photos.google.com","#c9a8ff","@photos"],["News","https://news.google.com","#ff9ec7","N"]].map(function(x){return {n:x[0],u:x[1],c:x[2],g:x[3]}});
 var BWF=lsj("regis-bwfav",null)||BWD.slice(),BWS=lsj("regis-bwside",null)||BWD.slice(0,8).map(function(x){return x.u});
 function bwSave(){lsw("regis-bwfav",BWF);lsw("regis-bwside",BWS)}
+SB=sbLoad();
 function bwGlyph(x){var g=x.g||"";return g.charAt(0)==="@"&&BWI[g.slice(1)]?BWI[g.slice(1)]:'<span>'+esc(g||(x.n||"?").charAt(0).toUpperCase())+'</span>'}
 function bwSites(){var q=$("#bw-qs"),d=$("#bw-dial");if(!q||!d)return;var ed=!!BW.edit,fe=!!BW.fedit;
-  q.innerHTML=BWS.map(function(u){var x=BWF.find(function(f){return f.u===u});if(!x)return "";return '<span class="bw-mk"><button class="bw-ic" data-act="bw-go" data-u="'+esc(x.u)+'" title="'+esc(x.n)+'" aria-label="'+esc(x.n)+'"><b style="--c:'+esc(x.c)+'">'+bwGlyph(x)+'</b><small>'+esc(short(x.n,9))+'</small></button>'+(ed?'<button class="bw-rm" data-act="bwq-del" data-u="'+esc(x.u)+'" aria-label="Remove '+esc(x.n)+' from the sidebar">×</button>':"")+'</span>'}).join("");
+  sbRender();
   d.classList.toggle("edit",fe);var eb=$("#bwf-edit");if(eb)eb.textContent=fe?"Done":"Edit favourites";
   d.innerHTML=BWF.map(function(x,i){var inner='<i style="--c:'+esc(x.c)+'">'+bwGlyph(x)+'</i><span>'+esc(x.n)+'</span>';
-    return fe?'<div class="bw-t bw-te">'+inner+'<button class="bw-rm" data-act="bwf-del" data-i="'+i+'" aria-label="Remove '+esc(x.n)+'">×</button><button class="bw-pn" data-act="bwf-pin" data-i="'+i+'" aria-pressed="'+(BWS.indexOf(x.u)>=0)+'" title="Show in the sidebar" aria-label="Show '+esc(x.n)+' in the sidebar">▤</button></div>':'<button class="bw-t" data-act="bw-go" data-u="'+esc(x.u)+'">'+inner+'</button>'}).join("")+
+    return fe?'<div class="bw-t bw-te">'+inner+'<button class="bw-rm" data-act="bwf-del" data-i="'+i+'" aria-label="Remove '+esc(x.n)+'">×</button><button class="bw-pn" data-act="bwf-pin" data-i="'+i+'" aria-pressed="'+sbHas(x.u)+'" title="Show in the sidebar" aria-label="Show '+esc(x.n)+' in the sidebar">▤</button></div>':'<button class="bw-t" data-act="bw-go" data-u="'+esc(x.u)+'">'+inner+'</button>'}).join("")+
     (fe?'<form class="bw-t bw-tf" data-actsubmit="bwf-add" autocomplete="off"><input id="bwf-n" placeholder="Name" maxlength="16" aria-label="Site name"><input id="bwf-u" placeholder="https://…" aria-label="Site address"><button class="btn sm pri" type="submit">Add</button></form>':"")}
 document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches||!f.matches("[data-actsubmit=bwf-add]"))return;e.preventDefault();var n=$("#bwf-n").value.trim(),u=$("#bwf-u").value.trim();if(u&&!/^https?:\/\//i.test(u))u="https://"+u;try{u=new URL(u).href}catch(_){toast("That address doesn’t look right.","bad");return}
   if(!n)n=new URL(u).hostname.replace(/^www\./,"");var h=0,i;for(i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;BWF.push({n:n.slice(0,16),u:u,c:"hsl("+h+" 80% 70%)",g:""});bwSave();bwSites()});
+function vswPin(){var v=document.getElementById("vsw");if(v&&v.parentNode!==document.body)document.body.appendChild(v)}
+try{vswPin()}catch(_){}
 function browserEnter(){var br=$("#browser");if(!br)return;br.hidden=false;bwTagQuick();
   if(!BW.wired){BW.wired=true;
-    if(window.MutationObserver){var ov=new MutationObserver(function(){bwSync()});["#modal","#look","#alert-pop","#more-pop"].forEach(function(q){var e=$(q);if(e)ov.observe(e,{attributes:true,attributeFilter:["hidden"]})})}
+    if(window.MutationObserver){var ov=new MutationObserver(function(){bwSync()});["#modal","#look","#alert-pop","#more-pop","#bw-bmpop"].forEach(function(q){var e=$(q);if(e)ov.observe(e,{attributes:true,attributeFilter:["hidden"]})})}
     if(bwNative()&&APP.browser.onKey)APP.browser.onKey(bwKey);document.addEventListener("keydown",function(e){if(S.view!=="browser"||!(e.ctrlKey||e.metaKey)||e.altKey)return;var k=e.key.toLowerCase(),a=k==="t"?"newtab":k==="l"?"addr":k==="d"?"bookmark":k==="w"?"close":null;if(a){e.preventDefault();bwKey(a)}});window.addEventListener("resize",function(){if(S.view==="browser")bwLayout()});
     if(window.ResizeObserver){BW.ro=new ResizeObserver(function(){if(S.view==="browser")bwBounds()});BW.ro.observe($("#bw-stage"))}
     if(window.ResizeObserver){var tpo=new ResizeObserver(function(){if(S.view==="browser")bwLayout()});var tp=document.querySelector(".top");if(tp)tpo.observe(tp)}
@@ -4360,7 +4526,7 @@ function bwSkyOn(){return opGet("bwstar")}
   oS("bw",B,"Glow, fade and pulse","Glowing and fading touches in the browser",true,function(v){document.documentElement.classList.toggle("nofx-bw",!v)});
   oS("bwstar",B,"Constellation animation","Stars that connect and fade on the start page",true);
   oR("bwsd",B,"Constellation stars","How many",8,140,2,46,"",null);oR("bwss",B,"Constellation speed","",20,300,5,100,"%",null);
-  oS("bwclock",B,"Start page clock","",true);oS("bwsearch",B,"Start page search box","",true);oS("bwtiles",B,"Start page site tiles","",true);oS("bwnote",B,"Start page footnote","",true);oS("bwkick",B,"Start page label","The Regis · Browser line",true);
+  oS("bwbm",B,"Bookmarks bar","Your bookmarks and folders in a row under the address bar",true,function(v){document.documentElement.classList.toggle("x-bwbm",!v);try{bwBounds()}catch(_){}});oS("bwclock",B,"Start page clock","",true);oS("bwsearch",B,"Start page search box","",true);oS("bwtiles",B,"Start page site tiles","",true);oS("bwnote",B,"Start page footnote","",true);oS("bwkick",B,"Start page label","The Regis · Browser line",true);
   oL("bwbg",B,"Start page background","Layers behind the start page","depth",[["app","Same as the app"],["depth","Depth"],["aurora","Aurora"],["grid","Grid floor"],["dusk","Dusk"],["mesh","Mesh"]],function(v){document.documentElement.setAttribute("data-bwbg",v||"depth")});
   oR("bwdepth",B,"Background depth","How far the layers drift as you move the pointer",0,200,10,100,"%",function(v){document.documentElement.style.setProperty("--bwd",String(v/100))});
   oS("bwquick",B,"Quick sites in the sidebar","Google, Gmail, Drive and the rest",true);
@@ -4395,7 +4561,8 @@ function bwSkyOn(){return opGet("bwstar")}
   oS("rchome",H,"Regis constellation behind the clock","",true);oS("rcbw",B,"Regis constellation on the start page","",true);oS("rcvault",P,"Regis constellation on the Vault","",true);
   oR("rcop",P,"Constellation brightness","How visible the Regis constellation is around the app",2,40,1,10,"%",function(v){document.documentElement.style.setProperty("--rcop",String(v/100))});
   oL("vlock",V,"Lock the Vault after","Time without activity before it asks for the password again","15",[["5","5 minutes"],["15","15 minutes"],["60","1 hour"],["0","Never (until closed)"]],null);
-  oS("vfill",V,"Autofill saved logins","Fill matching sign-in forms in the Browser when the Vault is unlocked",true);
+  oS("vfill",V,"Autofill saved logins","Fill matching sign-in forms in the Browser",true);
+  oS("vdev",V,"Fill and save without unlocking","Desktop app: keep the Vault key in this computer’s protected storage so logins fill and save by themselves. Seeing passwords still needs your master password.",true,function(v){if(!v&&APP&&APP.vaultKey){APP.vaultKey.set("").catch(function(){});if(VT.dev){VT.dev=false;if(!VT.seen){VT.key=null;VT.raw=null;VT.items=[];try{vtRender();vtBar()}catch(_){}}}}else if(v&&VT.seen)vtEnroll()});
   oS("vsave",V,"Offer to save new logins","Ask after you sign in to a site in the Browser",true);
   oS("vshow",V,"Show passwords by default","Otherwise passwords stay hidden until you press Show",false);
   oS("phonepulse",F,"Pulses on phone","Allow pulsing rings and glows on small screens",false);
@@ -4798,10 +4965,18 @@ document.addEventListener("click",async function(ev){
     case "vt-savecred":{var pc=VT.pend;if(pc&&VT.key){var ex2=vtLogins(pc.host).find(function(i){return i.d.user===pc.user});await vtSave("login",{site:pc.host,url:pc.url,user:pc.user,pass:pc.pass},ex2?ex2.id:"");VT.pend=null;vtBar();toast("Saved to your Vault.","good")}break}
     case "vt-fill":{var fi2=VT.items.find(function(x){return x.id===b.dataset.id});vtFill(fi2);break}
     case "bw-markedit":BW.edit=!BW.edit;bwMarks();bwSites();break;
+    case "bw-bmf":if(b.dataset.in){var bmp=$("#bw-bmpop");if(bmp)bmp.innerHTML=bwBmFolderHtml(b.dataset.id)}else bwBmPop(b,bwBmFolderHtml(b.dataset.id));break;
+    case "bw-bmmore":bwBmPop(b,bwBmMoreHtml());break;
+    case "bw-bmall":(S.marks||[]).filter(function(m){return m.folder===b.dataset.id}).forEach(function(m){if(bwNative())APP.browser.open(m.url).catch(function(){});else window.open(m.url,"_blank","noopener")});break;
+    case "bws-edit":sbEdit();break;
+    case "bws-tog":{var sf=SB[+b.dataset.i];if(sf&&sf.t==="f"){sf.open=!sf.open;sbSave();sbRender()}break}
+    case "bws-mv":sbMove(b.dataset.p,+b.dataset.d);break;
+    case "bws-del":sbDel(b.dataset.p);break;
+    case "bws-fav":{var fv=BWF.find(function(f){return f.u===b.dataset.u});if(fv&&!sbHas(fv.u)){SB.push(sbSite(fv.n,fv.u,fv.c,fv.g));sbRe()}break}
     case "bwf-edit":BW.fedit=!BW.fedit;bwSites();break;
     case "bwf-del":{var rx=BWF.splice(+b.dataset.i,1)[0];if(rx)BWS=BWS.filter(function(u){return u!==rx.u});bwSave();bwSites();break}
     case "bwq-del":BWS=BWS.filter(function(u){return u!==b.dataset.u});bwSave();bwSites();break;
-    case "bwf-pin":{var px=BWF[+b.dataset.i];if(px){var k=BWS.indexOf(px.u);if(k>=0)BWS.splice(k,1);else BWS.push(px.u);bwSave();bwSites()}break}
+    case "bwf-pin":{var px=BWF[+b.dataset.i];if(px){if(sbHas(px.u))sbDrop(px.u);else SB.push(sbSite(px.n,px.u,px.c,px.g));sbSave();bwSites()}break}
     case "bw-markdel":await remove("marks",b.dataset.id);if(b.dataset.re)bwFoldOpen(b.dataset.re);break;
     case "bw-tab":if(bwNative())APP.browser.activate(+b.dataset.id).catch(function(){});break;
     case "bw-close":if(bwNative())APP.browser.close(+b.dataset.id).catch(function(){});break;
@@ -4891,7 +5066,7 @@ document.addEventListener("click",async function(ev){
     case "vo-up":voMove(b.dataset.v,-1);break;
     case "vo-down":voMove(b.dataset.v,1);break;
     case "vo-reset":VORD=VIEWS.slice();lsw("regis-vord",VORD);voApply();break;
-    case "sp-nav":case "sp-play":case "sp-ctl":case "sp-like":case "sp-queue":case "sp-dev":case "sp-xfer":case "sp-sdk":case "sp-out":case "sp-hist":case "sp-lf":case "sp-all":case "sp-genre":case "sp-rpt":case "sp-look":case "sp-fnew":case "sp-ftog":case "sp-fdel":case "sp-fmv":case "sp-sel":case "sp-seldone":case "sp-pick":case "sp-pickf":case "sp-selall":case "sp-selun":case "sp-selmv":case "sp-fsetm":case "sp-fset":case "sp-sgp":case "sp-seekto":case "sp-lyx":case "sp-drmhelp":spAct(b);break;
+    case "sp-nav":case "sp-play":case "sp-ctl":case "sp-like":case "sp-queue":case "sp-dev":case "sp-xfer":case "sp-sdk":case "sp-out":case "sp-hist":case "sp-lf":case "sp-all":case "sp-genre":case "sp-rpt":case "sp-look":case "sp-fnew":case "sp-ftog":case "sp-fdel":case "sp-fmv":case "sp-diag":case "sp-repcopy":case "sp-sel":case "sp-seldone":case "sp-pick":case "sp-pickf":case "sp-selall":case "sp-selun":case "sp-selmv":case "sp-fsetm":case "sp-fset":case "sp-sgp":case "sp-seekto":case "sp-lyx":case "sp-drmhelp":spAct(b);break;
     case "app-go":appGo(b.dataset.u);break;
     case "mu-pick":MU.sel=+b.dataset.i;muSave();muRender();break;
     case "mu-del":MU.list.splice(+b.dataset.i,1);if(MU.sel>=MU.list.length)MU.sel=Math.max(0,MU.list.length-1);muSave();muRender();break;

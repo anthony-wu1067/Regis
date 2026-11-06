@@ -6,7 +6,7 @@ const root = path.join(__dirname, '..');
 const src = fs.readFileSync(path.join(root, 'page', 'regis.html'), 'utf8');
 const metaTitle = (src.match(/<title>[\s\S]*?<\/title>/) || ['<title>Regis</title>'])[0];
 let body = src.replace(/<title>[\s\S]*?<\/title>/, '').replace(/<meta name="claude:viewport-fit-sides"[^>]*>/, '');
-const csp = "default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob:; connect-src https: data: blob:; worker-src blob:";
+const csp = "default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://sdk.scdn.co 'wasm-unsafe-eval'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https://i.scdn.co https://*.scdn.co https://mosaic.scdn.co https://image-cdn-ak.spotifycdn.com https://image-cdn-fa.spotifycdn.com https://*.spotifycdn.com; media-src 'self' blob: https:; connect-src https: data: blob:; worker-src blob:; frame-src https://open.spotify.com https://sdk.scdn.co https://discord.com";
 const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
   '<meta http-equiv="Content-Security-Policy" content="' + csp + '">' + metaTitle +
   '<style>html{color-scheme:dark}body{margin:0}[hidden]{display:none!important}</style><script src="sync.js"></script><script src="localdb.js"></script><script src="shim.js"></script></head><body>' + body + '</body></html>';

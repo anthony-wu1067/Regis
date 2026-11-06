@@ -202,5 +202,6 @@ const GM = 'https://gmail.googleapis.com/gmail/v1/users/me';
     assert.strictEqual(new Mini(() => null, screen).enter(), false);
   });
   await t('OAuth scopes include calendar list (merged calendars)', () => { assert(SCOPES.some((x) => x.includes('calendarlist'))); });
+  await t('a failed iframe or cancelled load must not discard a staged update', () => { const m = fs.readFileSync(path.join(__dirname, '..', 'main.js'), 'utf8'); assert(/isMainFrame/.test(m) && /code === -3/.test(m) && !/once\('did-fail-load', \(\) => \{ updater\.clear/.test(m)); });
   console.log(`\n${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();

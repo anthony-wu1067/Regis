@@ -7,12 +7,16 @@ contextBridge.exposeInMainWorld('regisBridge', {
   sample: (input, opts) => call('claude:sample', input, opts),
   getStatus: () => call('app:status'), saveGoogle: (v) => call('app:saveGoogle', v), connectGoogle: () => call('app:connectGoogle'),
   disconnectGoogle: () => call('app:disconnectGoogle'), saveCanvas: (v) => call('app:saveCanvas', v), removeCanvas: () => call('app:removeCanvas'), saveKey: (k) => call('app:saveKey', k), setOpenAtLogin: (b) => call('app:openAtLogin', b),
+  fullscreen: (on) => call('win:fullscreen', on), fsState: () => call('win:fsState'), onFullscreen: (cb) => { ipcRenderer.on('win:fs', (_e, v) => { try { cb(!!v); } catch (_) {} }); },
   notify: (title, body) => call('app:notify', title, body),
+  spotifyAuth: (url) => call('spotify:auth', url), drm: () => call('app:drm'),
+  vaultKey: { get: () => call('vault:keyGet'), set: (k) => call('vault:keySet', k) },
   saveUpdateUrl: (u) => call('app:saveUpdateUrl', u), updateCheck: () => call('app:updateCheck'), updateApply: () => call('app:updateApply'),
   onUpdate: (cb) => { ipcRenderer.on('update:ready', (_e, v) => { try { cb(String(v)); } catch (_) {} }); },
   browser: {
     state: () => call('browser:state'), open: (u) => call('browser:open', u), close: (id) => call('browser:close', id), activate: (id) => call('browser:activate', id),
     go: (id, text) => call('browser:go', id, text), back: (id) => call('browser:back', id), forward: (id) => call('browser:forward', id), reload: (id) => call('browser:reload', id), stop: (id) => call('browser:stop', id),
+    onKey: (cb) => { ipcRenderer.on('browser:key', (_e, k) => { try { cb(k); } catch (_) {} }); },
     fill: (id, user, pass) => call('browser:fill', id, user, pass), onCred: (cb) => { ipcRenderer.on('browser:cred', (_e, c) => { try { cb(c); } catch (_) {} }); },
     bounds: (b) => call('browser:bounds', b), show: (v) => call('browser:show', v), shield: (on) => call('browser:shield', on),
     onState: (cb) => { ipcRenderer.on('browser:state', (_e, s) => { try { cb(s); } catch (_) {} }); }

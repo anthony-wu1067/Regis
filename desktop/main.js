@@ -1,6 +1,7 @@
 'use strict';
 const { app, BrowserWindow, Tray, Menu, ipcMain, safeStorage, shell, session, nativeImage, globalShortcut, Notification, screen } = require('electron');
 const path = require('path');
+const http = require('http');
 const { Store } = require('./lib/store');
 const { Google, signIn } = require('./lib/google');
 const { Anthropic } = require('./lib/anthropic');
@@ -69,23 +70,34 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1280, height: 860, minWidth: 420, minHeight: 600, backgroundColor: '#0a0713', title: 'Regis', autoHideMenuBar: true,
     icon: path.join(__dirname, 'assets', 'icon.png'),
-    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: true }
+    webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }
   });
   const staged = updater && updater.current();      // a newer interface downloaded over the air, if any
   runningVersion = staged ? staged.version : app.getVersion();
   win.loadFile(staged ? path.join(staged.dir, 'index.html') : BUNDLED_PAGE);
-  if (staged) win.webContents.once('did-fail-load', () => { updater.clear(); if (win && !win.isDestroyed()) win.loadFile(BUNDLED_PAGE); runningVersion = app.getVersion(); });
+  if (staged) { /* fall back to the built-in page only if the staged page itself could not load; a failed iframe/embed or a cancelled load must never throw the update away */
+    const onFail = (_e, code, _d, _u, isMainFrame) => { if (!isMainFrame || code === -3) return; win.webContents.removeListener('did-fail-load', onFail); updater.clear(); if (win && !win.isDestroyed()) win.loadFile(BUNDLED_PAGE); runningVersion = app.getVersion(); };
+    win.webContents.on('did-fail-load', onFail); win.webContents.once('did-finish-load', () => { if (win && !win.isDestroyed()) win.webContents.removeListener('did-fail-load', onFail); });
+  }
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
   win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('file:')) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
   win.on('close', (e) => { if (!quitting) { e.preventDefault(); win.hide(); } }); // keep running in the tray so autopilot + scheduled sends continue
   win.webContents.on('did-finish-load', () => { if (pendingCaptures.length) win.webContents.send('capture:add', pendingCaptures.splice(0)); });
+  win.webContents.on('before-input-event', (e, i) => { if (i.type === 'keyDown' && i.key === 'F11') { e.preventDefault(); win.setFullScreen(!win.isFullScreen()); } });
+  win.on('enter-full-screen', () => { if (!win.isDestroyed()) win.webContents.send('win:fs', true); });
+  win.on('leave-full-screen', () => { if (!win.isDestroyed()) win.webContents.send('win:fs', false); });
   win.on('closed', () => { win = null; if (mini) mini.reset(); });
   win.webContents.on('did-finish-load', () => { if (updater && runningVersion) { const p = updater.pending(runningVersion); if (p) win.webContents.send('update:ready', p.version); } });
   win.webContents.on('did-finish-load', () => { if (mini && mini.on) win.webContents.send('mini:state', true); });
 }
 
+/* keep audio smooth: do not let Chromium slow the page down when the window is behind others or minimised to the tray */
+for (const sw of ['disable-renderer-backgrounding', 'disable-backgrounding-occluded-windows', 'disable-background-timer-throttling']) app.commandLine.appendSwitch(sw);
 app.setAppUserModelId('app.regis.desktop'); // Windows: groups the taskbar icon and lets notifications show as Regis
-app.whenReady().then(() => {
+let DRM = false; /* true only on the castlabs Electron build that ships Widevine (copy-protected audio) */
+app.whenReady().then(async () => {
+  try { const c = require('electron').components; if (c && c.whenReady) { await Promise.race([c.whenReady(), new Promise((_, no) => setTimeout(() => no(new Error('cdm timeout')), 30000))]); DRM = true; } } catch (_) { DRM = false; } /* never block start-up on it */
+  if (process.platform !== 'darwin') Menu.setApplicationMenu(null); /* no File/Edit/View bar: Regis has its own controls */
   mini = new Mini(() => win, screen);
   const store = new Store(app.getPath('userData'), crypt());
   const google = new Google({ creds: () => ({ clientId: store.getMeta('gClientId', ''), clientSecret: store.getSecret('gSecret'), refreshToken: store.getSecret('gRefresh') }) });
@@ -96,9 +108,28 @@ app.whenReady().then(() => {
   const runCheck = async () => { let r = await updater.check(updateUrl()); const p = notifyPending(); if (p) r = { status: 'staged', version: p.version }; return r; };
   const claude = new Anthropic({ getKey: () => store.getSecret('anthropicKey'), onUsage: (t) => store.addUsage(t) });
 
-  session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) => cb(perm === 'media'));
-  session.defaultSession.setPermissionCheckHandler((_wc, perm) => perm === 'media');
+  session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) => cb(perm === 'media' || perm === 'protected-media-identifier'));
+  session.defaultSession.setPermissionCheckHandler((_wc, perm) => perm === 'media' || perm === 'protected-media-identifier');
+  ipcMain.handle('app:drm', wrap(() => DRM));
+  /* Vault device key: lets this computer fill and save logins without the master password. Kept only when the OS can protect it
+     (Windows DPAPI / macOS Keychain via safeStorage); never written in a readable form. */
+  const vaultSafe = () => { try { return safeStorage.isEncryptionAvailable(); } catch (_) { return false; } };
+  ipcMain.handle('vault:keyGet', wrap(() => (vaultSafe() ? store.getSecret('vaultDevKey') || '' : '')));
+  ipcMain.handle('vault:keySet', wrap((v) => { const k = typeof v === 'string' && /^[A-Za-z0-9+/]{43}=$/.test(v) ? v : ''; if (k && !vaultSafe()) return false; store.setSecret('vaultDevKey', k); return !!k; }));
 
+  ipcMain.handle('spotify:auth', wrap((url) => new Promise((resolve, reject) => {
+    let u; try { u = new URL(String(url)); } catch (_) { return reject(new Error('Bad address')); }
+    if (u.protocol !== 'https:' || u.hostname !== 'accounts.spotify.com') return reject(new Error('Not a Spotify address'));
+    let done = false; const fin = (fn, v) => { if (done) return; done = true; clearTimeout(timer); try { srv.close(); } catch (_) {} fn(v); };
+    const srv = http.createServer((req, res) => {
+      const q = new URL(req.url, 'http://127.0.0.1:8888'); if (q.pathname !== '/callback') { res.writeHead(404); return res.end(); }
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end('<!doctype html><meta charset="utf-8"><title>Regis</title><body style="font:16px system-ui;background:#0b0816;color:#eee;display:grid;place-items:center;height:100vh;margin:0"><p>Spotify is connected. You can close this tab and go back to Regis.</p>');
+      if (q.searchParams.get('error')) fin(reject, new Error('Spotify said: ' + q.searchParams.get('error'))); else fin(resolve, { code: q.searchParams.get('code') || '', state: q.searchParams.get('state') || '' });
+    });
+    const timer = setTimeout(() => fin(reject, new Error('Spotify sign-in timed out')), 5 * 60 * 1000);
+    srv.on('error', (e) => fin(reject, new Error(e.code === 'EADDRINUSE' ? 'Port 8888 is busy. Close whatever uses it and try again.' : String(e.message))));
+    srv.listen(8888, '127.0.0.1', () => { shell.openExternal(u.toString()); });
+  })));
   ipcMain.handle('db:load', wrap(() => store.getDb()));
   ipcMain.handle('db:save', wrap((db) => { store.setDb(db); return true; }));
   ipcMain.handle('mcp:call', wrap((server, tool, input) => server === 'Canvas' ? canvas.callTool(tool, input || {}) : google.callTool(server, tool, input)));
@@ -127,7 +158,7 @@ app.whenReady().then(() => {
   ipcMain.handle('app:saveUpdateUrl', wrap((u) => { store.setMeta('updateUrl', String(u || '').trim()); return true; }));
   ipcMain.handle('app:updateCheck', wrap(() => runCheck()));
   ipcMain.handle('app:updateApply', wrap(() => { const st = updater.current(); if (!st || !win) return false; runningVersion = st.version; win.loadFile(path.join(st.dir, 'index.html')); return true; }));
-  browserHost = new BrowserHost({ getWin: () => win, onCred: (c) => { if (win && !win.isDestroyed()) win.webContents.send('browser:cred', c); }, shield: store.getMeta('bwShield', '1') !== '0', onPersist: (urls) => store.setMeta('bwTabs', JSON.stringify(urls)) });
+  browserHost = new BrowserHost({ getWin: () => win, onKey: (k) => { if (win && !win.isDestroyed()) win.webContents.send('browser:key', k); }, onCred: (c) => { if (win && !win.isDestroyed()) win.webContents.send('browser:cred', c); }, shield: store.getMeta('bwShield', '1') !== '0', onPersist: (urls) => store.setMeta('bwTabs', JSON.stringify(urls)) });
   const bw = browserHost;
   ipcMain.handle('browser:state', wrap(() => { if (!bw.tabs.length) { let urls = []; try { urls = JSON.parse(store.getMeta('bwTabs', '[]') || '[]'); } catch (_) {} bw.init(); if (urls.length) bw.restore(urls); else bw.open(''); } return bw.snapshot(); }));
   ipcMain.handle('browser:open', wrap((u) => bw.open(u)));
@@ -143,6 +174,8 @@ app.whenReady().then(() => {
   ipcMain.on('bw:cred', (e, d) => { try { bw.cred(e.sender, d); } catch (_) {} });
   ipcMain.handle('browser:fill', wrap((id, user, pass) => bw.fill(+id, user, pass)));
   ipcMain.handle('browser:shield', wrap((on) => { store.setMeta('bwShield', on ? '1' : '0'); return bw.setShield(!!on); }));
+  ipcMain.handle('win:fullscreen', wrap((on) => { if (!win) return false; win.setFullScreen(typeof on === 'boolean' ? on : !win.isFullScreen()); return win.isFullScreen(); }));
+  ipcMain.handle('win:fsState', wrap(() => !!(win && win.isFullScreen())));
   ipcMain.handle('app:mini', wrap((on) => setMini(!!on)));
   ipcMain.handle('app:miniState', wrap(() => !!(mini && mini.on)));
   ipcMain.handle('app:notify', wrap((title, body) => {

@@ -1,8 +1,15 @@
 'use strict';
 /* Runs inside every page opened in Regis's browser (isolated from the page's own scripts). It only watches for a login form being submitted
    and tells Regis the host, username and password so Regis can offer to save them. It exposes nothing to the page. */
-const { ipcRenderer } = require('electron');
+const { ipcRenderer, contextBridge, webFrame } = require('electron');
 let last = '';
+/* On Google's sign-in pages Regis presents itself as Firefox (see lib/browser.js). Firefox has no navigator.userAgentData, so hide it
+   there too, or Google sees a mismatch and says "This browser or app may not be secure". Nothing changes on any other site. */
+if (location.protocol === 'https:' && /^accounts\.(google|youtube)\.com$/i.test(location.hostname)) {
+  const hide = function () { try { Object.defineProperty(Navigator.prototype, 'userAgentData', { get: function () { return undefined; }, configurable: true }); } catch (_) {} try { delete Navigator.prototype.userAgentData; } catch (_) {} };
+  try { if (contextBridge && contextBridge.executeInMainWorld) contextBridge.executeInMainWorld({ func: hide }); else throw 0; }
+  catch (_) { try { webFrame.executeJavaScript('(' + hide.toString() + ')()'); } catch (_) {} }
+}
 const visible = (el) => { try { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch (_) { return false; } };
 function userFor(pw) {
   const scope = pw.form || document;

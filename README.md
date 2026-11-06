@@ -84,10 +84,30 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.7.7 Spotify audio signing, Google sign-in, bookmarks bar, Vault autofill
+
+- **Spotify audio stopping after ~9 seconds: fixed at the cause.** The castlabs Widevine build only carries a *development* signature, and Spotify's licence server refuses it: you hear the few unencrypted seconds at the start of a song, then silence, glitchy seeking and "Playback error" on several songs. `Enable Spotify audio` now also **VMP-signs** Regis with castlabs' free EVS service. First run: it installs the castlabs signing tool (needs Python 3) and asks you to create or sign in to a free castlabs EVS account in that window, then signs and verifies. Run it again after any reinstall (or `npm run drm:sign`).
+- **Google sign-in in the Browser works.** Google blocked it as an "insecure browser" because it saw a Chrome identity whose hints didn't list Google Chrome. On Google's sign-in pages only, Regis now presents itself as Firefox (matching headers and page script). Every other site still sees normal Chrome.
+- **Bookmarks bar** under the address bar, like Chrome or Opera GX. Folders open a menu (open one, open all, edit). Bookmarks that don't fit go under ». Turn it off in Appearance → Browser → Bookmarks bar.
+- **Sidebar shortcuts are their own thing.** The Edit button at the bottom of the sidebar opens *Sidebar shortcuts*: add any site (it fills in the page you're on), quick-add favourites, reorder, and make **folders** that open and close in the sidebar like a drawer.
+- **Vault fills and saves without your master password** in the desktop app. After you unlock once on a computer, the Vault key is kept in Windows' protected storage (DPAPI; Keychain on Mac), the same way Chrome keeps passwords. Seeing or editing what's inside still asks for the master password. Turn this off in Appearance → Vault & privacy → Fill and save without unlocking.
+- **The page switcher (Home / Workspace / Music / Browser) stays in one fixed spot** at the top right on every page.
+- Fixed: a just-saved login could be counted twice, which stopped it filling by itself.
+- Updating: install `Regis-app.zip` once (`main.js`, `preload.js` and `lib/` changed), then run `Enable Spotify audio` again.
+
 ## 1.7.6 iPhone overhaul, folder multi-select, playlist songs fix
+
+- **Spotify audio troubleshooting.** New *Playback report* (speaker button, then "Playback report") lists what the player did, so a stop at ~9 seconds can be diagnosed. Regis now controls its own web player directly when it is the active device, follows player events instead of guessing, backs off when Spotify rate-limits, and no longer fights the progress bar while you seek.
+- **Real shuffle.** With shuffle on, starting a playlist, album or Liked Songs begins at a random song each time.
+- **Desktop shell:** window throttling is switched off so audio is not starved when the window is covered. This needs `Regis-app.zip` reinstalled.
+- **Project zip now includes `desktop/`** (the page and shared code the GitHub build reads). Upload it together with the rest so the website and update feed always carry the newest page.
 
 - **iPhone layout:** the four pages (Home, Workspace, Music, Browser) now switch from an iOS-style bottom tab bar, so nothing important sits under the camera notch. The top is just a bell and a menu button (Daily brief and Appearance moved into the menu). Titles are large and left-aligned, Workspace sections are quiet pills, the Browser address bar sits clear of the notch, and Music has a slim Apple-Music-style mini player.
 - **Folder multi-select:** in the Music library, tap the tick button, pick playlists (or use Unsorted / All, or the circle on a folder), then Move to… a folder or a new one.
+
+- **Desktop update fix:** the app no longer throws away a downloaded update (and falls back to the old built-in page) when an embedded frame fails to load at start-up. Reinstall Regis-app.zip once to get this fix.
+
+- **Playback errors:** if Spotify’s player fails on several songs in a row, Regis now pauses it and shows one message with the likely cause, instead of a chain of identical errors while Spotify skips ahead.
 
 ### Playlist songs fix
 

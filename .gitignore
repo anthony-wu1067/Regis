@@ -1,0 +1,10 @@
+node_modules/
+web/dist/
+desktop/dist/
+desktop/renderer/index.html
+desktop/renderer/sync.js
+desktop/renderer/localdb.js
+ios/Regis.xcodeproj/
+*.log
+release/
+.claude/
