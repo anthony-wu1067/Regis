@@ -21,6 +21,8 @@ if (!['on', 'off', 'sign'].includes(mode)) { console.log('Usage: node scripts/dr
 const run = (cmd, args, opts) => spawnSync(cmd, args, Object.assign({ cwd: ROOT, stdio: 'inherit', shell: WIN }, opts || {}));
 const ask = (q) => new Promise((res) => { const rl = readline.createInterface({ input: process.stdin, output: process.stdout }); rl.question(q, (a) => { rl.close(); res(String(a || '').trim()); }); });
 
+/* the castlabs build reports a version like "45.2.1+wvcus" */
+function castlabsInstalled() { try { const v = JSON.parse(fs.readFileSync(path.join(ROOT, 'node_modules', 'electron', 'package.json'), 'utf8')).version || ''; return /wvcus/.test(v) && fs.existsSync(path.join(ROOT, 'node_modules', 'electron', 'dist')) ? v : ''; } catch (_) { return ''; } }
 function findPython() {
   for (const c of WIN ? [['py', '-3'], ['python'], ['python3']] : [['python3'], ['python']]) {
     const r = spawnSync(c[0], c.slice(1).concat(['--version']), { shell: WIN, encoding: 'utf8' });
@@ -57,6 +59,12 @@ async function sign() {
       console.log('  This needs Git, which is not installed on this computer.\n  1. Install "Git for Windows" (or Git for Mac) from https://git-scm.com/downloads\n  2. Close this window, then run this again.\n');
       process.exit(1);
     }
+  }
+  if (mode === 'on' && castlabsInstalled()) {
+    console.log('\n  Step 1 of 2: Spotify audio support is already installed (' + castlabsInstalled() + '). Skipping the download.\n');
+    const s0 = await sign();
+    console.log(s0 ? '  Not signed yet, so Spotify will still stop after a few seconds. Fix the step above and run this again.\n' : '\n  Done. Start Regis again and play a song.\n');
+    process.exit(s0);
   }
   console.log(mode === 'on' ? '\n  Step 1 of 2: adding Spotify audio support (copy-protected audio) to Regis...\n' : '\n  Going back to the standard Regis engine...\n');
   const r = run(WIN ? 'npm.cmd' : 'npm', ['install', '--save-dev', '--no-audit', '--no-fund', mode === 'on' ? CASTLABS : NORMAL]);

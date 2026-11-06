@@ -20,9 +20,17 @@ for /f "delims=" %%v in ('node -v') do set NODEV=%%v
 echo Node %NODEV% >> "%LOG%"
 echo  Using Node %NODEV%
 
+rem --- keep the Spotify audio engine (castlabs build) if it is already installed: a plain install would replace it ---
+findstr /c:"wvcus" "%~dp0node_modules\electron\package.json" >nul 2>nul
+if not errorlevel 1 (
+  echo  Spotify audio engine found, keeping it.
+  echo Kept castlabs Electron >> "%LOG%"
+  goto :installed
+)
 echo  Installing (this takes a minute or two)...
 call npm install --no-audit --no-fund
 if errorlevel 1 goto :npmfail
+:installed
 
 rem --- Electron downloads its program in a post-install step; retry if that was skipped ---
 if not exist "%~dp0node_modules\electron\dist\electron.exe" (

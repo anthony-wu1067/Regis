@@ -17,7 +17,7 @@ Regis is the owner's personal command centre: mail, calendar, tasks, a built-in 
 ## Build and test
 - `cd desktop && node scripts/make-index.js` after editing the page.
 - `cd desktop && npm test` (22 + 35 + 11), `cd web && node build.js && npm test` (17).
-- Electron UI test: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (52).
+- Electron UI test: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (53).
 - jsdom suite lives outside the repo (`test/run.js`, about 510 checks) and may not be present.
 
 ## Gotchas
@@ -25,12 +25,22 @@ Regis is the owner's personal command centre: mail, calendar, tasks, a built-in 
 - Page keys in Appearance are capitalised (`lookOpenPage("Music","Spotify")`).
 - The desktop app loads a downloaded update from its data folder if newer than the built-in page. Only `main.js`/`preload.js`/`lib/*` changes need a reinstall.
 - Spotify (2026 rules): playlist songs are `/playlists/{id}/items` (field `item`, max 50 per page) and are only readable for playlists the user owns or collaborates on. Folders are not in the API, so Regis keeps its own (localStorage `regis-sp-fold`).
-- Widevine: stock Electron cannot play Spotify audio. `scripts/drm.js on` installs the castlabs Electron build (needs Git installed).
+- Widevine: stock Electron cannot play Spotify audio. `scripts/drm.js on` installs the castlabs Electron build (needs Git installed) and VMP-signs it; if the castlabs build is already there it only signs. `Setup Regis.bat` skips `npm install` when `node_modules/electron` is the castlabs build, or it would replace it.
+- Over-the-air updates only replace the page. If a release changes `main.js`/`preload.js`/`lib/*`, bump `SHELL_NEED` in the page so the "update the desktop app" bar appears for older installs (`APP.getStatus().shell` is the installed app's version).
+- The main script is one IIFE ending in `boot();
+})();`. Add new code inside it, before `boot();`, or it can't see the page's functions.
+- Don't name CSS custom properties `--rc` (it's the constellation mask image).
 
 ## Open problems
 1. **In-app Spotify audio stops about 9 seconds in** (fixed in 1.7.7, not yet confirmed on the owner's machine). Cause: castlabs ECS ships only a development VMP signature (`electron.exe.sig`) and Spotify's licence server rejects it, so only the clear lead plays. `scripts/drm.js on|sign` now VMP-signs `node_modules/electron/dist` with castlabs EVS (`pip install castlabs-evs`, `python -m castlabs_evs.vmp sign-pkg`; one-time free EVS account, entered by the owner). Re-sign after every Electron reinstall. If it still fails, read the Playback report.
 2. Phone layout was rebuilt in 1.7.6 (bottom tab bar). Only checked in simulated iPhone screenshots, not on a device.
 3. Google sign-in in the built-in browser (1.7.7): Firefox identity on accounts.google.com only (`lib/browser.js` headers + per-navigation UA, `lib/bw-preload.js` hides `navigator.userAgentData`). Tested against the live sign-in page's fingerprint, not with a real account.
+
+## Notes from 1.7.8
+- Design layer: the block starting "1.7.8 · Regis HUD design layer" at the end of the CSS. It only uses skin tokens, so it works for all skins; tokens `--surf`, `--edge`, `--depth`, `--hud*`, `--rctl`. Tactical and liquid glass keep their own radius.
+- Efficiency rules: animate only transform/opacity on HTML elements; no `backdrop-filter` on large surfaces (only with liquid glass); no animated shapes under blur; avoid rounded `overflow:hidden` around moving things. SVG CSS animations are paused and stepped by a 20 Hz driver (search "can't run on the graphics chip").
+- `html.away` (window hidden/minimised, sent by main as `win:vis`) pauses every animation and sets idle.
+- Perf numbers were measured with an Electron harness reading `app.getAppMetrics()` and CDP `Performance.getMetrics` per page.
 
 ## Notes from 1.7.7
 - The page switcher `#vsw` is moved to `<body>` at start-up (`vswPin`) and is `position:fixed` on desktop; `bwLayout` measures it for the tab strip's right edge.

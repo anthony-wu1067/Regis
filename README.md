@@ -84,6 +84,16 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.7.8 HUD redesign, efficiency, and making 1.7.7's fixes actually land
+
+- **Why 1.7.7 didn't seem to work:** the page updated over the air, but the desktop app itself was still 1.7.6, so the Google fix and the new "Enable Spotify audio" never ran. Regis now shows a bar when the installed desktop app is older than the page, with the steps to update it.
+- **Setup Regis keeps the Spotify audio engine.** Before, unzipping a new version and running Setup quietly replaced it with the standard engine. *Enable Spotify audio* also skips the 100 MB download when the engine is already there and goes straight to signing.
+- **Google sign-in, stronger:** on Google's sign-in pages Regis now also hides Chrome-only traces (`window.chrome`, Chrome's vendor string), so it matches real Firefox throughout.
+- **New look (every page, every colour skin):** one shape and size scale for panels, buttons, fields and tabs; layered depth with a lit top edge and HUD corner marks; panel headers whose rule draws itself in; panels and cards glide in when a page opens; a light runs along a panel's edge on hover; a hairline "system rail" with a travelling light; a slow scan of light over the background; pop-in dialogs and drop-down menus; matching scrollbars and focus rings. Reduced-motion and Lite are respected.
+- **Lighter on the computer** (measured in the app): in Full mode Home went from 47 to 59 fps with half the graphics load, Workspace's graphics load dropped from 15% to 5%, Music from 13% to 3%. In Balanced, Home's main-thread work roughly halved. The biggest wins: background glows that only move instead of re-blurring every frame, no live glass blur behind 30 panels, the clock's sweep no longer forcing the dial to redraw, the dial and satellite rings stepped 5-20 times a second instead of 60, and batched star fields.
+- **Pauses when minimised or in the tray.** The desktop app keeps running in the background (for Spotify), which also kept every animation running. Now everything stops while the window is hidden.
+- Updating: install `Regis-app.zip` once (the desktop app files changed), then run `Enable Spotify audio`.
+
 ## 1.7.7 Spotify audio signing, Google sign-in, bookmarks bar, Vault autofill
 
 - **Spotify audio stopping after ~9 seconds: fixed at the cause.** The castlabs Widevine build only carries a *development* signature, and Spotify's licence server refuses it: you hear the few unencrypted seconds at the start of a song, then silence, glitchy seeking and "Playback error" on several songs. `Enable Spotify audio` now also **VMP-signs** Regis with castlabs' free EVS service. First run: it installs the castlabs signing tool (needs Python 3) and asks you to create or sign in to a free castlabs EVS account in that window, then signs and verifies. Run it again after any reinstall (or `npm run drm:sign`).

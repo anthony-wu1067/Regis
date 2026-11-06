@@ -1632,8 +1632,9 @@ html.d3h .bw-t{translate:calc(var(--px,0) * 3px * var(--par,1)) calc(var(--py,0)
 html.d3h .bw-hero::before{translate:calc(var(--px,0) * -14px * var(--par,1)) calc(var(--py,0) * -14px * var(--par,1))}
 html.d3h .hm-card,html.d3h .panel{box-shadow:inset 0 1px 0 rgba(255,255,255,calc(.16 * var(--d3))),inset 0 0 0 1px color-mix(in srgb,var(--accent) 12%,transparent),0 1px 2px rgba(0,0,0,calc(.3 * var(--d3))),0 14px 30px -10px rgba(0,0,0,calc(.5 * var(--d3))),0 40px 70px -30px color-mix(in srgb,var(--accent) calc(18% * var(--d3)),transparent)}
 html.d3h .hm-card{background-image:radial-gradient(380px circle at var(--mx,30%) var(--my,-20%),color-mix(in srgb,var(--accent) 13%,transparent),transparent 62%)}
-.hm-sweep{display:none;position:absolute;inset:5%;border-radius:50%;overflow:hidden;pointer-events:none;z-index:2;contain:strict}
-.hm-sweep i{position:absolute;top:0;bottom:0;left:0;width:60%;background:linear-gradient(105deg,transparent,color-mix(in srgb,var(--accent) 18%,transparent) 50%,transparent);transform:translateX(-120%);will-change:transform}
+.hm-sweep{display:none;position:absolute;inset:5%;pointer-events:none;z-index:2}
+/* a soft oval of light that fades at its own edges: no round clip (that forced a repaint of the dial every frame) */
+.hm-sweep i{position:absolute;top:4%;bottom:4%;left:0;width:46%;background:radial-gradient(50% 50% at 50% 50%,color-mix(in srgb,var(--accent) 17%,transparent),color-mix(in srgb,var(--accent) 6%,transparent) 55%,transparent 72%);transform:translateX(-120%);will-change:transform}
 html.d3h:not(.lite):not(.idle):not(.o-still):not(.mob) .hm-sweep{display:block}
 html.d3h:not(.lite):not(.idle):not(.o-still):not(.mob) .hm-sweep i{animation:holoSweep 11s cubic-bezier(.4,0,.2,1) infinite}
 @keyframes holoSweep{0%{transform:translateX(-120%)}45%,100%{transform:translateX(220%)}}
@@ -2130,10 +2131,206 @@ html.o-bwlbl .bw-sf{width:62px}
 .bws-fav{margin:12px 0 4px}
 .bws-fav>div{display:flex;flex-wrap:wrap;gap:6px}
 @media (max-width:640px){.bws-gr{grid-template-columns:1fr}.bws-to{max-width:96px}}
+
+/* ===================================================================================================
+   1.7.8 · Regis HUD design layer
+   One set of shapes, sizes, depth and motion for every page and every colour skin (it only uses the
+   skin tokens). Motion is compositor-only (transform / opacity), plays once on entry or on hover, and
+   the few ambient loops are slow, tiny-area and paused when idle, hidden or with reduced motion.
+   =================================================================================================== */
+:root{
+  --r:18px;--r2:13px;--rctl:10px;
+  --e-out:cubic-bezier(.16,.84,.24,1);--e-io:cubic-bezier(.65,0,.35,1);
+  --hud:color-mix(in srgb,var(--accent) 62%,transparent);
+  --hud-soft:color-mix(in srgb,var(--accent) 18%,transparent);
+  --hud-faint:color-mix(in srgb,var(--accent) 8%,transparent);
+  --surf:color-mix(in srgb,var(--bg) 80%,var(--accent) 5%);
+  --surf2:color-mix(in srgb,var(--bg) 66%,var(--accent) 7%);
+  --sheen:color-mix(in srgb,var(--fg) 5.5%,transparent);
+  --edge:color-mix(in srgb,var(--accent) 17%,var(--line));
+  --edge-hi:color-mix(in srgb,var(--accent) 40%,var(--line));
+  --field:color-mix(in srgb,var(--bg) 55%,#000 22%);
+  --depth:inset 0 1px 0 rgba(255,255,255,.06),0 0 0 1px rgba(0,0,0,.22),0 22px 44px -22px rgba(0,0,0,.72),0 3px 10px -3px rgba(0,0,0,.32);
+  --depth-hi:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(0,0,0,.22),0 30px 60px -26px rgba(0,0,0,.8),0 0 28px -10px var(--hud-soft);
+  --lift:0 10px 26px -12px rgba(0,0,0,.6);
+}
+html[data-look]:not([data-ui="tactical"]):not([data-glass="liquid"]){--r:16px;--r2:12px}
+:root[data-skin="linen"]{
+  --surf:color-mix(in srgb,#fff 82%,var(--bg));--surf2:color-mix(in srgb,#fff 70%,var(--bg));--field:color-mix(in srgb,#fff 60%,var(--bg));
+  --sheen:rgba(255,255,255,.7);--depth:inset 0 1px 0 rgba(255,255,255,.9),0 0 0 1px rgba(90,60,30,.06),0 18px 36px -22px rgba(90,60,30,.35),0 2px 6px -2px rgba(90,60,30,.12);
+  --depth-hi:inset 0 1px 0 #fff,0 0 0 1px rgba(90,60,30,.08),0 24px 48px -24px rgba(90,60,30,.4),0 0 24px -10px var(--hud-soft);--lift:0 8px 20px -10px rgba(90,60,30,.3);
+}
+
+/* ---------- living background, cheap: soft gradient glows that only move (no blur filter, no shape morph) ---------- */
+html .bg .blob{filter:none!important;will-change:transform;animation:hudDrift 48s var(--e-io) infinite alternate!important;animation-duration:calc(48s * var(--bgk,1))!important}
+html .bg .blob.b1{background:radial-gradient(closest-side,var(--blob1),transparent)!important}
+html .bg .blob.b2{background:radial-gradient(closest-side,var(--blob2),transparent)!important;animation-delay:-16s!important;animation-direction:alternate-reverse!important}
+html .bg .blob.b3{background:radial-gradient(closest-side,var(--blob3),transparent)!important;animation-delay:-30s!important}
+@keyframes hudDrift{0%{transform:translate3d(0,0,0) scale(1.15)}50%{transform:translate3d(4vw,3vh,0) scale(1.25)}100%{transform:translate3d(-3vw,5vh,0) scale(1.1)}}
+/* the system rail: a hairline across the top with one light travelling along it */
+.hud-rail{position:fixed;left:0;right:0;top:0;height:1px;z-index:31;pointer-events:none;overflow:hidden;background:linear-gradient(90deg,transparent,var(--hud-soft) 20%,var(--hud-soft) 80%,transparent)}
+.hud-rail::after{content:"";position:absolute;top:0;left:0;width:180px;height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 85%,#fff),transparent);box-shadow:0 0 10px var(--accent);
+  transform:translate3d(-200px,0,0);animation:hudRail 9s var(--e-io) infinite;will-change:transform}
+@keyframes hudRail{0%{transform:translate3d(-200px,0,0)}55%,100%{transform:translate3d(100vw,0,0)}}
+html.lite .hud-rail::after,html.mob .hud-rail{display:none}
+html.idle .hud-rail::after{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.hud-rail::after{display:none}}
+/* one slow scan band for the whole screen: a single layer moved with transform */
+.hud-scan{position:fixed;left:0;right:0;top:0;height:46vh;z-index:0;pointer-events:none;opacity:.6;
+  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--accent) 3%,transparent) 55%,color-mix(in srgb,var(--accent) 7%,transparent) 86%,transparent);
+  transform:translate3d(0,-40vh,0);animation:hudScan 14s linear infinite;will-change:transform}
+@keyframes hudScan{0%{transform:translate3d(0,-40vh,0)}62%,100%{transform:translate3d(0,108vh,0)}}
+:root[data-skin="linen"] .hud-scan{opacity:.25}
+
+/* ---------- surfaces: one shape, one edge, one depth ---------- */
+html[data-look] .panel,html[data-look] .hm-card,html[data-look] .sp-sec,html[data-look] #look,html[data-look] #more-pop,html[data-look] #alert-pop{
+  border-radius:var(--r);border:1px solid var(--edge);
+  background:linear-gradient(90deg,transparent 6%,var(--hud) 50%,transparent 94%) top center/100% 1px no-repeat,linear-gradient(180deg,var(--sheen),transparent 140px),color-mix(in srgb,var(--surf) 90%,transparent);
+  box-shadow:var(--depth);transition:border-color .35s var(--e-out),box-shadow .35s var(--e-out)}
+html[data-look] .hm-card{border-radius:var(--r2)}
+html[data-look] :is(#look,#more-pop,#alert-pop){background:linear-gradient(90deg,transparent 6%,var(--hud) 50%,transparent 94%) top center/100% 1px no-repeat,linear-gradient(180deg,var(--sheen),transparent 140px),var(--surf)}
+html[data-look] .sp-sec{background:transparent;border:0;box-shadow:none}
+@media (hover:hover){html[data-look] .panel:hover,html[data-look] .hm-card:hover{border-color:var(--edge-hi);box-shadow:var(--depth-hi)}}
+/* big surfaces don't blur what's behind them (that re-blurs every frame when the background moves). Liquid glass keeps it, by choice. */
+html[data-look]:not([data-glass="liquid"]) :is(.panel,.hm-card,.chip,.cmd,.bw-side,.bw-tabs,.bw-bar,.bw-t,.top,.sat,.vsw,.dock){-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html[data-look]:not([data-glass="liquid"]) .panel::before{filter:none!important;background:radial-gradient(closest-side,var(--accent-soft),transparent)!important}
+/* the spinning conic border repainted every panel each frame: replace it with a light that runs along the top edge on hover */
+html[data-look] .panel::after{animation:none!important;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 80%,#fff) 50%,transparent)!important;
+  -webkit-mask:none!important;mask:none!important;padding:0!important;inset:0 auto auto 0!important;width:38%!important;height:1px!important;border-radius:0!important;opacity:0;
+  transform:translate3d(-110%,0,0);box-shadow:0 0 12px var(--accent)}
+@media (hover:hover){html[data-look]:not(.lite) .panel:hover::after{opacity:1;animation:hudEdge 1.6s var(--e-out) 1 both!important}}
+@keyframes hudEdge{0%{transform:translate3d(-110%,0,0);opacity:0}15%{opacity:1}100%{transform:translate3d(290%,0,0);opacity:0}}
+/* HUD corner marks (the existing bracket element), small and quiet */
+html[data-look] .panel>.hud{display:block!important;position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background:linear-gradient(var(--hud),var(--hud)) 7px 7px/12px 1px,linear-gradient(var(--hud),var(--hud)) 7px 7px/1px 12px,
+             linear-gradient(var(--hud),var(--hud)) calc(100% - 7px) calc(100% - 7px)/12px 1px,linear-gradient(var(--hud),var(--hud)) calc(100% - 7px) calc(100% - 7px)/1px 12px;
+  background-repeat:no-repeat;opacity:.5;transition:opacity .35s}
+@media (hover:hover){html[data-look] .panel:hover>.hud{opacity:1}}
+html.mob .panel>.hud{opacity:.25}
+html.x-hud .panel>.hud,:root[data-ui="tactical"] .panel>.hud{display:none!important}
+
+/* ---------- panel headers: title, mono counter, a thin rule that draws itself in ---------- */
+html[data-look] .ph{position:relative}
+html[data-look] .ph::after{content:"";position:absolute;left:20px;right:20px;bottom:0;height:1px;background:linear-gradient(90deg,var(--hud),var(--hud-faint) 40%,transparent);
+  transform-origin:0 50%;animation:hudRule .9s var(--e-out) .15s 1 both}
+@keyframes hudRule{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
+html[data-look] .ph h2{font:600 15.5px/1.2 var(--f-display);letter-spacing:.015em}
+html[data-look] .ph .sub,html[data-look] .ph em{font-family:var(--f-mono);letter-spacing:.08em}
+
+/* ---------- controls: one height scale, one radius, one way to show hover / press / focus ---------- */
+html[data-look] .btn{border-radius:var(--rctl);letter-spacing:.005em;
+  border:1px solid var(--edge);background:linear-gradient(180deg,var(--sheen),transparent),var(--surf2);color:var(--fg);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.25);
+  transition:background-color .18s,border-color .18s,box-shadow .25s var(--e-out),transform .12s var(--e-out),color .18s}
+html[data-look] .btn.sm{border-radius:9px}
+html[data-look] .cmd .mic{border-radius:11px}
+html[data-look] .btn.ghost{background:transparent;border-color:transparent;box-shadow:none;color:var(--fg2)}
+html[data-look] .btn.pri{border-color:transparent;color:var(--accent-ink);font-weight:600;background:var(--grad);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 18px -8px var(--accent),0 0 0 1px color-mix(in srgb,var(--accent) 50%,transparent)}
+html[data-look] .btn.danger:not(.ghost){color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+@media (hover:hover){
+  html[data-look] .btn:not(:disabled):hover{border-color:var(--edge-hi);color:var(--fg);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),var(--lift),0 0 0 1px var(--hud-soft)}
+  html[data-look] .btn.ghost:not(:disabled):hover{background:var(--hud-faint);border-color:transparent;box-shadow:none}
+  html[data-look] .btn.pri:not(:disabled):hover{filter:brightness(1.07);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 8px 24px -8px var(--accent),0 0 0 1px var(--accent)}}
+html[data-look] .btn:not(:disabled):active{transform:scale(.97)}
+html[data-look] .btn:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+html[data-look] :is(.btn,.tab,.chip,.bw-ic,.bw-nb,.vsw button):focus-visible{outline:none;box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
+
+/* fields */
+html[data-look] :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),select,textarea){
+  border-radius:var(--rctl);border:1px solid var(--edge);background-color:var(--field);color:var(--fg);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.35);transition:border-color .2s,box-shadow .25s var(--e-out),background-color .2s}
+:root[data-skin="linen"] :is(input,select,textarea){box-shadow:inset 0 1px 2px rgba(90,60,30,.08)}
+html[data-look] :is(input,select,textarea):hover:not(:focus){border-color:var(--edge-hi)}
+html[data-look] :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea):focus{outline:none;border-color:var(--accent);box-shadow:inset 0 1px 2px rgba(0,0,0,.3),0 0 0 3px var(--hud-soft)}
+::placeholder{color:var(--fg3);opacity:.85}
+
+/* segmented controls and tabs share the page switcher's look */
+html[data-look] :is(.tabs,.vsw){background:var(--field);border:1px solid var(--edge);border-radius:12px;padding:3px;gap:2px;box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
+html[data-look] .vsw{border-radius:12px}
+html[data-look] :is(.tab,.vsw button){border-radius:9px;color:var(--fg2);transition:background-color .2s,color .2s,box-shadow .3s var(--e-out)}
+@media (hover:hover){html[data-look] :is(.tab,.vsw button):not([aria-selected=true]):hover{color:var(--fg);background:var(--hud-faint)}}
+html[data-look] :is(.tab,.vsw button)[aria-selected=true]{color:var(--fg);background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 26%,transparent),color-mix(in srgb,var(--accent) 12%,transparent));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 0 1px color-mix(in srgb,var(--accent) 45%,transparent),0 4px 14px -6px var(--accent)}
+html:not(.mob):not(.tv) #vsw{background:color-mix(in srgb,var(--bg) 86%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 30px -12px rgba(0,0,0,.7),0 0 0 1px rgba(0,0,0,.2)}
+
+/* chips: small, squared, mono-numbered */
+html[data-look] .chip{border-radius:8px;border-color:var(--edge);background:var(--hud-faint);color:var(--fg2);transition:border-color .2s,color .2s,background-color .2s}
+@media (hover:hover){html[data-look] button.chip:hover,html[data-look] a.chip:hover{border-color:var(--edge-hi);color:var(--fg)}}
+
+/* status lights glow a little */
+html[data-look] .led{box-shadow:0 0 0 3px color-mix(in srgb,currentColor 14%,transparent),0 0 10px currentColor}
+
+/* command line */
+html[data-look] .cmd{border-radius:14px;border-color:var(--edge);background:linear-gradient(90deg,transparent 4%,var(--hud) 50%,transparent 96%) top center/100% 1px no-repeat,color-mix(in srgb,var(--surf) 92%,transparent);box-shadow:var(--depth)}
+html[data-look] .cmd:focus-within{border-color:var(--accent);box-shadow:var(--depth-hi),0 0 0 3px var(--hud-soft)}
+html[data-look] .cmd input{background:transparent!important;border:0!important;box-shadow:none!important}
+
+/* overlays: modal, menus, toasts */
+html[data-look] .mdl{background:color-mix(in srgb,var(--bg) 62%,transparent)}
+html[data-look] .mdl-card{border-radius:var(--r);border:1px solid var(--edge-hi);background:linear-gradient(90deg,transparent 6%,var(--hud) 50%,transparent 94%) top center/100% 1px no-repeat,linear-gradient(180deg,var(--sheen),transparent 160px),var(--surf);box-shadow:var(--depth-hi),0 40px 90px -30px rgba(0,0,0,.8)}
+html[data-look] .mdl:not([hidden]) .mdl-card{animation:hudPop .38s var(--e-out) 1 both}
+@keyframes hudPop{from{opacity:0;transform:translate3d(0,10px,0) scale(.975)}to{opacity:1;transform:none}}
+html[data-look] .mdl-h{border-bottom:1px solid var(--edge)}
+html[data-look] :is(#more-pop,#alert-pop,#look,.bw-bmpop,#sp-devs){border-radius:var(--r2);border:1px solid var(--edge-hi);box-shadow:var(--depth-hi),0 30px 70px -24px rgba(0,0,0,.8)}
+html[data-look] :is(#more-pop,#alert-pop,.bw-bmpop,#sp-devs):not([hidden]){animation:hudDrop .26s var(--e-out) 1 both}
+@keyframes hudDrop{from{opacity:0;transform:translate3d(0,-6px,0)}to{opacity:1;transform:none}}
+html[data-look] .toast{border-radius:12px;border:1px solid var(--edge-hi);border-left:3px solid var(--accent);background:linear-gradient(180deg,var(--sheen),transparent),var(--surf);box-shadow:var(--depth-hi)}
+html[data-look] .toast.bad{border-left-color:var(--bad)} html[data-look] .toast.good{border-left-color:var(--good)}
+
+/* ---------- motion: things arrive, they don't pop ---------- */
+@keyframes hudIn{from{opacity:0;transform:translate3d(0,14px,0)}to{opacity:1;transform:none}}
+@keyframes hudFade{from{opacity:0}to{opacity:1}}
+html[data-view="work"] .grid>.panel,html[data-view="home"] .hm-card,html[data-view="home"] .sat{animation:hudIn .6s var(--e-out) 1 both}
+html[data-view="work"] .grid>.panel:nth-child(2),html[data-view="home"] .hm-card:nth-child(2){animation-delay:.05s}
+html[data-view="work"] .grid>.panel:nth-child(3),html[data-view="home"] .hm-card:nth-child(3){animation-delay:.1s}
+html[data-view="work"] .grid>.panel:nth-child(4){animation-delay:.15s}
+html[data-view="work"] .grid>.panel:nth-child(5){animation-delay:.2s}
+html[data-view="work"] .grid>.panel:nth-child(n+6){animation-delay:.25s}
+html[data-view="music"] #music,html[data-view="browser"] .bw-main{animation:hudFade .45s var(--e-out) 1 both}
+.top .hello>*{animation:hudIn .7s var(--e-out) 1 both}
+.top .hello>*:nth-child(2){animation-delay:.06s}.top .hello>*:nth-child(3){animation-delay:.12s}.top .hello>*:nth-child(n+4){animation-delay:.18s}
+
+/* ---------- layout polish ---------- */
+html:not(.mob)[data-view="work"] .top .right{align-self:start}
+html[data-look] .grid{gap:16px}
+html[data-look] .bw-ic{border-radius:12px;border-color:var(--edge);background:linear-gradient(180deg,var(--sheen),transparent),var(--surf2);transition:border-color .2s,box-shadow .25s var(--e-out),transform .15s var(--e-out)}
+@media (hover:hover){html[data-look] .bw-ic:hover{border-color:var(--edge-hi);box-shadow:var(--lift),0 0 0 1px var(--hud-soft);transform:translate3d(0,-1px,0)}}
+html[data-look] .bw-side{background:color-mix(in srgb,var(--bg) 88%,transparent);border-right:1px solid var(--edge)}
+html[data-look] .bw-bm{background:color-mix(in srgb,var(--bg) 92%,transparent);border-bottom-color:var(--edge)}
+
+/* thin scrollbars that match */
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--accent) 38%,transparent) transparent}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--accent) 30%,transparent);border-radius:10px;border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background-color:color-mix(in srgb,var(--accent) 55%,transparent)}
+::selection{background:color-mix(in srgb,var(--accent) 38%,transparent);color:var(--fg)}
+
+/* ---------- efficiency switches ---------- */
+/* the dial rings are one big SVG: a slow turn repaints all of it every frame. 10 updates a second looks the same (about 1px per step). */
+.hdr1{animation-timing-function:steps(1800)!important}
+.hdr2{animation-timing-function:steps(1100)!important}
+.hdr3{animation-timing-function:steps(600)!important}
+.sat .sx{animation-timing-function:steps(400)!important}
+/* nothing moves while Regis is idle, minimised, in the tray or hidden */
+html.idle .hud-scan,html.away .hud-scan,html.away .bg .blob{animation-play-state:paused!important}
+html.away *,html.away *::before,html.away *::after{animation-play-state:paused!important}
+/* Lite keeps the arrivals and hover feedback but no endless loops */
+html.lite .hud-scan{display:none}
+html.lite .bg .blob{animation:none!important}
+html.mob .hud-scan{display:none}
+@media (prefers-reduced-motion:reduce){
+  .hud-scan{display:none}
+  html .bg .blob,html[data-look] .ph::after,html[data-view] .grid>.panel,html[data-view] .hm-card,html[data-view] .sat,.top .hello>*,html[data-look] .mdl-card,html[data-look] :is(#more-pop,#alert-pop,.bw-bmpop,#sp-devs),html[data-view] #music,html[data-view] .bw-main{animation:none!important}
+}
+
+/* the update-the-app bar shows on every page */
+html[data-view] #app>#shell-bar:not([hidden]){display:block!important;margin-bottom:12px}
 </style>
 
 <div class="scan" aria-hidden="true"></div><div class="xgrid" aria-hidden="true"></div>
-<div class="bg" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+<div class="bg" aria-hidden="true"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><i class="hud-scan"></i></div><i class="hud-rail" aria-hidden="true"></i>
 <div class="sbar" aria-hidden="true"></div>
 <div class="dock" id="dock" aria-label="Quick bar">
   <b style="font:500 13px var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:var(--fg2)">Regis</b>
@@ -2212,6 +2409,7 @@ html.o-bwlbl .bw-sf{width:62px}
   <div class="status" id="status" aria-label="Connections"></div>
   <div class="ticker" id="ticker" aria-hidden="true"><div class="tk-in" id="tk-in"></div></div>
   <div id="banner" class="banner" hidden></div>
+  <div id="shell-bar" class="banner" hidden><span id="shell-msg"></span> <button class="btn sm pri" data-act="shell-help">How to update</button> <button class="btn sm ghost" data-act="shell-hide">Later</button></div>
   <div id="upd-bar" class="banner good" hidden><span id="upd-msg"></span> <button class="btn sm pri" data-act="update-apply">Reload now</button></div>
 
   <section class="home" id="home" aria-label="Home">
@@ -2984,21 +3182,25 @@ function initFx(){
   function readCol(){var c=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),m;
     if(m=c.match(/^#([0-9a-f]{6})$/i))col=[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)];
     else if(m=c.match(/(\d+)\D+(\d+)\D+(\d+)/))col=[+m[1],+m[2],+m[3]]}
-  function size(){if(!cx)return;dpr=Math.min(window.devicePixelRatio||1,1.5);W=window.innerWidth;H=window.innerHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
+  function size(){if(!cx)return;dpr=1;W=window.innerWidth;H=window.innerHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
     var n=Math.max(18,Math.min(PERF.bal?24:54,Math.round(W*H/26000)));while(pts.length<n)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,r:.8+Math.random()*1.6,p:Math.random()*6.28});pts.length=n}
   var lt=0;
   function frame(ts){
     if(!cx)return;if(FX.bg!=="aurora"){on=false;cx.clearRect(0,0,W,H);return}
+    if(S.view==="browser"){on=false;return}
     if(ts&&lt&&ts-lt<30&&!PERF.lite&&!PERF.bal){requestAnimationFrame(frame);return}lt=ts||0;     // 30 fps cap
     cx.clearRect(0,0,W,H);tick++;if(tick%90===1)readCol();
     var rgb=col.join(",");
-    for(var i=0;i<pts.length;i++){var a=pts[i];
-      if(!reduce){a.x+=a.vx*FX.s;a.y+=a.vy*FX.s;a.p+=.012*FX.s;if(a.x<-20)a.x=W+20;else if(a.x>W+20)a.x=-20;if(a.y<-20)a.y=H+20;else if(a.y>H+20)a.y=-20;
-        }
-      for(var j=i+1;j<pts.length;j++){var b=pts[j],ex=a.x-b.x,ey=a.y-b.y,dd=ex*ex+ey*ey;
-        if(dd<20000){cx.strokeStyle="rgba("+rgb+","+(.2*(1-dd/20000)).toFixed(3)+")";cx.lineWidth=.7;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
-      cx.fillStyle="rgba("+rgb+","+(.35+.3*Math.sin(a.p)).toFixed(3)+")";cx.beginPath();cx.arc(a.x,a.y,a.r,0,6.283);cx.fill()}
-    if(!reduce&&!document.hidden&&!PERF.lite&&!PERF.idle){if(PERF.bal)setTimeout(function(){requestAnimationFrame(frame)},48);else requestAnimationFrame(frame)}else on=false}
+    /* batched: lines and dots are grouped into 4 brightness levels, so a frame is ~8 draw calls instead of dozens */
+    var LB=[[],[],[],[]],DB=[[],[],[],[]],i,j,k;
+    for(i=0;i<pts.length;i++){var a=pts[i];
+      if(!reduce){a.x+=a.vx*FX.s;a.y+=a.vy*FX.s;a.p+=.012*FX.s;if(a.x<-20)a.x=W+20;else if(a.x>W+20)a.x=-20;if(a.y<-20)a.y=H+20;else if(a.y>H+20)a.y=-20}
+      for(j=i+1;j<pts.length;j++){var b=pts[j],ex=a.x-b.x,ey=a.y-b.y,dd=ex*ex+ey*ey;if(dd<20000)LB[Math.min(3,((1-dd/20000)*4)|0)].push(a.x,a.y,b.x,b.y)}
+      DB[Math.min(3,((.5+.5*Math.sin(a.p))*4)|0)].push(a)}
+    cx.lineWidth=.7;
+    for(k=0;k<4;k++){var L=LB[k];if(L.length){cx.strokeStyle="rgba("+rgb+","+(.2*(k+.5)/4).toFixed(3)+")";cx.beginPath();for(i=0;i<L.length;i+=4){cx.moveTo(L[i],L[i+1]);cx.lineTo(L[i+2],L[i+3])}cx.stroke()}
+      var D=DB[k];if(D.length){cx.fillStyle="rgba("+rgb+","+(.05+.3*(k+.5)/2).toFixed(3)+")";cx.beginPath();for(i=0;i<D.length;i++){cx.moveTo(D[i].x+D[i].r,D[i].y);cx.arc(D[i].x,D[i].y,D[i].r,0,6.283)}cx.fill()}}
+    if(!reduce&&!document.hidden&&!PERF.lite&&!PERF.idle){if(PERF.bal)setTimeout(function(){requestAnimationFrame(frame)},66);else requestAnimationFrame(frame)}else on=false}
   PERF.wake.push(function(){if(FX.bg==="aurora"&&!on){on=true;requestAnimationFrame(frame)}});
   size();readCol();frame();
   window.addEventListener("resize",function(){size();if(reduce||PERF.lite)frame()});
@@ -4595,7 +4797,7 @@ function skyCol(){var c=(getComputedStyle(document.documentElement).getPropertyV
 function skyOK(){return !!(window.HTMLCanvasElement&&!/jsdom/i.test(navigator.userAgent||""))}
 function bwSkyStart(){if(!skyOK())return;var cv=$("#bw-sky");if(!cv)return;if(SKY.bw)return SKY.bw.kick();
   var ctx=cv.getContext("2d");if(!ctx)return;var W=0,H=0,st=[],raf=0,last=0,col=skyCol(),colAt=0,run=false;
-  function size(){var r=cv.getBoundingClientRect(),d=Math.min(2,window.devicePixelRatio||1);W=Math.max(1,r.width|0);H=Math.max(1,r.height|0);cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
+  function size(){var r=cv.getBoundingClientRect(),d=Math.min(1.25,window.devicePixelRatio||1);W=Math.max(1,r.width|0);H=Math.max(1,r.height|0);cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0)}
   function mk(init){var m=6+Math.random()*9;return {x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,age:init?Math.random()*m:0,max:m,r:.9+Math.random()*1.5}}
   function target(){var n=+opGet("bwsd")||46;while(st.length<n)st.push(mk(true));if(st.length>n)st.length=n}
   function frame(t){raf=0;if(!run)return;if(document.hidden||S.view!=="browser"||($("#bw-start")||{}).hidden||PERF.lite||PERF.idle||document.documentElement.classList.contains("o-still")||!opGet("bwstar")){run=false;ctx.clearRect(0,0,W,H);return}
@@ -4603,8 +4805,13 @@ function bwSkyStart(){if(!skyOK())return;var cv=$("#bw-sky");if(!cv)return;if(SK
     if(t-colAt>4000){col=skyCol();colAt=t}target();ctx.clearRect(0,0,W,H);var L=Math.min(170,Math.max(90,W/7)),i,j;
     for(i=0;i<st.length;i++){var a=st[i];a.age+=dt*sp;a.x+=a.vx*sp*60*dt;a.y+=a.vy*sp*60*dt;if(a.age>=a.max||a.x<-20||a.x>W+20||a.y<-20||a.y>H+20)st[i]=a=mk(false);a.al=Math.sin(Math.PI*Math.min(1,a.age/a.max))}
     ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=.8;
-    for(i=0;i<st.length;i++){var p=st[i];for(j=i+1;j<st.length;j++){var q=st[j],dx=p.x-q.x,dy=p.y-q.y,d2=dx*dx+dy*dy;if(d2<L*L){var al=Math.min(p.al,q.al)*(1-Math.sqrt(d2)/L)*.7;if(al>.02){ctx.globalAlpha=al;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}}}
-      ctx.globalAlpha=Math.min(1,p.al*1.1);ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.283);ctx.fill()}
+    /* batched into 5 brightness levels: ~10 draw calls a frame instead of one per line and star */
+    var LB=[[],[],[],[],[]],DB=[[],[],[],[],[]],k;
+    for(i=0;i<st.length;i++){var p=st[i];for(j=i+1;j<st.length;j++){var q=st[j],dx=p.x-q.x,dy=p.y-q.y,d2=dx*dx+dy*dy;if(d2<L*L){var al=Math.min(p.al,q.al)*(1-Math.sqrt(d2)/L)*.7;if(al>.02)LB[Math.min(4,(al/.7*5)|0)].push(p.x,p.y,q.x,q.y)}}
+      DB[Math.min(4,(Math.min(1,p.al*1.1)*5)|0)].push(p)}
+    for(k=0;k<5;k++){var LL=LB[k],DD=DB[k];
+      if(LL.length){ctx.globalAlpha=.7*(k+.5)/5;ctx.beginPath();for(i=0;i<LL.length;i+=4){ctx.moveTo(LL[i],LL[i+1]);ctx.lineTo(LL[i+2],LL[i+3])}ctx.stroke()}
+      if(DD.length){ctx.globalAlpha=(k+.5)/5;ctx.beginPath();for(i=0;i<DD.length;i++){ctx.moveTo(DD[i].x+DD[i].r,DD[i].y);ctx.arc(DD[i].x,DD[i].y,DD[i].r,0,6.283)}ctx.fill()}}
     ctx.globalAlpha=1}
   function kick(){if(run)return;if(!opGet("bwstar"))return;size();run=true;last=0;raf=requestAnimationFrame(frame)}
   window.addEventListener("resize",function(){if(run)size()});
@@ -4965,6 +5172,8 @@ document.addEventListener("click",async function(ev){
     case "vt-savecred":{var pc=VT.pend;if(pc&&VT.key){var ex2=vtLogins(pc.host).find(function(i){return i.d.user===pc.user});await vtSave("login",{site:pc.host,url:pc.url,user:pc.user,pass:pc.pass},ex2?ex2.id:"");VT.pend=null;vtBar();toast("Saved to your Vault.","good")}break}
     case "vt-fill":{var fi2=VT.items.find(function(x){return x.id===b.dataset.id});vtFill(fi2);break}
     case "bw-markedit":BW.edit=!BW.edit;bwMarks();bwSites();break;
+    case "shell-help":shellHelp();break;
+    case "shell-hide":{try{localStorage.setItem("regis-shell-skip",SHELL_NEED)}catch(_){}var shb=$("#shell-bar");if(shb)shb.hidden=true;break}
     case "bw-bmf":if(b.dataset.in){var bmp=$("#bw-bmpop");if(bmp)bmp.innerHTML=bwBmFolderHtml(b.dataset.id)}else bwBmPop(b,bwBmFolderHtml(b.dataset.id));break;
     case "bw-bmmore":bwBmPop(b,bwBmMoreHtml());break;
     case "bw-bmall":(S.marks||[]).filter(function(m){return m.folder===b.dataset.id}).forEach(function(m){if(bwNative())APP.browser.open(m.url).catch(function(){});else window.open(m.url,"_blank","noopener")});break;
@@ -5989,6 +6198,30 @@ async function boot(){
     if(!document.hidden&&Date.now()-S.lastSync>5*60000){S.lastSync=Date.now();refreshAll(true)}},30000);
   setInterval(pushSnapshot,45000);setTimeout(pushSnapshot,6000);
   setTimeout(processQueue,2000);setTimeout(function(){try{checkAlerts()}catch(_){}},4000)}
+/* 1.7.8: the desktop window tells the page when it is hidden (background throttling is off, so the page can't see it). Pause every visual then. */
+(function(){var R=document.documentElement;function away(on){R.classList.toggle("away",!!on);if(on)perfIdle(true);else idleTouch(true)}
+  if(APP&&APP.onVis)APP.onVis(function(v){away(!v)});
+  document.addEventListener("visibilitychange",function(){away(document.hidden)})})();
+/* 1.7.8: a page update can arrive over the air, but the desktop app's own files only change when it is reinstalled. Say so once per version. */
+if(window.MutationObserver)new MutationObserver(function(){if(S.view!=="browser")try{FX.kick()}catch(_){}}).observe(document.documentElement,{attributes:true,attributeFilter:["data-view"]});
+/* 1.7.8: animations inside SVG drawings (dial rings, satellites, pulse rings) can't run on the graphics chip: Chromium restyles and
+   repaints the whole drawing every frame (about 80% of the page's work). Keep the same keyframes, but step them ourselves:
+   slow turns 5-10 times a second, quick pulses 20 times a second. Looks the same, a fraction of the work. */
+(function(){if(!document.getAnimations||!document.timeline)return;var R=document.documentElement,list=[],n=0;
+  function scan(){list=document.getAnimations().filter(function(a){var t=a.effect&&a.effect.target;if(!(t instanceof SVGElement)||!a.animationName)return false;var tm=a.effect.getTiming();return tm.iterations===Infinity});
+    list.forEach(function(a){if(a.playState==="running"){var ct=a.currentTime||0;a.pause();a.currentTime=ct;a._t0=document.timeline.currentTime-ct}
+      var d=+a.effect.getTiming().duration||1000;a._every=d>=20000?4:d>=8000?2:1})}
+  function tick(){n++;if(n%40===1)scan();if(R.classList.contains("idle")||R.classList.contains("away")||R.classList.contains("lite"))return;var now=document.timeline.currentTime;
+    for(var i=0;i<list.length;i++){var a=list[i];if(a._t0==null||n%a._every)continue;try{a.currentTime=now-a._t0}catch(_){}}}
+  setInterval(function(){if(!document.hidden&&(list.length||n%40===0))tick();else n++},50)})();
+var SHELL_NEED="1.7.8";
+function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
+function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
+  var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;
+  var b=$("#shell-bar"),m=$("#shell-msg");if(!b||!m)return;m.textContent="Your Regis desktop app"+(sh?" ("+sh+")":"")+" is older than this page. Google sign-in, Spotify audio and autofill need the new app installed once.";b.hidden=false}).catch(function(){})}
+function shellHelp(){openModal("Update the Regis desktop app",'<ol class="steps"><li>Quit Regis: right-click its icon by the clock, then <b>Quit Regis</b>.</li><li>Unzip the new <code>Regis-app.zip</code> and copy everything into your Regis folder, replacing the old files. Your data and settings are kept.</li><li>Double-click <b>Setup Regis</b>. It keeps the Spotify audio engine if you have it.</li><li>For Spotify playback inside Regis, double-click <b>Enable Spotify audio</b> and follow its window (a free castlabs account the first time).</li><li>Open Regis again.</li></ol>');try{bwSync()}catch(_){}}
+setTimeout(shellCheck,2500);
+
 boot();
 })();
 </script>

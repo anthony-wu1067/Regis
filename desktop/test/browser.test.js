@@ -86,6 +86,8 @@ app.whenReady().then(async () => {
     const j = JSON.parse(fp), h = sent[sent.length - 1], hk = Object.keys(h).map((k) => k.toLowerCase());
     ok(/Firefox\//.test(j.ua) && !/Chrome|Electron/.test(j.ua), 'Google sign-in page sees Firefox in navigator.userAgent');
     ok(j.uad === false, 'Google sign-in page sees no navigator.userAgentData (like real Firefox)');
+    const ff = JSON.parse(await gwc.executeJavaScript("JSON.stringify({chrome:typeof window.chrome,vendor:navigator.vendor,ps:navigator.productSub})"));
+    ok(ff.chrome === 'undefined' && ff.vendor === '' && ff.ps === '20100101', 'no Chrome-only traces on the sign-in page (window.chrome, vendor), like real Firefox');
     ok(/Firefox\//.test(h['User-Agent'] || '') && !hk.some((k) => k.startsWith('sec-ch-ua')), 'requests to Google sign-in carry Firefox UA and no Chrome client hints');
     host.go(g, base + '/a'); ok(await until(() => gt.title === 'Page A'), 'leaving Google sign-in works');
     const back = JSON.parse(await gwc.executeJavaScript("JSON.stringify({ua:navigator.userAgent,uad:'userAgentData' in navigator})"));

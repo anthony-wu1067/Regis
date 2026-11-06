@@ -6,7 +6,13 @@ let last = '';
 /* On Google's sign-in pages Regis presents itself as Firefox (see lib/browser.js). Firefox has no navigator.userAgentData, so hide it
    there too, or Google sees a mismatch and says "This browser or app may not be secure". Nothing changes on any other site. */
 if (location.protocol === 'https:' && /^accounts\.(google|youtube)\.com$/i.test(location.hostname)) {
-  const hide = function () { try { Object.defineProperty(Navigator.prototype, 'userAgentData', { get: function () { return undefined; }, configurable: true }); } catch (_) {} try { delete Navigator.prototype.userAgentData; } catch (_) {} };
+  const hide = function () {
+    try { delete Navigator.prototype.userAgentData; } catch (_) {}
+    var def = function (k, v) { try { Object.defineProperty(Navigator.prototype, k, { get: function () { return v; }, configurable: true }); } catch (_) {} };
+    def('vendor', ''); def('productSub', '20100101'); def('oscpu', navigator.platform === 'MacIntel' ? 'Intel Mac OS X 10.15' : navigator.platform.indexOf('Linux') === 0 ? 'Linux x86_64' : 'Windows NT 10.0; Win64; x64');
+    def('buildID', '20181001000000');
+    try { delete window.chrome; } catch (_) {} try { Object.defineProperty(window, 'chrome', { get: function () { return undefined; }, configurable: true }); } catch (_) {}
+  };
   try { if (contextBridge && contextBridge.executeInMainWorld) contextBridge.executeInMainWorld({ func: hide }); else throw 0; }
   catch (_) { try { webFrame.executeJavaScript('(' + hide.toString() + ')()'); } catch (_) {} }
 }

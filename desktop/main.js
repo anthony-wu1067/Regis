@@ -72,6 +72,9 @@ function createWindow() {
     icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }
   });
+  /* Background throttling is off (so Spotify keeps playing), which also hides minimise/tray from the page. Tell it, so visuals can pause. */
+  const vis = (v) => () => { try { if (win && !win.isDestroyed()) win.webContents.send('win:vis', v); } catch (_) {} };
+  win.on('hide', vis(false)); win.on('minimize', vis(false)); win.on('show', vis(true)); win.on('restore', vis(true));
   const staged = updater && updater.current();      // a newer interface downloaded over the air, if any
   runningVersion = staged ? staged.version : app.getVersion();
   win.loadFile(staged ? path.join(staged.dir, 'index.html') : BUNDLED_PAGE);
@@ -141,7 +144,7 @@ app.whenReady().then(async () => {
     googleConfigured: !!(store.getMeta('gClientId', '') && store.getSecret('gSecret')), googleConnected: !!store.getSecret('gRefresh'),
     googleEmail: store.getMeta('gEmail', ''), anthropicKey: !!store.getSecret('anthropicKey'), usage: store.monthUsage(),
     canvasConnected: !!(store.getMeta('cvHost', '') && store.getSecret('cvToken')), canvasHost: (store.getMeta('cvHost', '') || '').replace(/^https?:\/\//, ''),
-    openAtLogin: app.getLoginItemSettings().openAtLogin, voice: true, version: runningVersion || app.getVersion(), updateUrl: updateUrl()
+    openAtLogin: app.getLoginItemSettings().openAtLogin, voice: true, version: runningVersion || app.getVersion(), shell: app.getVersion(), drm: DRM, updateUrl: updateUrl()
   })));
   ipcMain.handle('app:saveGoogle', wrap(({ clientId, clientSecret }) => {
     if (clientId) store.setMeta('gClientId', String(clientId).trim()); if (clientSecret) store.setSecret('gSecret', String(clientSecret).trim()); return true; }));
