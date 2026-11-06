@@ -2408,6 +2408,9 @@ html[data-look] .bw-addr{gap:10px;padding-left:14px}
 html[data-look] .bw-addr input{padding:0 10px 0 4px!important}
 
 .sp-noart{width:40px;height:40px;border-radius:6px;display:grid;place-items:center;background:color-mix(in srgb,var(--fg) 7%,transparent);color:var(--fg3);font-size:16px}
+
+.sp-hold{margin:0 0 10px;padding:10px 14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--amber) 45%,transparent);background:color-mix(in srgb,var(--amber) 10%,transparent);color:var(--fg);font-size:13px}
+.sp-hold[hidden]{display:none}
 </style>
 
 <div class="scan" aria-hidden="true"></div><div class="xgrid" aria-hidden="true"></div>
@@ -4085,7 +4088,7 @@ function voMove(v,d){var i=VORD.indexOf(v),j=i+d;if(i<0||j<0||j>=VORD.length)ret
 (function(){var o=lsj("regis-vord",null);if(o&&o.length===VIEWS.length&&VIEWS.every(function(v){return o.indexOf(v)>=0}))VORD=o.slice();voApply()})();
 
 /* ---------- Spotify (sign-in with PKCE, Web API, optional in-browser player) ---------- */
-var SP={sel:{on:false,ids:{}},cid:lsj("regis-sp-cid",""),tok:lsj("regis-sp-tok",null),me:null,st:null,devs:[],pl:null,view:{t:"home"},liked:{},sdk:null,sdkDev:"",tickT:0,pollN:0,loadT:0,hist:[],hi:-1,lf:"playlists",lc:{},qn:[],rpId:null,fo:lsj("regis-sp-fold",{f:[],m:{}}),ly:{},sg:{items:[],i:-1,t:0,q:""},curId:"",rp:lsj("regis-sp-rp",true)!==false};
+var SP={holdUntil:lsj("regis-sp-hold",0),sel:{on:false,ids:{}},cid:lsj("regis-sp-cid",""),tok:lsj("regis-sp-tok",null),me:null,st:null,devs:[],pl:null,view:{t:"home"},liked:{},sdk:null,sdkDev:"",tickT:0,pollN:0,loadT:0,hist:[],hi:-1,lf:"playlists",lc:{},qn:[],rpId:null,fo:lsj("regis-sp-fold",{f:[],m:{}}),ly:{},sg:{items:[],i:-1,t:0,q:""},curId:"",rp:lsj("regis-sp-rp",true)!==false};
 function mvLayout(){var tp=document.querySelector(".top");if(tp){var b=Math.ceil(tp.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty("--mvtop",b+"px")}}
 window.addEventListener("resize",function(){if(S.view==="music")mvLayout()});
 function spOn(){return !!(SP.cid&&SP.tok)}
@@ -4106,15 +4109,37 @@ async function spToken(body){var r=await fetch("https://accounts.spotify.com/api
 function spSaveTok(j){SP.tok={a:j.access_token,r:j.refresh_token||(SP.tok&&SP.tok.r)||"",e:Date.now()+(j.expires_in||3600)*1000-30000};lsw("regis-sp-tok",SP.tok)}
 async function spExchange(code,v){spSaveTok(await spToken({client_id:SP.cid,grant_type:"authorization_code",code:code,redirect_uri:spRedirect(),code_verifier:v}));await spStart()}
 async function spFresh(){if(!SP.tok)throw new Error("Not signed in to Spotify.");if(Date.now()<SP.tok.e)return SP.tok.a;spSaveTok(await spToken({client_id:SP.cid,grant_type:"refresh_token",refresh_token:SP.tok.r}));return SP.tok.a}
-async function spApi(m,path,body,again){var o={method:m,headers:{Authorization:"Bearer "+await spFresh()}};if(body!==undefined){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(body)}
-  var r=await fetch("https://api.spotify.com/v1"+path,o);if(r.status===204||r.status===202)return null;
+async function spApi(m,path,body,again){
+  if(m==="GET"){var ck=spCacheGet(path,false);if(ck)return ck.v}else spCacheDrop(path);
+  if(spHeld()){var st=m==="GET"&&spCacheGet(path,true);if(st)return st.v;var he=new Error(spHoldMsg());he.status=429;he.hold=1;throw he}
+  var o={method:m,headers:{Authorization:"Bearer "+await spFresh()}};if(body!==undefined){o.headers["Content-Type"]="application/json";o.body=JSON.stringify(body)}
+  var r;try{r=await fetch("https://api.spotify.com/v1"+path,o)}catch(ne){var sn=m==="GET"&&spCacheGet(path,true);if(sn)return sn.v;throw ne}if(r.status===204||r.status===202)return null;
   if(r.status===401&&!again){SP.tok.e=0;return spApi(m,path,body,1)}
   var j=await r.json().catch(function(){return null});
-  if(!r.ok){spLog("api "+r.status,m+" "+path.split("?")[0]);var e=new Error((j&&j.error&&j.error.message)||("Spotify error "+r.status));e.status=r.status;e.reason=j&&j.error&&j.error.reason;if(r.status===429){var ra=+r.headers.get("Retry-After")||5;SP.holdUntil=Date.now()+ra*1000;e.message="Spotify asks for a short pause ("+ra+"s). Try again in a moment."}throw e}
+  if(!r.ok){spLog("api "+r.status,m+" "+path.split("?")[0]);var e=new Error((j&&j.error&&j.error.message)||("Spotify error "+r.status));e.status=r.status;e.reason=j&&j.error&&j.error.reason;if(r.status===429){var ra=+r.headers.get("Retry-After")||0;SP.h429=(SP.h429||0)+1;if(!ra)ra=Math.min(600,15*Math.pow(2,SP.h429-1));spHold(ra);e.hold=1;e.message=spHoldMsg();var s4=m==="GET"&&spCacheGet(path,true);if(s4)return s4.v}throw e}
+  SP.h429=0;if(m==="GET")spCachePut(path,j);
   return j}
-function spErr(e){var m=(e&&e.message)||"Spotify didn’t answer.";if(e&&e.reason==="PREMIUM_REQUIRED")m="Spotify Premium is needed to control playback.";else if(e&&(e.reason==="NO_ACTIVE_DEVICE"||e.status===404&&/device/i.test(m)))m=spDesk()&&!SP.drm?"No speaker found. This copy of Regis can’t play audio itself yet: run “Enable Spotify audio” in the Regis folder, or open the Spotify app on this computer or your phone and pick it with the device button.":"No speaker found. Open Spotify on a device, or pick “Regis in this browser” with the device button.";toast(m,"bad")}
+/* 1.8.1 Spotify rate limits. Spotify's limit for personal apps is low; when it says "slow down" (429) it gives a wait time.
+   Regis then sends nothing at all until that time (counted across restarts), and the Music page keeps showing what it last saw. */
+function spHeld(){return !!(SP.holdUntil&&Date.now()<SP.holdUntil)}
+function spHold(sec){SP.holdUntil=Date.now()+Math.max(1,sec)*1000;lsw("regis-sp-hold",SP.holdUntil);spHoldUi()}
+function spHoldMsg(){var ms=Math.max(0,(SP.holdUntil||0)-Date.now()),m=Math.ceil(ms/60000),at=new Date(SP.holdUntil||Date.now()).toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+  return "Spotify asked Regis to slow down for a while (too many requests). It will be back "+(ms<90000?"in "+Math.max(1,Math.ceil(ms/1000))+" seconds":"at "+at+" (in "+m+" min)")+". Music already playing keeps going."}
+function spHoldUi(){var e=$("#sp-hold");if(!e){var mc=$("#sp-main");if(!mc||!mc.parentNode)return;e=document.createElement("div");e.id="sp-hold";e.className="sp-hold";e.setAttribute("role","status");mc.parentNode.insertBefore(e,mc)}
+  clearTimeout(SP.holdT);if(!spHeld()){e.hidden=true;return}e.hidden=false;e.textContent=spHoldMsg();SP.holdT=setTimeout(function(){spHoldUi();if(!spHeld()){spPoll();if(SP.view)spOpen(SP.view,1)}},Math.min(30000,Math.max(1000,SP.holdUntil-Date.now()+500)))}
+/* cache: slow-changing reads are reused for a while and kept across restarts; anything you change clears the matching entries */
+var SPC=(function(){var o=lsj("regis-sp-cache",null);return o&&typeof o==="object"?o:{}})();
+function spCacheTtl(path){if(/^\/me\/player|^\/me\/tracks\/contains/.test(path))return /^\/me\/tracks\/contains/.test(path)?600000:0;
+  if(/^\/me(\?|$)|^\/me\/playlists|^\/me\/top|^\/browse|^\/me\/albums|^\/me\/following/.test(path))return 15*60000;
+  if(/^\/me\/player\/recently-played/.test(path))return 5*60000;
+  if(/^\/(playlists|albums|artists|tracks|search)/.test(path)||/^\/me\/tracks/.test(path))return 5*60000;return 0}
+function spCacheKeep(path){return /^\/me(\?|$)|^\/me\/playlists|^\/me\/top|^\/browse|^\/me\/player\/recently-played/.test(path)}
+function spCacheGet(path,stale){var c=SPC[path];if(!c)return null;var ttl=spCacheTtl(path);if(!ttl&&!stale)return null;if(stale||Date.now()-c.t<ttl)return c;return null}
+function spCachePut(path,v){if(!spCacheTtl(path)||v==null)return;SPC[path]={t:Date.now(),v:v};clearTimeout(SP.cacheT);SP.cacheT=setTimeout(function(){var keep={},n=0;Object.keys(SPC).forEach(function(k){if(spCacheKeep(k)&&n<40){keep[k]=SPC[k];n++}});try{localStorage.setItem("regis-sp-cache",JSON.stringify(keep))}catch(_){}},800)}
+function spCacheDrop(path){var m=/^\/playlists\/([^/?]+)/.exec(path),keys=Object.keys(SPC);keys.forEach(function(k){if(/^\/me\/playlists/.test(k)||(m&&k.indexOf("/playlists/"+m[1])===0)||(/^\/me\/tracks/.test(path)&&/^\/me\/tracks/.test(k))||(/followers/.test(path)&&/^\/me\/playlists/.test(k)))SPC[k].t=0})}
+function spErr(e){if(e&&e.hold){if(SP.holdToast===SP.holdUntil)return;SP.holdToast=SP.holdUntil;spHoldUi()}var m=(e&&e.message)||"Spotify didn’t answer.";if(e&&e.reason==="PREMIUM_REQUIRED")m="Spotify Premium is needed to control playback.";else if(e&&(e.reason==="NO_ACTIVE_DEVICE"||e.status===404&&/device/i.test(m)))m=spDesk()&&!SP.drm?"No speaker found. This copy of Regis can’t play audio itself yet: run “Enable Spotify audio” in the Regis folder, or open the Spotify app on this computer or your phone and pick it with the device button.":"No speaker found. Open Spotify on a device, or pick “Regis in this browser” with the device button.";toast(m,"bad")}
 function spOut(){SP.hist=[];SP.hi=-1;SP.lc={};SP.rpId=null;SP.tok=null;SP.me=null;SP.st=null;SP.pl=null;SP.opened=0;lsw("regis-sp-tok",null);clearInterval(SP.tickT);SP.tickT=0;clearInterval(SP.lyT);SP.lyT=0;spShow()}
-function spShow(){var on=spOn();var a=$("#sp-app"),b=$("#sp-setup");if(!a)return;a.hidden=!on;b.hidden=on;var np=$("#sp-np");if(np)np.hidden=!(on&&(S.view==="music"||opGet("spbar"))&&S.view!=="browser");
+function spShow(){var on=spOn();try{spHoldUi()}catch(_){}var a=$("#sp-app"),b=$("#sp-setup");if(!a)return;a.hidden=!on;b.hidden=on;var np=$("#sp-np");if(np)np.hidden=!(on&&(S.view==="music"||opGet("spbar"))&&S.view!=="browser");
   document.documentElement.classList.toggle("sp-bar-on",!!(on&&np&&!np.hidden));document.documentElement.classList.toggle("sp-on",on);document.documentElement.classList.toggle("sp-rp-on",!!SP.rp);var rb=$("#sp-rpb");if(rb)rb.setAttribute("aria-pressed",String(!!SP.rp));
   var u=$("#sp-weburi");if(u)u.textContent=spRedirect();var c=$("#sp-cid");if(c&&!c.value)c.value=SP.cid||"";var w=$("#sp-warn");if(w)w.textContent=(!spDesk()&&!spWebOK())?"Sign-in needs the Regis desktop app or your own web address. It can’t run inside Claude’s artifact view.":"";
   $("#sp-sub").textContent=on&&SP.me?"Signed in as "+(SP.me.display_name||SP.me.id)+(SP.me.product&&SP.me.product!=="premium"?" · "+SP.me.product+" plan (playback needs Premium)":""):"Spotify inside Regis.";
@@ -4266,8 +4291,8 @@ function spSgPick(i){var it=SP.sg.items[i];if(!it)return;spSgClose();
   else if(it.k==="track")spPlay({uris:[it.x.uri]});
   else spOpen({t:it.k,id:it.x.id})}
 /* player */
-async function spPoll(){if(!spOn()||document.hidden||Date.now()<(SP.holdUntil||0))return;try{var t0=Date.now(),r=await spApi("GET","/me/player");if(SP.drag||(SP.seeking&&Date.now()-SP.seeking<1500)){SP.st=r;return}SP.st=r;SP.at=t0+Math.round((Date.now()-t0)/2);SP.base=r?r.progress_ms:0;spNP()}catch(e){if(e.status===401)spOut()}}
-function spTick(){if(!spOn()||document.hidden)return;var np=$("#sp-np");if(!np||np.hidden)return;SP.pollN=(SP.pollN+1)%5;if(!SP.pollN)spPoll();else if(SP.st&&SP.st.is_playing&&SP.st.item){var p=Math.min(SP.st.item.duration_ms,(SP.base||0)+Date.now()-SP.at);spBar(p)}}
+async function spPoll(){if(!spOn()||document.hidden||spHeld()||document.documentElement.classList.contains("away"))return;try{var t0=Date.now(),r=await spApi("GET","/me/player");if(SP.drag||(SP.seeking&&Date.now()-SP.seeking<1500)){SP.st=r;return}SP.st=r;SP.at=t0+Math.round((Date.now()-t0)/2);SP.base=r?r.progress_ms:0;spNP()}catch(e){if(e.status===401)spOut()}}
+function spTick(){if(!spOn()||document.hidden||document.documentElement.classList.contains("away"))return;var np=$("#sp-np");if(!np||np.hidden)return;var every=spLocal()?30:(SP.st&&SP.st.is_playing?5:15);SP.pollN=((SP.pollN||0)+1)%every;if(!SP.pollN)spPoll();else if(SP.st&&SP.st.is_playing&&SP.st.item){var p=Math.min(SP.st.item.duration_ms,(SP.base||0)+Date.now()-SP.at);spBar(p)}}
 function spBar(p){if(SP.seeking&&Date.now()-SP.seeking<1500)return;var d=SP.st&&SP.st.item?SP.st.item.duration_ms:0,sk=$("#sp-seek");if(sk&&!SP.drag)sk.value=d?Math.round(p/d*1000):0;if(sk)sk.style.setProperty("--p",(sk.value/10)+"%");$("#sp-t0").textContent=spDur(p);$("#sp-t1").textContent=spDur(d)}
 function spNP(){var st=SP.st,t=st&&st.item;$("#sp-nm").textContent=t?t.name:"Nothing playing";var ar=$("#sp-ar");ar.textContent=t?(t.artists||[]).map(function(a){return a.name}).join(", "):"Pick something to play";ar.dataset.id=t&&t.artists&&t.artists[0]?t.artists[0].id:"";ar.dataset.t="artist";$("#sp-nm").dataset.t=t&&t.album?"album":"queue";$("#sp-nm").dataset.id=t&&t.album?t.album.id:"";
   var im=t&&t.album?spImg(t.album.images,64):"";var a=$("#sp-art");a.style.visibility=im?"visible":"hidden";if(im&&a.src!==im)a.src=im;
@@ -4341,7 +4366,9 @@ setInterval(function(){if(!SP.sdk||!spLocal()||document.hidden)return;SP.sdk.get
 function spSdk(){if(SP.sdk||SP.sdkTried||!spPlayerOK())return;SP.sdkTried=1;var sc=document.createElement("script");sc.src="https://sdk.scdn.co/spotify-player.js";sc.async=true;document.head.appendChild(sc);
   window.onSpotifyWebPlaybackSDKReady=function(){try{SP.sdk=new Spotify.Player({name:"Regis",getOAuthToken:function(cb){spFresh().then(cb)},volume:.6});SP.sdk.addListener("ready",function(x){SP.sdkDev=x.device_id;spLog("ready",x.device_id);spPoll().then(function(){if((!SP.st||!SP.st.device)&&!spDrmBad()){spApi("PUT","/me/player",{device_ids:[x.device_id],play:false}).then(function(){setTimeout(spPoll,500)}).catch(function(){})}})});SP.sdk.addListener("authentication_error",function(e){spLog("authentication_error",e&&e.message);toast("Spotify needs you to sign in again.","bad")});SP.sdk.addListener("account_error",function(e){spLog("account_error",e&&e.message);toast("The web player needs Spotify Premium.","bad")});SP.sdk.addListener("playback_error",function(e){spLog("playback_error",e&&e.message);spPbErr(e)});
     SP.sdk.addListener("player_state_changed",function(x){if(!x)return;SP.sdkAt=Date.now();var c=x.track_window&&x.track_window.current_track;spLog("state",{pos:x.position,paused:x.paused,loading:x.loading,track:c&&c.name,shuf:x.shuffle,rs:x.repeat_mode,why:x.disallows&&Object.keys(x.disallows).filter(function(k){return x.disallows[k]}).join("+")});
-      if(SP.st&&SP.st.device&&SP.st.device.id===SP.sdkDev&&!SP.seeking){SP.base=x.position;SP.at=Date.now();SP.st.is_playing=!x.paused}clearTimeout(SP.evT);SP.evT=setTimeout(spPoll,350)});
+      if(c&&(spLocal()||spHeld()||!SP.st||!SP.st.item||(SP.st.device&&SP.st.device.id===SP.sdkDev))&&!SP.seeking)spFromSdk(x);
+      else if(SP.st&&SP.st.device&&SP.st.device.id===SP.sdkDev&&!SP.seeking){SP.base=x.position;SP.at=Date.now();SP.st.is_playing=!x.paused}
+      clearTimeout(SP.evT);if(!spLocal())SP.evT=setTimeout(spPoll,2000)});
     SP.sdk.addListener("autoplay_failed",function(){spLog("autoplay_failed")});SP.sdk.addListener("autoplay_failed",function(){toast("Your browser blocked autoplay. Press play once.","bad")});SP.sdk.addListener("not_ready",function(){spLog("not_ready");SP.sdkDev=null});SP.sdk.addListener("initialization_error",function(e){spLog("initialization_error",e&&e.message);toast("This browser can’t play Spotify here.","bad")});SP.sdk.connect()}catch(_){}}}
 async function spAct(b){var a=b.dataset.act,d=b.dataset;if(/^sp-(tm|tq|tadd|tto|trm|tlink|pnew|pledit|pldel|plfol|plunf|pllink|fren)$/.test(a))return spLibAct(a,b,d);if(SP.sdk&&SP.sdk.activateElement&&(a==="sp-play"||a==="sp-ctl"))try{SP.sdk.activateElement()}catch(_){}
   if(a==="sp-nav"){var v={t:d.t,id:d.id};if(d.t==="library")v.tab=d.tab;if(d.t==="liked")v.off=+d.off||0;if(d.t==="search")v.q="";if(!d.t||(d.t==="artist"&&!d.id)||(d.t==="album"&&!d.id))return;if(S.view!=="music")setView("music",true);spOpen(v);if(d.t==="search"){var qi=$("#sp-q");if(qi)setTimeout(function(){qi.focus()},30)}}
@@ -6455,6 +6482,19 @@ function bmEdit(id){var m=(S.marks||[]).find(function(x){return x.id===id});if(!
   openModal("Edit bookmark",'<form data-bm-form="1" data-id="'+esc(id)+'" class="vt-f" autocomplete="off"><div class="ic-pv"><b class="ic-tile">'+bwMkIc(m)+'</b><div><b>'+esc(m.title||bwHost(m.url))+'</b><small>'+esc(m.url)+'</small></div></div><label>Name<input id="bm-en" maxlength="40" value="'+esc(m.title||"")+'"></label><label>Address<input id="bm-eu" value="'+esc(m.url)+'" spellcheck="false"></label><div class="fbar"><button class="btn pri" type="submit">Save</button><button class="btn" type="button" data-act="ic-open" data-k="mark" data-id="'+esc(id)+'">Change icon</button><button class="btn danger" type="button" data-act="bw-markdel" data-id="'+esc(id)+'">Delete</button></div></form>');try{bwSync()}catch(_){}}
 document.addEventListener("submit",async function(e){var f=e.target;if(!f||!f.dataset||!f.dataset.bmForm)return;e.preventDefault();var u=$("#bm-eu").value.trim();if(u&&!/^https?:\/\//i.test(u))u="https://"+u;try{u=new URL(u).href}catch(_){toast("That address doesn’t look right.","bad");return}
   try{await update("marks",f.dataset.id,{title:$("#bm-en").value.trim().slice(0,40)||bwHost(u),url:u});closeModal();try{bwSync()}catch(_){}bwMarks()}catch(er){toast("Couldn’t save the bookmark.","bad")}});
+
+/* build the now-playing state from Regis's own player (the Web Playback SDK) */
+function spFromSdk(x){var c=x&&x.track_window&&x.track_window.current_track;if(!c)return;var id=c.id||String(c.uri||"").split(":").pop();
+  var arts=(c.artists||[]).map(function(a){return {id:String(a.uri||"").split(":").pop(),name:a.name}});
+  var item={id:id,uri:c.uri,name:c.name,duration_ms:c.duration_ms||x.duration||0,artists:arts,album:{id:String((c.album&&c.album.uri)||"").split(":").pop(),name:c.album&&c.album.name,images:(c.album&&c.album.images)||[]}};
+  var dev=(SP.st&&SP.st.device&&SP.st.device.id===SP.sdkDev)?SP.st.device:{id:SP.sdkDev,name:"Regis",type:"Computer",is_active:true,volume_percent:SP.st&&SP.st.device?SP.st.device.volume_percent:60};
+  SP.st=Object.assign({},SP.st||{},{device:dev,is_playing:!x.paused,progress_ms:x.position,item:item,shuffle_state:!!x.shuffle,repeat_state:["off","context","track"][x.repeat_mode||0]||"off"});
+  SP.base=x.position;SP.at=Date.now();spNP()}
+/* space bar plays and pauses on the Music page, unless you are typing */
+document.addEventListener("keydown",function(e){if(e.code!=="Space"&&e.key!==" ")return;if(S.view!=="music"||e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;
+  var t=e.target,tag=t&&t.tagName;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(tag)))return;var md=$("#modal");if(md&&!md.hidden)return;if(!spOn())return;
+  e.preventDefault();if(t&&t.blur&&t!==document.body)try{t.blur()}catch(_){}
+  if(SP.sdk&&SP.sdk.activateElement)try{SP.sdk.activateElement()}catch(_){}spCtl("toggle")},true);
 var SHELL_NEED="1.8.0";
 function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;

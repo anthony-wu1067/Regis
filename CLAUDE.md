@@ -22,7 +22,7 @@ egis`; localStorage for file:// is shared across folders, so settings carry over
 ## Build and test
 - `cd desktop && node scripts/make-index.js` after editing the page.
 - `cd desktop && npm test` (22 + 35 + 11), `cd web && node build.js && npm test` (17).
-- Electron UI tests: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (51) and `test/spotify.test.js` (9, fake Spotify SDK + Web API via `protocol.handle`), `test/music.test.js` (21: library management, seek, lyrics timing, 300-row scroll smoothness), `test/browser-ui.test.js` (16: icons, address bar).
+- Electron UI tests: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (51) and `test/spotify.test.js` (9, fake Spotify SDK + Web API via `protocol.handle`), `test/music.test.js` (30: library management, seek, lyrics timing, 300-row scroll smoothness, request rate, 429 handling, space bar), `test/browser-ui.test.js` (16: icons, address bar).
 - jsdom suite lives outside the repo (`test/run.js`, about 510 checks) and may not be present.
 
 ## Gotchas
@@ -42,6 +42,10 @@ egis`; localStorage for file:// is shared across folders, so settings carry over
 1. **In-app Spotify audio stops about 9 seconds in** (fixed in 1.7.7, not yet confirmed on the owner's machine). Cause: castlabs ECS ships only a development VMP signature (`electron.exe.sig`) and Spotify's licence server rejects it, so only the clear lead plays. `scripts/drm.js on|sign` now VMP-signs `node_modules/electron/dist` with castlabs EVS (`pip install castlabs-evs`, `python -m castlabs_evs.vmp sign-pkg`; one-time free EVS account, entered by the owner). Re-sign after every Electron reinstall. If it still fails, read the Playback report.
 2. Phone layout was rebuilt in 1.7.6 (bottom tab bar). Only checked in simulated iPhone screenshots, not on a device.
 3. Google sign-in in the built-in browser (since 1.7.9): plain Chrome UA everywhere plus a `window.chrome` surface (app, runtime, csi, loadTimes; functions report `[native code]`) injected by `lib/bw-preload.js` in the main world. Never call `wc.setUserAgent` during a navigation: it crashed Electron on the docs.google.com to accounts.google.com redirect (1.7.7/1.7.8). Not yet tested with a real account.
+
+## Notes from 1.8.1
+- Spotify rate limits: `spApi` checks `spHeld()` first (hold time from Retry-After, or 15 s doubling to 10 min; localStorage `regis-sp-hold`) and serves stale cache (`SPC`, `spCacheTtl`, persisted subset in `regis-sp-cache`) during holds or network errors. Writes mark related cache entries stale (`t=0`), never delete them. Polling: `spTick` every 5/15/30 s, never while `html.away` or hidden. `spFromSdk` builds `SP.st` from the SDK state.
+- `test/music.test.js` (30) covers request counts (open 30 s, minimised 30 s), a 429 with restart, and the space bar.
 
 ## Notes from 1.8.0
 - Music: `spLibAct` handles the library actions (`sp-tm` song menu, `sp-pnew/pledit/pldel/plfol/plunf/pllink`, `sp-fren`); playlist songs go through `spItems` (tries `/items`, falls back to `/tracks`); new playlists `POST /me/playlists` with a `/users/{id}/playlists` fallback. Forms use `data-sp-form`.

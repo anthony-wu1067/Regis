@@ -5,7 +5,7 @@ app.setPath('userData', fs.mkdtempSync(path.join(os.tmpdir(), 'regis-mu-')));
 let pass = 0, fail = 0; const ok = (c, m) => { if (c) { pass++; console.log('PASS', m); } else { fail++; console.log('FAIL', m); } };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const until = async (f, ms = 8000) => { const t = Date.now(); while (Date.now() - t < ms) { try { if (await f()) return true; } catch (_) {} await sleep(120); } return false; };
-const calls = []; const T0 = Date.now();
+const calls = []; const T0 = Date.now(); let LIMIT = false;
 const FAKE_SDK = `window.Spotify={Player:function(){var L={};this.addListener=function(n,f){(L[n]=L[n]||[]).push(f)};this.connect=function(){setTimeout(function(){(L.ready||[]).forEach(function(f){f({device_id:"regis-dev"})})},300);return Promise.resolve(true)};
   ["pause","resume","togglePlay","nextTrack","previousTrack","seek"].forEach(function(k){this[k]=function(){return Promise.resolve()}},this);this.activateElement=function(){};this.getCurrentState=function(){return Promise.resolve(null)}}};
   setTimeout(function(){window.onSpotifyWebPlaybackSDKReady&&window.onSpotifyWebPlaybackSDKReady()},50);`;
@@ -17,6 +17,7 @@ const LRC = Array.from({ length: 60 }, (_, i) => { const t = 10 + i * 2; return 
 function api(method, url, body) {
   const u = new URL(url), p = u.pathname.replace('/v1', '');
   calls.push(method + ' ' + p + (body ? ' ' + body : ''));
+  if (LIMIT) return [429, { error: { status: 429, message: 'API rate limit exceeded' } }];
   if (p === '/me') return [200, me];
   if (p === '/me/playlists' && method === 'GET') return [200, { items: pls, next: null }];
   if (p === '/me/playlists' && method === 'POST') { const b = JSON.parse(body || '{}'); const n = { id: 'p2', name: b.name, description: b.description, public: b.public, uri: 'spotify:playlist:p2', owner: { id: 'sam', display_name: 'Sam' }, images: [] }; pls = [n].concat(pls); return [201, n]; }
@@ -41,7 +42,7 @@ app.whenReady().then(async () => {
     if (/accounts\.spotify\.com/.test(url)) return new Response(JSON.stringify({ access_token: 'AT', expires_in: 3600 }), { status: 200, headers: H });
     if (/lrclib\.net/.test(url)) return new Response(JSON.stringify(/search/.test(url) ? [{ syncedLyrics: LRC, plainLyrics: '' }] : { syncedLyrics: LRC, plainLyrics: '' }), { status: 200, headers: H });
     const body = req.method === 'GET' ? null : await req.text(); const r = api(req.method, url, body || null);
-    return new Response(r[0] === 204 ? null : JSON.stringify(r[1]), { status: r[0], headers: H });
+    return new Response(r[0] === 204 ? null : JSON.stringify(r[1]), { status: r[0], headers: r[0] === 429 ? Object.assign({ 'Retry-After': '300' }, H) : H });
   });
   const J = (c) => win.webContents.executeJavaScript('(async()=>{' + c + '})()', true);
   const click = (sel) => J('var b=document.querySelector(' + JSON.stringify(sel) + ');if(!b)return false;b.click();return true');
@@ -117,5 +118,29 @@ app.whenReady().then(async () => {
   ok(!calls.some((c) => /^DELETE \/playlists\/p1\/followers/.test(c)), 'Delete asks for a second press first');
   await click('[data-act="sp-pldel"]');
   ok(await until(() => Promise.resolve(calls.some((c) => /^DELETE \/playlists\/p1\/followers/.test(c)))), 'pressing Delete again deletes it');
+  // space bar: play/pause on the Music page, but not while typing
+  await click('#sp-pls [data-act="sp-nav"][data-t="liked"]'); await sleep(800);
+  let n0 = calls.length; await J('document.activeElement&&document.activeElement.blur&&document.activeElement.blur()');
+  win.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Space' }); win.webContents.sendInputEvent({ type: 'char', keyCode: ' ' }); win.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'Space' });
+  ok(await until(() => Promise.resolve(calls.slice(n0).some((c) => /^PUT \/me\/player\/(pause|play)/.test(c))), 4000), 'space bar plays/pauses on the Music page');
+  await sleep(1200); n0 = calls.length; await J('var q=document.getElementById("sp-q");q.focus();q.value="";');
+  win.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Space' }); win.webContents.sendInputEvent({ type: 'char', keyCode: ' ' }); win.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'Space' }); await sleep(1200);
+  ok(!calls.slice(n0).some((c) => /^PUT \/me\/player\/(pause|play)/.test(c)) && await J('return document.getElementById("sp-q").value===" "'), 'space bar types a space in the search box instead');
+  await J('var q=document.getElementById("sp-q");q.value="";q.blur()');
+  // how often Regis asks Spotify: modest while open, nothing while minimised
+  await sleep(2000); n0 = calls.length; await sleep(30000); const open30 = calls.length - n0;
+  ok(open30 <= 8, 'while open and playing, Regis checks Spotify ' + open30 + ' times in 30 s');
+  win.minimize(); await sleep(1500); n0 = calls.length; await sleep(30000); const min30 = calls.length - n0; win.restore(); win.show(); await sleep(1500);
+  ok(min30 === 0, 'while minimised, Regis sends nothing to Spotify (' + min30 + ' requests in 30 s)');
+  // Spotify says "slow down": Regis stops, says when it will be back, keeps the library on screen, and remembers it after a restart
+  LIMIT = true; n0 = calls.length; await click('#vsw [data-v="music"]'); await sleep(200);
+  await click('.sp-np-c [data-act="sp-ctl"][data-k="next"]');
+  ok(await until(() => J('var h=document.getElementById("sp-hold");return !!h&&!h.hidden&&/slow down/.test(h.textContent)&&/in [0-9]+ min/.test(h.textContent)')), 'Regis shows when Spotify will be back');
+  await sleep(1000); const hit = calls.length; await sleep(15000);
+  ok(calls.length === hit, 'during the pause Regis sends nothing more (' + (calls.length - hit) + ' requests in 15 s)');
+  win.webContents.reload(); await sleep(6000); const afterRe = calls.length; await click('#vsw [data-v="music"]'); await sleep(6000);
+  ok(calls.length === afterRe, 'after restarting Regis, the pause is still respected (' + (calls.length - afterRe) + ' requests)');
+  ok(await J('return document.querySelectorAll("#sp-pls .sp-lr").length>=2'), 'the library is still shown from what Regis saw last');
+  ok(await J('var h=document.getElementById("sp-hold");return !!h&&!h.hidden'), 'the pause note is shown after the restart too');
   console.log(pass + ' passed, ' + fail + ' failed'); app.exit(fail ? 1 : 0);
 });

@@ -84,6 +84,13 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.1 Spotify stays within its limits, space bar
+
+- **"Spotify needs a break" fixed at the cause.** Spotify allows personal apps only a modest number of requests. Regis checked Spotify every 5 seconds even while minimised or in the tray (about 17,000 times a day), and after every player event. Now: nothing while minimised or hidden, every 5 s only while something plays elsewhere, every 15 s when paused, every 30 s when Regis itself plays (its own player tells it what's on). Library, Home sections, playlists and albums are reused for 5 to 15 minutes instead of being fetched each time.
+- **When Spotify still says "slow down"**, Regis now sends nothing until the time Spotify gives (it used to keep asking, which made Spotify extend the pause), remembers it across restarts, shows one note with the time it will be back, and keeps your library and pages on screen from what it saw last. Music already playing keeps going.
+- **The bottom bar always shows the song** when Regis itself is playing: it follows Regis's own player directly.
+- **Space bar** plays and pauses on the Music page (not while you're typing).
+
 ## 1.8.0 Spotify-style library, smooth scrolling and lyrics, custom icons
 
 - **Music library like the Spotify app.** New playlist (the + in Your Library), Edit details (name, description, public or private), Delete, Save to / Remove from Library, Copy link. Every song has a ⋯ menu (also on right-click): Add to queue, Add to playlist (or a new one), Remove from this playlist, Like, Go to album or artist, Copy link. Folders can be renamed (✎).
