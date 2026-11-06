@@ -84,6 +84,13 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.3 True full screen
+
+- **Full screen hides the Windows title bar again**, from the full-screen button, F11 (fn+F11), or the Browser's ⋯ menu.
+- Why F11 had stopped working: since 1.8.2 browser tabs stay loaded behind the scenes, and after using the Browser the keyboard could stay with a hidden web page that ignored F11. Now F11 also works inside web pages, and leaving the Browser hands the keyboard back to Regis (which also keeps Alt+letter and the space bar working).
+- The full-screen button never had the desktop window's full screen (the function wasn't passed to the page), so it used a weaker web-page version. Fixed, and the button shows when it's on.
+- Updating: the desktop app changed, so run *Install Regis* once.
+
 ## 1.8.2 A fuller browser, Office page, scalable page switcher
 
 - **Tabs:** drag to reorder; drag onto a group's name (or a tab in a group) to join it, anywhere else to leave. The ⊞ button is gone: right-click a tab for New tab, Reload, Duplicate, Mute, Bookmark, Copy link, Add to group, Put to sleep, Close, Close others, Close to the right, Reopen closed tab. Tabs show the site's icon and a speaker when they play sound (click it to mute).

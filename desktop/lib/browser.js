@@ -54,7 +54,7 @@ function keyAction(i) {
   }
   if (i.alt && !mod) { if (k === 'arrowleft') return 'back'; if (k === 'arrowright') return 'forward'; if (/^[a-z]$/.test(k) && !i.shift && keyAction.views.indexOf(k) >= 0) return 'view-' + k; }
   if (k === 'f3') return i.shift ? 'findprev' : 'findnext';
-  if (k === 'f5') return 'reload'; if (k === 'escape') return 'stop';
+  if (k === 'f5') return 'reload'; if (k === 'f11') return 'fullscreen'; if (k === 'escape') return 'stop';
   return null;
 }
 
@@ -150,7 +150,10 @@ class BrowserHost {
   /* hiding (a Regis panel opens over the page): hand back a picture of the page so Regis can show it underneath instead of a blank */
   async show(v, wantSnap) { v = !!v; let snap = '';
     if (!v && wantSnap !== false && this.visible && this.attached) { try { const img = await this.attached.webContents.capturePage(); if (img && !img.isEmpty()) snap = 'data:image/jpeg;base64,' + img.toJPEG(72).toString('base64'); } catch (_) {} }
-    this.visible = v; this._attach(); return { visible: this.visible, snap }; }
+    this.visible = v; this._attach();
+    /* leaving the page: hand the keyboard back to Regis, or a hidden tab would keep it (F11, Alt+letter and the space bar stopped working) */
+    if (!v) { const w = this._win(); try { if (w && !w.webContents.isFocused()) w.webContents.focus(); } catch (_) {} }
+    return { visible: this.visible, snap }; }
   activate(id) { if (!this._tab(id)) return false; this.active = id; this._attach(); this._emit(); return true; }
   close(id) {
     const i = this.tabs.findIndex((t) => t.id === id); if (i < 0) return false;
@@ -198,6 +201,7 @@ class BrowserHost {
       case 'reload': this.reload(id); return true; case 'stop': return false;
       case 'back': this.back(id); return true; case 'forward': this.forward(id); return true;
       case 'zoomin': return z(0.5); case 'zoomout': return z(-0.5); case 'zoom0': if (wc) wc.setZoomLevel(0); return true;
+      case 'fullscreen': { const w = this._win(); if (w) w.setFullScreen(!w.isFullScreen()); return true; }
       case 'reopen': this.reopen(); return true;
       case 'print': this.print(id); return true;
       case 'tab1': case 'tab2': case 'tab3': case 'tab4': case 'tab5': case 'tab6': case 'tab7': case 'tab8': case 'tab9': { const n = +a.slice(3), tt = n === 9 ? this.tabs[this.tabs.length - 1] : this.tabs[n - 1]; if (tt) this.activate(tt.id); return true; }

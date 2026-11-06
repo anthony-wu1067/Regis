@@ -57,6 +57,6 @@
     syncSet: function (on) { return ready().then(function () { meta.syncOn = !!on; flush(); if (on) return engine.start(60000).catch(function () {}).then(function () { return fullStatus(); }); engine.stop(); return fullStatus(); }); },
     syncNow: function () { return ready().then(function () { return engine.sync().then(function () { return fullStatus(); }); }); },
     onSync: function (cb) { syncCbs.push(cb); },
-    snapshot: B.snapshot, saveUpdateUrl: B.saveUpdateUrl, updateCheck: B.updateCheck, updateApply: B.updateApply, onUpdate: B.onUpdate, openExternal: B.openExternal, spotifyAuth: B.spotifyAuth, drm: B.drm, vaultKey: B.vaultKey || null, onVis: B.onVis || null, favicon: B.favicon || null, downloads: B.downloads || null, office: B.office || null, linkMode: B.linkMode || null, onLink: B.onLink || null, browser: B.browser || null
+    snapshot: B.snapshot, saveUpdateUrl: B.saveUpdateUrl, updateCheck: B.updateCheck, updateApply: B.updateApply, onUpdate: B.onUpdate, openExternal: B.openExternal, spotifyAuth: B.spotifyAuth, drm: B.drm, vaultKey: B.vaultKey || null, onVis: B.onVis || null, favicon: B.favicon || null, downloads: B.downloads || null, office: B.office || null, fullscreen: B.fullscreen || null, fsState: B.fsState || null, onFullscreen: B.onFullscreen || null, linkMode: B.linkMode || null, onLink: B.onLink || null, browser: B.browser || null
   };
 })();

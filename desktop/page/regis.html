@@ -4896,7 +4896,7 @@ document.addEventListener("submit",async function(e){var f=e.target;if(!f||!f.da
 function bwMenu(){var b=$("#bw-menub");if(!b)return;var p=$("#bw-bmpop");if(p&&!p.hidden&&BW.popFor==="bmenu"){bwBmClose();return}var r=b.getBoundingClientRect(),act=bwActive(),web=act&&!act.blank;
   var it=function(a,l,k,dis){return '<button role="menuitem" data-act="'+a+'"'+(dis?" disabled":"")+'><span>'+l+'</span>'+(k?'<small>'+k+'</small>':'')+'</button>'};
   bwPopAt(r.right-250,r.bottom+6,it("bw-newtab","New tab","Ctrl+T")+it("bw-reopen","Reopen closed tab","Ctrl+Shift+T",!BW.st.closed)+'<hr>'+it("bw-hist","History","Ctrl+H")+it("bw-dl","Downloads","Ctrl+J")+it("bw-findo","Find in page","Ctrl+F",!web)+it("bw-print","Print…","Ctrl+P",!web)+
-    '<div class="bw-zrow"><span>Zoom</span><button class="btn sm ghost" data-act="bw-zout" data-keep="1">−</button><b id="bw-zv">'+bwZpct(act)+'</b><button class="btn sm ghost" data-act="bw-zin" data-keep="1">+</button></div><hr>'+it("bw-cleardlg","Clear browsing data…"),"bmenu")}
+    it("fs",fsOn()?"Exit full screen":"Full screen","F11")+'<div class="bw-zrow"><span>Zoom</span><button class="btn sm ghost" data-act="bw-zout" data-keep="1">−</button><b id="bw-zv">'+bwZpct(act)+'</b><button class="btn sm ghost" data-act="bw-zin" data-keep="1">+</button></div><hr>'+it("bw-cleardlg","Clear browsing data…"),"bmenu")}
 function bwZpct(t){var lv=t&&t.zoom||0;return Math.round(100*Math.pow(1.2,lv))+"%"}
 /* suggestions under the address bar: bookmarks and history as you type */
 function bwSugClose(){var s=$("#bw-sug");if(s&&!s.hidden){s.hidden=true;s.innerHTML="";BW.sug=null}}
@@ -6828,7 +6828,10 @@ document.addEventListener("click",function(e){if(e.defaultPrevented||e.button!==
   if(a.closest("#browser"))return;e.preventDefault();var m=$("#modal");if(m&&!m.hidden)closeModal();appGo(u)},true);
 if(APP&&APP.onLink)APP.onLink(function(u){if(linkHere()){var m=$("#modal");if(m&&!m.hidden)closeModal();appGo(u)}else if(APP.openExternal)APP.openExternal(u)});
 setTimeout(function(){if(APP&&APP.linkMode)APP.linkMode(linkHere()).catch(function(){})},600);
-var SHELL_NEED="1.8.2";
+/* 1.8.3 full screen: the button and F11 both use the desktop window's true full screen (no Windows title bar); the page follows its state */
+if(APP&&APP.onFullscreen)APP.onFullscreen(function(v){setFs(!!v)});
+if(APP&&APP.fsState)APP.fsState().then(function(v){setFs(!!v)}).catch(function(){});
+var SHELL_NEED="1.8.3";
 function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
   var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;

@@ -22,7 +22,7 @@ egis`; localStorage for file:// is shared across folders, so settings carry over
 ## Build and test
 - `cd desktop && node scripts/make-index.js` after editing the page.
 - `cd desktop && npm test` (22 + 35 + 11), `cd web && node build.js && npm test` (17).
-- Electron UI tests: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (51) and `test/spotify.test.js` (9, fake Spotify SDK + Web API via `protocol.handle`), `test/music.test.js` (30: library management, seek, lyrics timing, 300-row scroll smoothness, request rate, 429 handling, space bar), `test/browser-ui.test.js` (16: icons, address bar), `test/tabs.test.js` (26: tab drag/groups/menu, snapshot, find, downloads, Easy Files, history, suggestions, sleep, Alt shortcuts, Office, priority colours, in-app links). `test/browser.test.js` is now 67.
+- Electron UI tests: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (51) and `test/spotify.test.js` (9, fake Spotify SDK + Web API via `protocol.handle`), `test/music.test.js` (30: library management, seek, lyrics timing, 300-row scroll smoothness, request rate, 429 handling, space bar), `test/browser-ui.test.js` (16: icons, address bar), `test/fullscreen.test.js` (6), `test/tabs.test.js` (26: tab drag/groups/menu, snapshot, find, downloads, Easy Files, history, suggestions, sleep, Alt shortcuts, Office, priority colours, in-app links). `test/browser.test.js` is now 67.
 - jsdom suite lives outside the repo (`test/run.js`, about 510 checks) and may not be present.
 
 ## Gotchas
@@ -42,6 +42,10 @@ egis`; localStorage for file:// is shared across folders, so settings carry over
 1. **In-app Spotify audio stops about 9 seconds in** (fixed in 1.7.7, not yet confirmed on the owner's machine). Cause: castlabs ECS ships only a development VMP signature (`electron.exe.sig`) and Spotify's licence server rejects it, so only the clear lead plays. `scripts/drm.js on|sign` now VMP-signs `node_modules/electron/dist` with castlabs EVS (`pip install castlabs-evs`, `python -m castlabs_evs.vmp sign-pkg`; one-time free EVS account, entered by the owner). Re-sign after every Electron reinstall. If it still fails, read the Playback report.
 2. Phone layout was rebuilt in 1.7.6 (bottom tab bar). Only checked in simulated iPhone screenshots, not on a device.
 3. Google sign-in in the built-in browser (since 1.7.9): plain Chrome UA everywhere plus a `window.chrome` surface (app, runtime, csi, loadTimes; functions report `[native code]`) injected by `lib/bw-preload.js` in the main world. Never call `wc.setUserAgent` during a navigation: it crashed Electron on the docs.google.com to accounts.google.com redirect (1.7.7/1.7.8). Not yet tested with a real account.
+
+## Notes from 1.8.3
+- Full screen: the shim must pass `fullscreen`, `fsState` and `onFullscreen` to the page (it didn't, so the button used HTML full screen). F11 is `keyAction` 'fullscreen' inside tabs; `BrowserHost.show(false)` refocuses the main webContents so a hidden tab never keeps the keyboard. `test/fullscreen.test.js` (6).
+- The 300-row scroll check in `test/music.test.js` fails when another Regis is running on the same machine (the unchanged 1.8.2 page failed the same way); close Regis before running it.
 
 ## Notes from 1.8.2
 - Pages: `NAV.pages` (v, n, key, ic) is the registry; `navRender` builds `#vsw` and `#tabbar`; `NAV.hide` (localStorage `regis-navhide`) moves pages under ⋯. A new page needs a registry entry, a `.mview` section, `html[data-view=X]` show/hide rules (Office copies Music's top-bar rules), and an `applyView` hook. Alt+letter goes through `keyAction.views` in main (set by `APP.browser.viewKeys`).
