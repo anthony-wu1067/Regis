@@ -1878,6 +1878,16 @@ html.sp-rp-on .sp-app{grid-template-columns:var(--sp-sw,300px) minmax(0,1fr) 320
 html[data-glass="liquid"][data-look] :is(.sp-card,.sp-mc,.sp-rpn){-webkit-backdrop-filter:blur(26px) saturate(1.7);backdrop-filter:blur(26px) saturate(1.7)}
 html.lite :is(.sp-card,.sp-mc,.sp-rpn){-webkit-backdrop-filter:none;backdrop-filter:none;background:var(--bg)}
 
+/* v1.7.3 browser tab strip: lifted surface so tabs read clearly on dark themes */
+/* the header used to sit ABOVE the tab strip and washed every tab out with its 88% film; keep it underneath */
+html:not(.mob)[data-view="browser"] .top{z-index:5;background:color-mix(in srgb,var(--fg) 8%,var(--bg))}
+html[data-view="browser"] .bw-tab{background:color-mix(in srgb,var(--fg) 9%,transparent);color:var(--fg2);border-color:transparent}
+html[data-view="browser"] .bw-tab:hover{background:color-mix(in srgb,var(--fg) 15%,transparent);color:var(--fg)}
+html[data-view="browser"] .bw-tab.on{background:color-mix(in srgb,var(--fg) 22%,var(--bg));color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.35),inset 0 .5px 0 rgba(255,255,255,.2)}
+html[data-view="browser"] .bw-tab.on span{font-weight:600}
+html[data-view="browser"] .bw-tab .x,html[data-view="browser"] .bw-new{color:var(--fg2)}
+html[data-view="browser"] .bw-tabs{background:color-mix(in srgb,var(--fg) 8%,var(--bg))}
+html:not(.mob)[data-view="browser"] .bw-tabs{background:transparent}
 /* browser: centred icons, favourites editing, background layers */
 .bw-ic b,.bw-t i{display:grid;place-items:center;line-height:1;text-align:center}
 .bw-ic b span,.bw-t i span{display:block;line-height:1;transform:translateY(.02em)}

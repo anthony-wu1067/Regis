@@ -84,6 +84,9 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.7.3 Browser tabs no longer dark
+The slim header was drawn on top of the tab strip and tinted every tab with a dark film. The header now sits underneath, and tabs, the + button and the strip have lighter surfaces with clearer text. Page-only change; no reinstall.
+
 ## 1.7.2 Music fills the whole page
 The Music page now works like the Browser page: it takes the full window under the slim header, laid out like Spotify. Left: Home and Search, and Your Library (Playlists / Albums / Artists chips, a filter box, Liked Songs pinned). Centre: back and forward buttons, a global search bar, quick tiles on Home, Show all on each shelf, a Top result card in search, genre tiles, and big headers with a sticky song table. Right: a Now playing panel with the next song (toggle it from the player bar). The player bar is docked along the bottom. On a phone the library collapses into a nav strip. No new setup: your Client ID and sign-in stay as they were. Only the page changes, so the web and desktop update from GitHub; the desktop app needs no reinstall for this release.
 
