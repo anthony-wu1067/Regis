@@ -1,7 +1,7 @@
 'use strict';
 /* node scripts/drm.js on|off|sign
    on   : switch to the castlabs build of Electron, which includes Widevine, then VMP-sign it (see below), so Spotify can play inside Regis
-   sign : only VMP-sign the Electron build that is already installed (run this again after any "npm install")
+   sign : only VMP-sign what is installed: node_modules/electron and the Regis app in AppData\Local\Programs\Regis (or folders given after "sign")
    off  : go back to the normal Electron
    Why signing matters: Spotify's licence server only hands out keys to players that carry a VMP signature. An unsigned build plays the
    few seconds of unencrypted "clear lead" at the start of a song (about 9 s), then stops; seeking stutters and songs fail with
@@ -31,23 +31,34 @@ function findPython() {
   return null;
 }
 
+/* the installed app (scripts/build-app.js) lives here; it needs its own signature because Regis.exe is a renamed, re-iconed copy */
+const INSTALLED = path.join(process.env.LOCALAPPDATA || '', 'Programs', 'Regis');
+function signTargets() {
+  const extra = process.argv.slice(3).filter((a) => !a.startsWith('-'));
+  if (extra.length) return extra.filter((d) => fs.existsSync(d));
+  const t = [], dist = path.join(ROOT, 'node_modules', 'electron', 'dist');
+  if (['electron.exe', 'Electron.app', 'electron'].some((f) => fs.existsSync(path.join(dist, f)))) t.push(dist);
+  if (WIN && fs.existsSync(path.join(INSTALLED, 'Regis.exe'))) t.push(INSTALLED);
+  return t;
+}
 async function sign() {
-  const dist = path.join(ROOT, 'node_modules', 'electron', 'dist');
-  if (!fs.existsSync(dist)) { console.log('\n  Electron is not installed yet. Run "Enable Spotify audio" first.\n'); return 1; }
+  const dirs = signTargets();
+  if (!dirs.length) { console.log('\n  Nothing to sign yet. Run "Setup Regis" first.\n'); return 1; }
   const py = findPython();
   if (!py) { console.log('\n  Signing needs Python 3, which is not installed.\n  1. Install it from https://www.python.org/downloads/ (tick "Add python.exe to PATH").\n  2. Close this window, then run "Enable Spotify audio" again.\n'); return 1; }
   const P = (args) => run(py[0], py.slice(1).concat(args));
   console.log('\n  Step 2 of 2: signing Regis for Spotify (castlabs EVS)...\n');
   if (P(['-m', 'pip', 'install', '--upgrade', '--quiet', 'castlabs-evs']).status !== 0) { console.log('\n  Could not install the castlabs signing tool. Check your internet connection and try again.\n'); return 1; }
-  let r = P(['-m', 'castlabs_evs.vmp', 'sign-pkg', dist]);
+  console.log('  Signing: ' + dirs.join('  and  ') + '\n');
+  let r = P(['-m', 'castlabs_evs.vmp', 'sign-pkg'].concat(dirs));
   if (r.status !== 0) {
     console.log('\n  The signing service needs a free castlabs EVS account (one time only).');
     const a = (await ask('  Do you already have one? Type y or n, then press Enter: ')).toLowerCase();
     if (P(['-m', 'castlabs_evs.account', a.startsWith('y') ? 'reauth' : 'signup']).status !== 0) { console.log('\n  The account step did not finish. Run "Enable Spotify audio" again to retry.\n'); return 1; }
-    r = P(['-m', 'castlabs_evs.vmp', 'sign-pkg', dist]);
+    r = P(['-m', 'castlabs_evs.vmp', 'sign-pkg'].concat(dirs));
     if (r.status !== 0) { console.log('\n  Signing did not finish. Run "Enable Spotify audio" again to retry.\n'); return 1; }
   }
-  P(['-m', 'castlabs_evs.vmp', 'verify-pkg', dist]);
+  P(['-m', 'castlabs_evs.vmp', 'verify-pkg'].concat(dirs));
   return 0;
 }
 

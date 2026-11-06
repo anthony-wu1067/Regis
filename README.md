@@ -84,6 +84,14 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.7.9 Regis.exe, Google Docs crash, dependable Spotify, smooth motion
+
+- **Regis is now a real app: `Regis.exe`.** Like a game folder: it installs to `AppData\Local\Programs\Regis`, and the Desktop and Start-menu shortcuts point at `Regis.exe` itself (no more "electron.exe has been changed or moved"). *Setup Regis* builds and installs it; *Install Regis* rebuilds it after an update. Your data and settings are kept.
+- **Google Docs no longer crashes Regis.** 1.7.7 switched the browser identity during Google's redirect to sign-in, which crashed the engine. That's gone: every site sees one plain Chrome identity, and pages get the `window.chrome` object real Chrome has. A missing `window.chrome` is what Google uses to call a browser "not secure". Tested against the live Google Docs sign-in page, not with a real account.
+- **Spotify is dependable even when Regis's own player can't play.** On the first playback error Regis pauses its player straight away (no more skipping five songs), and if audio silently stops it notices within about 3 seconds. Either way it moves playback to your Spotify app or phone on the same song and keeps going there, until the audio engine is signed. *Enable Spotify audio* now signs the installed `Regis.exe` as well.
+- **Smooth animations.** 1.7.8 stepped the dial rings a few times a second to save work, which looked laggy and could freeze a ring. Instead, every rotating or pulsing part now has its own layer that the graphics chip turns at 60 fps: the clock's star squares and number rings, the satellite rings, the header dial orbit, and the Today ring. Both squares of the clock's star turn again (one was switched off in Balanced). Old "stepped" timings for the ticker and dial sweep are gone too. Balanced mode also got lighter: Home 180 to 57 ms of main-thread work per second, Workspace about 100 to 44.
+- Updating: run *Setup Regis* (or *Install Regis*) once, then *Enable Spotify audio*.
+
 ## 1.7.8 HUD redesign, efficiency, and making 1.7.7's fixes actually land
 
 - **Why 1.7.7 didn't seem to work:** the page updated over the air, but the desktop app itself was still 1.7.6, so the Google fix and the new "Enable Spotify audio" never ran. Regis now shows a bar when the installed desktop app is older than the page, with the steps to update it.

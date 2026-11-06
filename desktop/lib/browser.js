@@ -9,16 +9,10 @@ const PARTITION = 'persist:regis-browser';
 const AD_HOSTS = ['doubleclick.net', 'googlesyndication.com', 'googleadservices.com', 'adservice.google.com', 'adnxs.com', 'taboola.com', 'outbrain.com', 'criteo.com', 'criteo.net',
   'scorecardresearch.com', 'quantserve.com', 'moatads.com', 'adsrvr.org', 'pubmatic.com', 'rubiconproject.com', 'openx.net', 'amazon-adsystem.com', 'hotjar.com', 'adform.net', 'smartadserver.com', 'casalemedia.com', 'advertising.com', 'yieldmo.com'];
 const AD_SET = new Set(AD_HOSTS);
-/* Google refuses to sign in inside "embedded" browsers. It spots them by a Chrome user-agent whose Client Hints (Sec-CH-UA) don't
-   list Google Chrome. On Google's sign-in pages only, Regis presents itself as Firefox (which has no Client Hints), the same thing
-   other desktop apps with a built-in browser do. Every other site sees the normal Chrome identity. */
-const SIGNIN_HOSTS = new Set(['accounts.google.com', 'accounts.youtube.com']);
-const isSignIn = (u) => { try { const x = new URL(String(u || '')); return x.protocol === 'https:' && SIGNIN_HOSTS.has(x.hostname.toLowerCase()); } catch (_) { return false; } };
-function firefoxUA(chromeUa, platform) {
-  const m = /Chrome\/(\d+)/.exec(String(chromeUa || '')), v = m ? Math.max(115, +m[1] + 2) : 140; /* Firefox's version runs about 2 ahead of Chrome's */
-  const os = platform === 'darwin' ? 'Macintosh; Intel Mac OS X 10.15' : platform === 'linux' ? 'X11; Linux x86_64' : 'Windows NT 10.0; Win64; x64';
-  return 'Mozilla/5.0 (' + os + '; rv:' + v + '.0) Gecko/20100101 Firefox/' + v + '.0';
-}
+/* Google sign-in: every page sees one plain Chrome identity (no Electron or app name in it), and lib/bw-preload.js gives pages the
+   window.chrome object real Chrome has. Google treats a missing window.chrome as an embedded browser ("may not be secure").
+   1.7.7 switched to a Firefox identity mid-navigation instead; changing the user agent during a redirect crashed Electron. */
+const isSignIn = (u) => { try { const x = new URL(String(u || '')); return x.protocol === 'https:' && /^accounts\.(google|youtube)\.com$/i.test(x.hostname); } catch (_) { return false; } };
 const hostBlocked = (h) =>{ h = String(h || '').toLowerCase(); while (h) { if (AD_SET.has(h)) return true; const i = h.indexOf('.'); if (i < 0) return false; h = h.slice(i + 1); } return false; };
 
 /* in-page scripts (run in the page, results come back as plain data) */
@@ -71,12 +65,7 @@ class BrowserHost {
     if (this.inited) return; this.inited = true;
     const ses = this.ses;
     const ua = (ses.getUserAgent() || '').replace(/\sElectron\/\S+/i, '').replace(/\sregis\/\S+/i, '').replace(/\sRegis\/\S+/i, '');
-    ses.setUserAgent(ua); this.ua = ua; this.ffUa = firefoxUA(ua, process.platform);
-    ses.webRequest.onBeforeSendHeaders({ urls: ['https://accounts.google.com/*', 'https://accounts.youtube.com/*'] }, (d, cb) => {
-      const h = Object.assign({}, d.requestHeaders);
-      for (const k of Object.keys(h)) { const l = k.toLowerCase(); if (l === 'user-agent' || l.startsWith('sec-ch-ua')) delete h[k]; }
-      h['User-Agent'] = this.ffUa; cb({ requestHeaders: h });
-    });
+    ses.setUserAgent(ua); this.ua = ua;
     ses.setPermissionRequestHandler((_wc, perm, cb) => cb(['clipboard-sanitized-write', 'fullscreen', 'pointerLock'].includes(perm)));
     ses.setPermissionCheckHandler((_wc, perm) => ['clipboard-sanitized-write', 'fullscreen'].includes(perm));
     ses.webRequest.onBeforeRequest((d, cb) => {
@@ -119,8 +108,7 @@ class BrowserHost {
     wc.on('did-navigate', sync); wc.on('did-navigate-in-page', sync);
     wc.on('will-navigate', (e, url) => { if (!isWeb(url)) e.preventDefault(); });
     wc.on('did-fail-load', (_e, code, desc, url, main) => { if (!main || code === -3 || !isWeb(url)) return; t.err = true; t.url = url; t.title = 'Can\u2019t reach this page'; wc.loadURL(errPage(url, desc)).catch(() => {}); });
-    wc.on('did-start-navigation', (_e, url, inPlace, main) => { if (main && !inPlace && isWeb(url)) { t.err = false; if (t.login) { t.login = false; this._emitSoon(); } this._ua(wc, url); } });
-    wc.on('did-redirect-navigation', (_e, url, inPlace, main) => { if (main && !inPlace) this._ua(wc, url); });
+    wc.on('did-start-navigation', (_e, url, inPlace, main) => { if (main && !inPlace && isWeb(url)) { t.err = false; if (t.login) { t.login = false; this._emitSoon(); } } });
     wc.on('before-input-event', (e, input) => { const a = keyAction(input); if (a && this.key(a, t.id)) e.preventDefault(); });
     wc.on('context-menu', (_e, p) => this._ctx(wc, t, p));
     wc.on('enter-html-full-screen', () => { const w = this._win(); if (w) w.setFullScreen(true); });
@@ -129,9 +117,7 @@ class BrowserHost {
     wc.setWindowOpenHandler(({ url }) => { if (isWeb(url)) setImmediate(() => this.open(url)); return { action: 'deny' }; });
     return v;
   }
-  /* the page's own navigator.userAgent must match what the request headers say, so switch it per navigation */
-  _ua(wc, url) { try { if (!this.ua || wc.isDestroyed()) return; const want = isSignIn(url) ? this.ffUa : this.ua; if (wc.getUserAgent() !== want) wc.setUserAgent(want); } catch (_) {} }
-  _load(t, url) { if (!isWeb(url)) return false; const v = this._ensureView(t); t.url = url; t.title = url.replace(/^https?:\/\//i, '').slice(0, 60); this._ua(v.webContents, url); v.webContents.loadURL(url, { userAgent: isSignIn(url) ? this.ffUa : this.ua }).catch(() => {}); return true; }
+  _load(t, url) { if (!isWeb(url)) return false; const v = this._ensureView(t); t.url = url; t.title = url.replace(/^https?:\/\//i, '').slice(0, 60); v.webContents.loadURL(url).catch(() => {}); return true; }
   go(id, input) { const t = this._tab(id); if (!t) return false; const u = resolveInput(input); if (!u) return false; const ok = this._load(t, u); this._attach(); this._emit(); return ok; }
   _attach() {
     const w = this._win(); if (!w) return;
@@ -188,4 +174,4 @@ class BrowserHost {
   setShield(on) { this.shield = !!on; this._emit(); return this.shield; }
   destroy() { this.flush(); this.tabs.slice().forEach((t) => { try { t.view && t.view.webContents.close(); } catch (_) {} }); this.tabs = []; this.attached = null; }
 }
-module.exports = { BrowserHost, resolveInput, hostBlocked, fillJS, keyAction, secureUrl, errPage, isSignIn, firefoxUA, PARTITION };
+module.exports = { BrowserHost, resolveInput, hostBlocked, fillJS, keyAction, secureUrl, errPage, isSignIn, PARTITION };

@@ -1,7 +1,7 @@
 // Run with: xvfb-run -a npx electron --no-sandbox test/browser.test.js
 const { app, BrowserWindow, ipcMain } = require('electron'); const http = require('http'); const fs = require('fs'); const os = require('os'); const path = require('path');
 app.setPath('userData', fs.mkdtempSync(path.join(os.tmpdir(), 'regis-bw-')));
-const { BrowserHost, resolveInput, hostBlocked, keyAction, secureUrl, isSignIn, firefoxUA } = require('../lib/browser');
+const { BrowserHost, resolveInput, hostBlocked, keyAction, secureUrl, isSignIn } = require('../lib/browser');
 const creds = [];
 let pass = 0, fail = 0; const ok = (c, m) => { if (c) { pass++; console.log('PASS', m); } else { fail++; console.log('FAIL', m); } };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -72,26 +72,24 @@ app.whenReady().then(async () => {
   host.close(host.tabs[1].id); ok(host.tabs.length === 1, 'tab closes');
   host.close(a); ok(host.tabs.length === 1 && host.snapshot().tabs[0].blank, 'closing the last tab leaves a fresh blank one');
   host.restore([base + '/a', base + '/b']); ok(host.tabs.length === 1, 'restore does nothing once tabs exist');
-  // Google sign-in: Regis presents itself as Firefox on Google's sign-in pages only, so Google doesn't call it an insecure embedded browser
-  ok(isSignIn('https://accounts.google.com/v3/signin') && isSignIn('https://accounts.youtube.com/x') && !isSignIn('https://www.google.com/') && !isSignIn('https://accounts.google.com.evil.com/') && !isSignIn('http://accounts.google.com/'), 'only https Google sign-in pages get the sign-in identity');
-  ok(/^Mozilla\/5\.0 \([^)]*rv:(\d+)\.0\) Gecko\/20100101 Firefox\/\1\.0$/.test(host.ffUa) && !/Chrome|Electron|Safari/.test(host.ffUa), 'sign-in identity is a consistent Firefox one (' + host.ffUa + ')');
-  ok(firefoxUA('Mozilla/5.0 (X) Chrome/142.0.0.0 Safari/537.36', 'win32').includes('Firefox/144.0'), 'Firefox version follows the engine version');
+  // Google sign-in: one plain Chrome identity everywhere, plus the window.chrome object real Chrome has
+  ok(isSignIn('https://accounts.google.com/v3/signin') && !isSignIn('https://www.google.com/') && !isSignIn('https://accounts.google.com.evil.com/') && !isSignIn('http://accounts.google.com/'), 'sign-in page detection');
+  host.go(host.active, base + '/a'); await until(() => host.snapshot().tabs.find((x) => x.id === host.active).title === 'Page A');
+  const lwc2 = host._tab(host.active).view.webContents;
+  const loc = JSON.parse(await lwc2.executeJavaScript("JSON.stringify({chrome:typeof window.chrome,keys:window.chrome?Object.keys(window.chrome).sort():[],nat:Function.prototype.toString.call(window.chrome.loadTimes),ts:Function.prototype.toString.call(Function.prototype.toString),own:(function x(){return 1}).toString(),lt:typeof window.chrome.loadTimes().requestTime})"));
+  ok(loc.chrome === 'object' && loc.keys.join() === 'app,csi,loadTimes,runtime', 'pages get window.chrome with app, csi, loadTimes and runtime');
+  ok(/\[native code\]/.test(loc.nat) && /\[native code\]/.test(loc.ts) && /return 1/.test(loc.own) && loc.lt === 'number', 'those functions look built-in, and normal functions still show their own source');
   const sent = []; host.ses.webRequest.onSendHeaders({ urls: ['https://accounts.google.com/*'] }, (d) => { if (d.resourceType === 'mainFrame') sent.push(d.requestHeaders); });
-  const g = host.open('https://accounts.google.com/signin'); const gt = host._tab(g);
-  const loaded = await until(() => gt.view && !gt.loading && /accounts\.google\.com/.test(gt.url) && sent.length > 0, 15000);
-  if (!loaded) console.log('SKIP live Google sign-in check (no internet?)');
+  const gone = []; app.on('render-process-gone', (_e, _w, d) => gone.push(d.reason)); app.on('child-process-gone', (_e, d) => gone.push(d.type + ':' + d.reason));
+  const g = host.open('https://docs.google.com/document/u/0/'); const gt = host._tab(g);
+  const loaded = await until(() => gt.view && !gt.loading && /accounts\.google\.com/.test(gt.url) && sent.length > 0, 20000);
+  if (!loaded) console.log('SKIP live Google check (no internet?)');
   else {
-    const gwc = gt.view.webContents; await sleep(500);
-    const fp = await gwc.executeJavaScript("JSON.stringify({ua:navigator.userAgent,uad:'userAgentData' in navigator})");
-    const j = JSON.parse(fp), h = sent[sent.length - 1], hk = Object.keys(h).map((k) => k.toLowerCase());
-    ok(/Firefox\//.test(j.ua) && !/Chrome|Electron/.test(j.ua), 'Google sign-in page sees Firefox in navigator.userAgent');
-    ok(j.uad === false, 'Google sign-in page sees no navigator.userAgentData (like real Firefox)');
-    const ff = JSON.parse(await gwc.executeJavaScript("JSON.stringify({chrome:typeof window.chrome,vendor:navigator.vendor,ps:navigator.productSub})"));
-    ok(ff.chrome === 'undefined' && ff.vendor === '' && ff.ps === '20100101', 'no Chrome-only traces on the sign-in page (window.chrome, vendor), like real Firefox');
-    ok(/Firefox\//.test(h['User-Agent'] || '') && !hk.some((k) => k.startsWith('sec-ch-ua')), 'requests to Google sign-in carry Firefox UA and no Chrome client hints');
-    host.go(g, base + '/a'); ok(await until(() => gt.title === 'Page A'), 'leaving Google sign-in works');
-    const back = JSON.parse(await gwc.executeJavaScript("JSON.stringify({ua:navigator.userAgent,uad:'userAgentData' in navigator})"));
-    ok(/Chrome\//.test(back.ua) && !/Firefox|Electron/.test(back.ua) && back.uad === true, 'other sites see the normal Chrome identity again');
+    ok(gone.length === 0, 'opening Google Docs (which redirects to sign-in) does not crash anything');
+    const j = JSON.parse(await gt.view.webContents.executeJavaScript("JSON.stringify({ua:navigator.userAgent,chrome:typeof window.chrome,keys:window.chrome?Object.keys(window.chrome).length:0,vendor:navigator.vendor,wd:navigator.webdriver})"));
+    ok(/Chrome\/\d+/.test(j.ua) && !/Electron|regis/i.test(j.ua) && j.vendor === 'Google Inc.' && j.wd === false, 'Google sign-in page sees plain Chrome (' + j.ua.replace(/^.*\) /, '') + ')');
+    ok(j.chrome === 'object' && j.keys >= 4, 'Google sign-in page sees a full window.chrome');
+    ok(!/Electron|regis/i.test(sent[sent.length - 1]['User-Agent'] || ''), 'requests to Google carry no Electron or app name');
   }
   host.destroy(); srv.close(); console.log(pass + ' passed, ' + fail + ' failed'); app.exit(fail ? 1 : 0);
 });

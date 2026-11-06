@@ -1,5 +1,5 @@
 /* Offline + update strategy: network first (so a new release is picked up the next time you open Regis while online),
-   cached copy when offline. 1.7.8 is stamped in at build time; a new version replaces the old cache. */
+   cached copy when offline. 1.7.9 is stamped in at build time; a new version replaces the old cache. */
 var VERSION = '__VERSION__', CACHE = 'regis-' + VERSION, FILES = ["./","apple-touch-icon.png","callback.html","icon-192.png","icon-512.png","index.html","localdb.js","manifest.webmanifest","regis-lib.js","shim.js","sync.js","webbridge.js"];
 self.addEventListener('install', function (e) { e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); })); });
 self.addEventListener('activate', function (e) { e.waitUntil(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return k !== CACHE && k.indexOf('regis-') === 0; }).map(function (k) { return caches.delete(k); })); }).then(function () { return self.clients.claim(); })); });

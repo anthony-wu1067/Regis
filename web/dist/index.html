@@ -934,9 +934,9 @@ html.bal .blob{filter:none;border-radius:50%;animation:drift 52s ease-in-out inf
 html.bal .b1{background:radial-gradient(closest-side,var(--blob1),transparent)}
 html.bal .b2{background:radial-gradient(closest-side,var(--blob2),transparent);animation-duration:66s}
 html.bal .b3{background:radial-gradient(closest-side,var(--blob3),transparent);animation-duration:78s}
-html.bal .dial-orbit{animation-timing-function:steps(140)}
-html.bal .dial-sweep{animation-timing-function:steps(66)}
-html.bal .spin,html.bal .orb::before{animation-timing-function:steps(120)}
+
+
+
 html.bal .ping{animation:none}
 /* legibility over bright backgrounds (nebula/photo): a soft scrim behind the greeting */
 .top .hello{position:relative}
@@ -1003,7 +1003,7 @@ html.novoice .say::before{display:none}
 :root[data-skin="sage"]:not([data-ui="tactical"]) .dial::before{content:"";position:absolute;inset:-11%;border-radius:50%;pointer-events:none;background:repeating-conic-gradient(var(--accent) 0 .45deg,transparent .45deg 7.5deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));opacity:.5;animation:turn 140s linear infinite reverse}
 :root[data-skin="sage"]:not([data-ui="tactical"]) .dial::after{content:"";position:absolute;inset:-19%;border-radius:50%;pointer-events:none;border:1px dashed var(--line2);opacity:.7;animation:turn 240s linear infinite}
 html.lite .dial::before,html.lite .dial::after{animation:none!important}
-html.bal .dial::before,html.bal .dial::after{animation-timing-function:steps(120)}
+
 :root[data-skin="sage"] .btn.pri{color:var(--accent-ink)}
 :root[data-skin="sage"] .top h1{letter-spacing:.01em}
 .cs:nth-child(7) .dot{background:linear-gradient(135deg,#8fdcff,#0a2a52)}
@@ -1055,7 +1055,7 @@ html.lite .panel>.hud::before{display:none}
 .tk-in i{font-style:normal;color:var(--fg2)}
 @keyframes tk{to{transform:translateX(-50%)}}
 html.lite .tk-in{animation:none}
-html.bal .tk-in{animation-timing-function:steps(1200)}
+
 html.novoice .ticker{display:none}
 @media (prefers-reduced-motion:reduce){.tk-in{animation:none}}
 .brand::after{content:"// " attr(data-line)}
@@ -1083,9 +1083,9 @@ html.novoice .ticker{display:none}
 @keyframes sgRise{0%{transform:translate3d(0,0,0);opacity:0}10%{opacity:.8}90%{opacity:.5}100%{transform:translate3d(18px,-108vh,0);opacity:0}}
 @media (max-width:900px){.sg-col{display:none}}
 html.lite .sig *,html.lite .sig{animation:none!important}
-html.bal .sg-r1,html.bal .sg-r2,html.bal .sg-r3{animation-timing-function:steps(150)}
+
 html.bal .sg-d:nth-of-type(n+9){display:none}
-html.bal .sg-tx{animation-timing-function:steps(900)}
+
 html.idle .sig *{animation-play-state:paused!important}
 @media (prefers-reduced-motion:reduce){.sig *{animation:none!important}}
 .seg.bgs{grid-template-columns:1fr 1fr 1fr}
@@ -1194,7 +1194,7 @@ html:not([data-view="work"]) .top .right{align-items:flex-end}
 html.pulse .homedial .cp{display:block;animation:ringPulse calc(4.4s / var(--pk,1)) cubic-bezier(.2,.6,.3,1) infinite}
 html.pulse .homedial .cp.b{animation-delay:calc(2.2s / var(--pk,1))}
 html.lite .hdx,html.lite .hdr1,html.lite .hdr2,html.lite .hdr3{animation:none}
-html.bal .hdr3{animation:none}
+
 @media (prefers-reduced-motion:reduce){.hdx,.homedial .cp{animation:none!important}}
 .hm-card{position:relative;padding:14px 16px 14px;border:1px solid var(--line);border-radius:var(--r2);background:color-mix(in srgb,var(--panel) 88%,transparent);min-width:0}
 .hm-card::before,.hm-card::after{content:"";position:absolute;width:11px;height:11px;border:1.5px solid var(--accent);opacity:.8;pointer-events:none}
@@ -2308,11 +2308,7 @@ html[data-look] .bw-bm{background:color-mix(in srgb,var(--bg) 92%,transparent);b
 ::selection{background:color-mix(in srgb,var(--accent) 38%,transparent);color:var(--fg)}
 
 /* ---------- efficiency switches ---------- */
-/* the dial rings are one big SVG: a slow turn repaints all of it every frame. 10 updates a second looks the same (about 1px per step). */
-.hdr1{animation-timing-function:steps(1800)!important}
-.hdr2{animation-timing-function:steps(1100)!important}
-.hdr3{animation-timing-function:steps(600)!important}
-.sat .sx{animation-timing-function:steps(400)!important}
+
 /* nothing moves while Regis is idle, minimised, in the tray or hidden */
 html.idle .hud-scan,html.away .hud-scan,html.away .bg .blob{animation-play-state:paused!important}
 html.away *,html.away *::before,html.away *::after{animation-play-state:paused!important}
@@ -2327,6 +2323,40 @@ html.mob .hud-scan{display:none}
 
 /* the update-the-app bar shows on every page */
 html[data-view] #app>#shell-bar:not([hidden]){display:block!important;margin-bottom:12px}
+
+/* 1.8 smooth motion: rotating parts live on their own layers (see liftStatic and the home dial builder) */
+.lift{transform-origin:50% 50%;will-change:transform}
+.lifted{animation:none!important}
+.lift-ring{transition:transform var(--o-snap,.42s) cubic-bezier(.3,1.5,.5,1)}
+.lift-ring.nt,html.lite .lift-ring,html.nofx-rev .lift-ring{transition:none}
+html.x-arcspin #hm-dial-arcs{transform:none!important;transition:none}
+.lift-hdr3{animation:turn calc(60s * var(--uik,1) / var(--o-sq,1)) linear infinite}
+.lift-hdr2{animation:turn calc(110s * var(--uik,1) / var(--o-sq,1)) linear infinite reverse}
+html.lite .lift-hd,html.nofx-sq .lift-hd{animation:none}
+html.d3h .lift-par{translate:calc(var(--px,0) * 6px * var(--par,1)) calc(var(--py,0) * 6px * var(--par,1))}
+.lift-cp{display:none;opacity:0}
+.lift-cp .cpl{fill:none;stroke:var(--accent);stroke-width:1.4;vector-effect:non-scaling-stroke}
+html.pulse .lift-cp{display:block;animation:ringPulse calc(4.4s / var(--pk,1)) cubic-bezier(.2,.6,.3,1) infinite}
+html.pulse .lift-cp.b{animation-delay:calc(2.2s / var(--pk,1))}
+html.x-hpulse .lift-cp,html.mob:not(.o-phonepulse) .lift-cp{display:none!important}
+.lift-sx{animation:turn calc(40s * var(--uik,1)) linear infinite}
+html.lite .lift-sx{animation:none}
+.lift-orbit{animation:turn calc(70s * var(--uik,1)) linear infinite}
+html.lite .lift-orbit{animation:none}
+:root[data-uipause] .lift-orbit{animation-play-state:paused}
+@media (prefers-reduced-motion:reduce){.lift{animation:none!important;transition:none!important}}
+
+.lift-o{position:absolute;pointer-events:none;overflow:visible;margin:0!important;max-width:none!important}
+.lift .cp.lifted{display:block!important;opacity:1!important}
+.lift-rcp{display:none;opacity:0}
+html.pulse .lift-rcp{display:block;animation:ringPulse calc(3.6s / var(--pk,1)) cubic-bezier(.2,.6,.3,1) infinite}
+html.pulse .lift-rcp.b{animation-delay:calc(1.8s / var(--pk,1))}
+.lift-spin{animation:turn 120s linear infinite}
+html.lite .lift-spin{animation:none}
+html .ringbox .ping.lifted{animation:none!important}
+.lift-ping{animation:none}
+html.pulseh .lift-ping{animation:ping calc(2.6s * var(--uik,1) / var(--pk,1)) ease-out infinite}
+:root[data-uipause] .lift-ping{animation-play-state:paused}
 </style>
 
 <div class="scan" aria-hidden="true"></div><div class="xgrid" aria-hidden="true"></div>
@@ -4203,7 +4233,8 @@ function spRpn(){var e=$("#sp-rpn");if(!e)return;var t=SP.st&&SP.st.item;
    (nx?'<div class="sp-rp-n"><div class="sp-rp-nh"><span>Next in queue</span><button class="sp-lnk" data-act="sp-nav" data-t="queue">Open queue</button></div><button class="sp-lr" data-act="sp-play" data-uri="'+esc(nx.uri)+'"><span class="sp-li">'+(nx.album&&nx.album.images&&nx.album.images.length?'<img src="'+esc(spImg(nx.album.images,64))+'" alt="">':'♫')+'</span><span class="sp-lx"><b>'+esc(nx.name)+'</b><small>'+esc((nx.artists||[]).map(function(a){return a.name}).join(", "))+'</small></span></button></div>':"")}
 function spRpLoad(){var t=SP.st&&SP.st.item,id=t?t.id:"";if(id===SP.rpId)return;SP.rpId=id;SP.qn=[];spRpn();spLyMiniRender();spLyrTrack();if(!t||!SP.rp)return;spApi("GET","/me/player/queue").then(function(r){if(SP.rpId===id){SP.qn=((r&&r.queue)||[]).slice(0,1);spRpn()}}).catch(function(){})}
 async function spPlay(body,dev){var key=JSON.stringify(body||0);if(SP.playBusy&&SP.playBusy===key&&Date.now()-SP.playAt<1500)return;SP.playBusy=key;SP.playAt=Date.now();try{await spPlay2(body,dev)}finally{setTimeout(function(){if(SP.playBusy===key)SP.playBusy=null},1500)}}
-async function spPlay2(body,dev){var q=dev?"?device_id="+dev:(SP.st&&SP.st.device?"":(SP.sdkDev?"?device_id="+SP.sdkDev:(SP.devs[0]?"?device_id="+SP.devs[0].id:"")));try{await spApi("PUT","/me/player/play"+q,body);setTimeout(spPoll,500)}catch(e){if(e.status===404){var d=await spDevices();if(d.length){try{await spApi("PUT","/me/player",{device_ids:[d[0].id],play:false});await spApi("PUT","/me/player/play?device_id="+d[0].id,body);setTimeout(spPoll,600);return}catch(e2){spErr(e2);return}}}spErr(e)}}
+async function spPlay2(body,dev){if(!dev&&spDrmBad()&&(!SP.st||!SP.st.device||SP.st.device.id===SP.sdkDev)){await spDevices();var po=spPickOther();if(po){dev=po.id;try{await spApi("PUT","/me/player",{device_ids:[po.id],play:false})}catch(_){}}}
+  var q=dev?"?device_id="+dev:(SP.st&&SP.st.device?"":(SP.sdkDev?"?device_id="+SP.sdkDev:(SP.devs[0]?"?device_id="+SP.devs[0].id:"")));try{await spApi("PUT","/me/player/play"+q,body);setTimeout(spPoll,500)}catch(e){if(e.status===404){var d=await spDevices();if(d.length){try{await spApi("PUT","/me/player",{device_ids:[d[0].id],play:false});await spApi("PUT","/me/player/play?device_id="+d[0].id,body);setTimeout(spPoll,600);return}catch(e2){spErr(e2);return}}}spErr(e)}}
 async function spDevices(){try{var r=await spApi("GET","/me/player/devices");SP.devs=(r&&r.devices)||[]}catch(_){SP.devs=[]}return SP.devs}
 async function spCtl(k){if(!SP.st&&k!=="toggle"){await spPoll()}
   try{spLog("ctl",k+(spLocal()?" local":" api"));
@@ -4236,14 +4267,26 @@ function spReport(){var st=SP.st,d=st&&st.device,t=st&&st.item,L=[];
 function spDrmProbe(){return Promise.race([spDrmProbe0(),new Promise(function(r){setTimeout(function(){r("no")},3000)})])}
 function spDrmProbe0(){if(!navigator.requestMediaKeySystemAccess)return Promise.resolve("no");try{return navigator.requestMediaKeySystemAccess("com.widevine.alpha",[{initDataTypes:["cenc"],audioCapabilities:[{contentType:'audio/mp4;codecs="mp4a.40.2"'}]}]).then(function(){return "ok"},function(){return "no"})}catch(_){return Promise.resolve("no")}}
 /* Spotify skips to the next song after each failure, so a bad player makes a chain of errors. Stop the chain and say why, once. */
-function spPbErr(e){var now=Date.now();SP.pbE=(SP.pbE||[]).filter(function(t){return now-t<10000});SP.pbE.push(now);if(SP.pbE.length<2||now-(SP.pbT||0)<30000)return;SP.pbT=now;
-  try{SP.sdk&&SP.sdk.pause()}catch(_){}spApi("PUT","/me/player/pause").catch(function(){});
-  spDrmProbe().then(function(r){var m;if(r!=="ok")m="This browser can’t play protected audio here (Widevine isn’t available). Use Chrome, Edge or Safari, or choose another device from the speaker button.";
-    else if(spDesk()&&SP.drm)m="Spotify refused to play inside Regis. This usually means the audio build isn’t signed yet: close Regis and run “Enable Spotify audio” again (it now signs Regis for Spotify; one free castlabs account the first time). Until then, choose another device from the speaker button.";
-    else m="Spotify’s web player failed on several songs in a row, so I stopped it. Turn off ad blockers for this site, press play once more, or choose another device from the speaker button.";
-    toast(m,"bad")})}
+/* 1.7.9 dependable playback. When Regis's own player can't play (usually an unsigned audio engine: Spotify refuses the licence,
+   skips to the next song, plays a few unprotected seconds, then goes silent), stop at the first sign, move playback to another
+   Spotify device (desktop app, phone) on the same song, and keep using that device until the engine is signed again. */
+function spDrmBad(){try{var v=JSON.parse(localStorage.getItem("regis-sp-drmbad")||"null");return !!(v&&spDesk()&&v.sig===String(SP.sigT||""))}catch(_){return false}}
+function spSetDrmBad(on){try{if(on)localStorage.setItem("regis-sp-drmbad",JSON.stringify({sig:String(SP.sigT||""),at:Date.now()}));else localStorage.removeItem("regis-sp-drmbad")}catch(_){}}
+function spOthers(){return (SP.devs||[]).filter(function(x){return x.id&&x.id!==SP.sdkDev&&!x.is_restricted})}
+function spPickOther(){var d=spOthers();return d.find(function(x){return x.is_active})||d.find(function(x){return /computer/i.test(x.type)})||d.find(function(x){return /smartphone/i.test(x.type)})||d[0]||null}
+async function spRescue(why){var now=Date.now();if(SP.rescueAt&&now-SP.rescueAt<12000)return;SP.rescueAt=now;spLog("rescue",why);
+  try{SP.sdk&&SP.sdk.pause()}catch(_){}
+  if(spDesk()&&SP.drm)spSetDrmBad(true);
+  await spDevices();var pick=spPickOther();
+  if(pick){try{await spApi("PUT","/me/player",{device_ids:[pick.id],play:true});toast("Regis’s own player couldn’t play that, so playback moved to "+pick.name+". It continues there.","good");setTimeout(spPoll,900);return}catch(e){spLog("rescue-xfer",e&&e.message)}}
+  try{await spApi("PUT","/me/player/pause")}catch(_){}
+  toast(spDesk()&&SP.drm?"Spotify won’t play inside Regis until its audio engine is signed. Close Regis and double-click “Enable Spotify audio”. Meanwhile, open Spotify on this computer or your phone and Regis plays there.":"Spotify’s player failed in this browser. Open Spotify on this computer or your phone and Regis will play there.","bad")}
+function spPbErr(e){spLog("pb-error",e&&e.message);spRescue("playback_error")}
+/* stall watchdog: playing, not loading, but the position stopped moving for 3 checks */
+setInterval(function(){if(!SP.sdk||!spLocal()||document.hidden)return;SP.sdk.getCurrentState().then(function(x){if(!x||x.paused||x.loading){SP.stN=0;SP.stP=x?x.position:-1;return}
+  var d=x.duration||0;if(x.position===SP.stP&&x.position>0&&(!d||x.position<d-2500)){SP.stN=(SP.stN||0)+1;if(SP.stN>=3){SP.stN=0;spRescue("stall at "+Math.round(x.position/1000)+"s")}}else SP.stN=0;SP.stP=x.position}).catch(function(){})},1000);
 function spSdk(){if(SP.sdk||SP.sdkTried||!spPlayerOK())return;SP.sdkTried=1;var sc=document.createElement("script");sc.src="https://sdk.scdn.co/spotify-player.js";sc.async=true;document.head.appendChild(sc);
-  window.onSpotifyWebPlaybackSDKReady=function(){try{SP.sdk=new Spotify.Player({name:"Regis",getOAuthToken:function(cb){spFresh().then(cb)},volume:.6});SP.sdk.addListener("ready",function(x){SP.sdkDev=x.device_id;spLog("ready",x.device_id);spPoll().then(function(){if(!SP.st||!SP.st.device){spApi("PUT","/me/player",{device_ids:[x.device_id],play:false}).then(function(){setTimeout(spPoll,500)}).catch(function(){})}})});SP.sdk.addListener("authentication_error",function(e){spLog("authentication_error",e&&e.message);toast("Spotify needs you to sign in again.","bad")});SP.sdk.addListener("account_error",function(e){spLog("account_error",e&&e.message);toast("The web player needs Spotify Premium.","bad")});SP.sdk.addListener("playback_error",function(e){spLog("playback_error",e&&e.message);spPbErr(e)});
+  window.onSpotifyWebPlaybackSDKReady=function(){try{SP.sdk=new Spotify.Player({name:"Regis",getOAuthToken:function(cb){spFresh().then(cb)},volume:.6});SP.sdk.addListener("ready",function(x){SP.sdkDev=x.device_id;spLog("ready",x.device_id);spPoll().then(function(){if((!SP.st||!SP.st.device)&&!spDrmBad()){spApi("PUT","/me/player",{device_ids:[x.device_id],play:false}).then(function(){setTimeout(spPoll,500)}).catch(function(){})}})});SP.sdk.addListener("authentication_error",function(e){spLog("authentication_error",e&&e.message);toast("Spotify needs you to sign in again.","bad")});SP.sdk.addListener("account_error",function(e){spLog("account_error",e&&e.message);toast("The web player needs Spotify Premium.","bad")});SP.sdk.addListener("playback_error",function(e){spLog("playback_error",e&&e.message);spPbErr(e)});
     SP.sdk.addListener("player_state_changed",function(x){if(!x)return;var c=x.track_window&&x.track_window.current_track;spLog("state",{pos:x.position,paused:x.paused,loading:x.loading,track:c&&c.name,shuf:x.shuffle,rs:x.repeat_mode,why:x.disallows&&Object.keys(x.disallows).filter(function(k){return x.disallows[k]}).join("+")});
       if(SP.st&&SP.st.device&&SP.st.device.id===SP.sdkDev&&!SP.seeking){SP.base=x.position;SP.at=Date.now();SP.st.is_playing=!x.paused}clearTimeout(SP.evT);SP.evT=setTimeout(spPoll,350)});
     SP.sdk.addListener("autoplay_failed",function(){spLog("autoplay_failed")});SP.sdk.addListener("autoplay_failed",function(){toast("Your browser blocked autoplay. Press play once.","bad")});SP.sdk.addListener("not_ready",function(){spLog("not_ready");SP.sdkDev=null});SP.sdk.addListener("initialization_error",function(e){spLog("initialization_error",e&&e.message);toast("This browser can’t play Spotify here.","bad")});SP.sdk.connect()}catch(_){}}}
@@ -4302,7 +4345,7 @@ document.addEventListener("keydown",function(e){var t=e.target;if(!t||t.id!=="sp
 document.addEventListener("click",function(e){if(!e.target.closest(".sp-gs,#sp-sg"))spSgClose();var fm=$("#sp-fm");if(fm&&!fm.hidden&&!e.target.closest("#sp-fm,.sp-mv,#sp-selmv"))fm.hidden=true;var m=$("#sp-devs");if(m&&!m.hidden&&!e.target.closest("#sp-devs,#sp-devb"))m.hidden=true});
 document.addEventListener("visibilitychange",function(){if(!document.hidden)spPoll()});
 setTimeout(spBoot,900);
-setTimeout(function(){if(APP&&APP.drm)APP.drm().then(function(v){SP.drm=!!v;if(SP.drm)spShow()}).catch(function(){})},400);
+setTimeout(function(){if(APP&&APP.getStatus)APP.getStatus().then(function(st){SP.sigT=String((st&&st.drmSig)||"")}).catch(function(){});if(APP&&APP.drm)APP.drm().then(function(v){SP.drm=!!v;if(SP.drm)spShow()}).catch(function(){})},400);
 /* ---------- executive home ---------- */
 var HD={last:{}};
 function hdSet(id,txt){var e=document.getElementById(id);if(e&&HD.last[id]!==txt){HD.last[id]=txt;e.textContent=txt}}
@@ -4317,7 +4360,7 @@ function homeBuild(){var el=$("#hm-dial");if(!el||el.dataset.b)return;el.dataset
   var cw="",cn="";for(i=0;i<12;i++){var pa=polar(C,C,162,i*30),pb=polar(C,C,162,((i+4)%12)*30);cw+='<line class="cw t'+(i%3)+'" data-a="'+i+'" data-b="'+((i+4)%12)+'" x1="'+pa[0].toFixed(1)+'" y1="'+pa[1].toFixed(1)+'" x2="'+pb[0].toFixed(1)+'" y2="'+pb[1].toFixed(1)+'"/>';cn+='<circle class="hn t'+(i%3)+'" id="hn'+i+'" cx="'+pa[0].toFixed(1)+'" cy="'+pa[1].toFixed(1)+'" r="'+(i%3===0?3.2:2.2)+'"/>'}
   h.push('<g class="hd-cn">'+cw+cn+'</g>');
   [[283,.6,""],[259,.5,""],[212,.5,""],[162,.5,"1 5"]].forEach(function(r){h.push('<circle cx="300" cy="300" r="'+r[0]+'" fill="none" stroke="'+(r[0]===283?"var(--accent)":"var(--line2)")+'" stroke-width="1" opacity="'+r[1]+'"'+(r[2]?' stroke-dasharray="'+r[2]+'"':'')+'/>')});
-  h.push('<g class="dl-arcs" fill="none" stroke="var(--clk)" stroke-width="3" stroke-linecap="butt" opacity=".85">'+[[10,60],[100,128],[190,246],[280,306]].map(function(r){return '<path d="'+arcPath(C,C,203,r[0],r[1])+'"/>'}).join("")+'</g>');
+  var ARCS=('<g class="dl-arcs" fill="none" stroke="var(--clk)" stroke-width="3" stroke-linecap="butt" opacity=".85">'+[[10,60],[100,128],[190,246],[280,306]].map(function(r){return '<path d="'+arcPath(C,C,203,r[0],r[1])+'"/>'}).join("")+'</g>');
   h.push('<circle class="dl-evt" cx="300" cy="300" r="246" fill="none" stroke="var(--line2)" stroke-width="9" opacity=".4"/><g id="hd-ev" fill="none"></g>');
   h.push('<circle id="hd-day" cx="300" cy="300" r="259" fill="none" stroke="var(--accent2)" stroke-width="2" stroke-dasharray="0 2000" transform="rotate(-90 300 300)" style="filter:drop-shadow(0 0 5px var(--accent))"/>');
   var A=h;h=[];
@@ -4329,20 +4372,25 @@ function homeBuild(){var el=$("#hm-dial");if(!el||el.dataset.b)return;el.dataset
   /* fixed pointer windows */
   h.push('<g class="hd-win" fill="none" stroke="var(--accent)" stroke-width="1.4"><rect id="w-s" x="287" y="15" width="26" height="26" rx="0"/><rect id="w-m" x="287" y="61" width="26" height="26" rx="0"/><rect id="w-h" x="282" y="97" width="36" height="38" rx="0"/></g><path d="M300 52l-6-9h12z" fill="var(--clk)" transform="translate(0 -45)"/>');
   /* two squares make an eight-pointed star; its tips are small stars */
-  h.push('<g class="dl-sq"><g class="hdx hdr3"><rect class="cs1" x="194" y="194" width="212" height="212"/><g class="hs"><circle cx="194" cy="194" r="2.6"/><circle cx="406" cy="194" r="2.6"/><circle cx="406" cy="406" r="2.6"/><circle cx="194" cy="406" r="2.6"/></g></g><g class="hdx hdr2"><rect class="cs2" x="194" y="194" width="212" height="212" transform="rotate(45 300 300)"/><g class="hs" transform="rotate(45 300 300)"><circle cx="194" cy="194" r="2.6"/><circle cx="406" cy="194" r="2.6"/><circle cx="406" cy="406" r="2.6"/><circle cx="194" cy="406" r="2.6"/></g></g></g>');
+  var SQ3=('<g class="dl-sq"><g class="hds"><rect class="cs1" x="194" y="194" width="212" height="212"/><g class="hs"><circle cx="194" cy="194" r="2.6"/><circle cx="406" cy="194" r="2.6"/><circle cx="406" cy="406" r="2.6"/><circle cx="194" cy="406" r="2.6"/></g></g></g>'),SQ2=('<g class="dl-sq"><g class="hds"><rect class="cs2" x="194" y="194" width="212" height="212" transform="rotate(45 300 300)"/><g class="hs" transform="rotate(45 300 300)"><circle cx="194" cy="194" r="2.6"/><circle cx="406" cy="194" r="2.6"/><circle cx="406" cy="406" r="2.6"/><circle cx="194" cy="406" r="2.6"/></g></g></g>');
   h.push('<path class="hd-br" d="M212 244V230H226M374 230H388V244M388 354V368H374M226 368H212V354" fill="none"/>');
-  h.push('<circle class="cp" cx="300" cy="300" r="290"/><circle class="cp b" cx="300" cy="300" r="290"/>');
+  var CP='<circle class="cpl" cx="300" cy="300" r="290"/>';
   h.push('<text class="hd-lab" x="300" y="248" text-anchor="middle" id="hd-lab">LOCAL</text><text class="hd-time" id="hd-time" x="300" y="318" text-anchor="middle">--:--</text><text class="hd-sec" id="hd-sec" x="300" y="348" text-anchor="middle"></text><text class="hd-next" id="hd-next" x="300" y="438" text-anchor="middle"></text>');
   var F=h;
-  var host=el.parentNode,mk=function(id,parts){var sv=document.createElementNS("http://www.w3.org/2000/svg","svg");sv.setAttribute("viewBox","0 0 600 600");sv.setAttribute("class","hm-dial homedial hd-l");sv.setAttribute("aria-hidden","true");sv.id=id;sv.innerHTML=parts.join("");host.appendChild(sv)};
-  mk("hm-dial-r",B);mk("hm-dial-f",F);h=A;
+  var host=el.parentNode,mk=function(id,parts,extra){var old=document.getElementById(id);if(old&&old.parentNode)old.parentNode.removeChild(old);var sv=document.createElementNS("http://www.w3.org/2000/svg","svg");sv.setAttribute("viewBox","0 0 600 600");sv.setAttribute("class","hm-dial homedial hd-l"+(extra?" "+extra:""));sv.setAttribute("aria-hidden","true");sv.id=id;sv.innerHTML=parts.join("");host.appendChild(sv)};
+  /* 1.8: moving parts get layers of their own (compositor-turned, smooth at 60 fps, no dial repaint) */
+  mk("hm-dial-arcs",[ARCS],"lift lift-ring");
+  mk("hm-dial-rs",[B[0]],"lift lift-ring");mk("hm-dial-rm",[B[1]],"lift lift-ring");mk("hm-dial-rh",[B[2]],"lift lift-ring");
+  mk("hm-dial-sq3",[SQ3],"lift lift-hd lift-hdr3 lift-par");mk("hm-dial-sq2",[SQ2],"lift lift-hd lift-hdr2 lift-par");
+  mk("hm-dial-cp1",[CP],"lift lift-cp lift-par");mk("hm-dial-cp2",[CP],"lift lift-cp b lift-par");
+  mk("hm-dial-f",F);h=A;
   el.innerHTML=h.join("")}
 function hdNode(v){if(HD.hn===v)return;HD.hn=v;$$("#hm-dial .hn.on,#hm-dial .cw.on").forEach(function(e){e.classList.remove("on")});var n=document.getElementById("hn"+v);if(n)n.classList.add("on");$$("#hm-dial .cw").forEach(function(l){if(+l.dataset.a===v||+l.dataset.b===v)l.classList.add("on")})}
 function hdRing(id,v,N){var g=document.getElementById(id);if(!g)return;HD.rv=HD.rv||{};var st=HD.rv[id];if(st&&st.v===v)return;var step=360/N,rot,snap=!st,dr=id==="rg-m"?-1:1;
   if(!st)rot=-dr*v*step;else{var dd=((v-st.v)%N+N)%N;rot=st.rot-dr*dd*step;if(dd>3)snap=true}
-  HD.rv[id]={v:v,rot:rot};if(snap)g.classList.add("nt");g.style.transform="rotate("+rot+"deg)";
-  if(id==="rg-s"){var ar=document.querySelector("#hm-dial .dl-arcs");if(ar){ar.classList.toggle("nt",snap);ar.style.transform="rotate("+(-rot)+"deg)";if(snap)requestAnimationFrame(function(){requestAnimationFrame(function(){ar.classList.remove("nt")})})}}
-  if(snap)requestAnimationFrame(function(){requestAnimationFrame(function(){g.classList.remove("nt")})});
+  HD.rv[id]={v:v,rot:rot};var gl=g.ownerSVGElement&&g.ownerSVGElement.classList.contains("lift-ring")?g.ownerSVGElement:g;if(snap)gl.classList.add("nt");gl.style.transform="rotate("+rot+"deg)";
+  if(id==="rg-s"){var ar=document.getElementById("hm-dial-arcs")||document.querySelector("#hm-dial .dl-arcs");if(ar){ar.classList.toggle("nt",snap);ar.style.transform="rotate("+(-rot)+"deg)";if(snap)requestAnimationFrame(function(){requestAnimationFrame(function(){ar.classList.remove("nt")})})}}
+  if(snap)requestAnimationFrame(function(){requestAnimationFrame(function(){gl.classList.remove("nt")})});
   var pv=g.querySelector(".cur");if(pv)pv.classList.remove("cur");var t=g.children[v];if(t)t.classList.add("cur")}
 function homeTick(force){if(S.view!=="home")return;if(!force&&(document.hidden||PERF.idle))return;homeBuild();
   var n=new Date(),H=n.getHours(),M=n.getMinutes(),Sx=n.getSeconds(),C=300,t=n.toLocaleTimeString([],{hour:"numeric",minute:"2-digit",hour12:T24?false:undefined}),am=/\s?(AM|PM)/i.exec(t),tm=t.replace(/\s?(AM|PM)/i,"");
@@ -6204,17 +6252,25 @@ async function boot(){
   document.addEventListener("visibilitychange",function(){away(document.hidden)})})();
 /* 1.7.8: a page update can arrive over the air, but the desktop app's own files only change when it is reinstalled. Say so once per version. */
 if(window.MutationObserver)new MutationObserver(function(){if(S.view!=="browser")try{FX.kick()}catch(_){}}).observe(document.documentElement,{attributes:true,attributeFilter:["data-view"]});
-/* 1.7.8: animations inside SVG drawings (dial rings, satellites, pulse rings) can't run on the graphics chip: Chromium restyles and
-   repaints the whole drawing every frame (about 80% of the page's work). Keep the same keyframes, but step them ourselves:
-   slow turns 5-10 times a second, quick pulses 20 times a second. Looks the same, a fraction of the work. */
-(function(){if(!document.getAnimations||!document.timeline)return;var R=document.documentElement,list=[],n=0;
-  function scan(){list=document.getAnimations().filter(function(a){var t=a.effect&&a.effect.target;if(!(t instanceof SVGElement)||!a.animationName)return false;var tm=a.effect.getTiming();return tm.iterations===Infinity});
-    list.forEach(function(a){if(a.playState==="running"){var ct=a.currentTime||0;a.pause();a.currentTime=ct;a._t0=document.timeline.currentTime-ct}
-      var d=+a.effect.getTiming().duration||1000;a._every=d>=20000?4:d>=8000?2:1})}
-  function tick(){n++;if(n%40===1)scan();if(R.classList.contains("idle")||R.classList.contains("away")||R.classList.contains("lite"))return;var now=document.timeline.currentTime;
-    for(var i=0;i<list.length;i++){var a=list[i];if(a._t0==null||n%a._every)continue;try{a.currentTime=now-a._t0}catch(_){}}}
-  setInterval(function(){if(!document.hidden&&(list.length||n%40===0))tick();else n++},50)})();
-var SHELL_NEED="1.7.8";
+
+/* 1.8: move a rotating SVG part onto its own layer (same size, same viewBox) and turn the layer instead: the graphics chip does it,
+   smoothly, and the drawing under it is not repainted 60 times a second. */
+function liftStatic(sel,cls){$$(sel).forEach(function(el){var sv=el.ownerSVGElement;if(!sv||el.classList.contains("lifted"))return;
+  var L=document.createElementNS("http://www.w3.org/2000/svg","svg");L.setAttribute("viewBox",sv.getAttribute("viewBox")||"");L.setAttribute("class","lift "+cls);L.setAttribute("aria-hidden","true");
+  if(sv.getAttribute("preserveAspectRatio"))L.setAttribute("preserveAspectRatio",sv.getAttribute("preserveAspectRatio"));
+  el.classList.add("lifted");L.appendChild(el);sv.parentNode.insertBefore(L,sv.nextSibling)})}
+try{liftStatic(".sat .sx","lift-sx");liftStatic(".dial .dial-orbit","lift-orbit")}catch(_){}
+/* drawings that sit in normal page flow (the Today ring): the layer is laid exactly over the drawing, kept in sync with its size,
+   turned/pulsed around the part's own centre, and re-made each time the ring is redrawn */
+function liftOver(sel,cls){$$(sel).forEach(function(el){var sv=el.ownerSVGElement;if(!sv||el.classList.contains("lifted"))return;var vb=(sv.getAttribute("viewBox")||"0 0 100 100").split(/[\s,]+/).map(Number);
+  var L=document.createElementNS("http://www.w3.org/2000/svg","svg");L.setAttribute("viewBox",vb.join(" "));L.setAttribute("class","lift lift-o "+cls);L.setAttribute("aria-hidden","true");
+  var cx=+el.getAttribute("cx"),cy=+el.getAttribute("cy");if(el.tagName.toLowerCase()==="circle"&&isFinite(cx)&&isFinite(cy))L.style.transformOrigin=((cx-vb[0])/vb[2]*100).toFixed(3)+"% "+((cy-vb[1])/vb[3]*100).toFixed(3)+"%";
+  el.classList.add("lifted");L.appendChild(el);sv.parentNode.insertBefore(L,sv.nextSibling);
+  var put=function(){var pa=sv.parentNode;if(!pa||!pa.getBoundingClientRect)return;var r=sv.getBoundingClientRect(),q=pa.getBoundingClientRect();L.style.left=(r.left-q.left-(pa.clientLeft||0)+(pa.scrollLeft||0))+"px";L.style.top=(r.top-q.top-(pa.clientTop||0)+(pa.scrollTop||0))+"px";L.style.width=r.width+"px";L.style.height=r.height+"px"};put();requestAnimationFrame(put);
+  if(window.ResizeObserver){var ro=new ResizeObserver(function(){if(!L.isConnected){ro.disconnect();return}put()});ro.observe(sv);if(sv.parentNode)ro.observe(sv.parentNode)}})}
+function liftRing(){try{liftOver("#ring .cp:not(.b)","lift-rcp");liftOver("#ring .cp.b","lift-rcp b");liftOver("#ring .spin","lift-spin");liftOver("#ring .ping","lift-ping")}catch(_){}}
+(function(){var r=document.getElementById("ring");if(!r)return;liftRing();if(window.MutationObserver)new MutationObserver(function(){liftRing()}).observe(r,{childList:true})})();
+var SHELL_NEED="1.7.9";
 function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
   var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;

@@ -97,7 +97,9 @@ function createWindow() {
 /* keep audio smooth: do not let Chromium slow the page down when the window is behind others or minimised to the tray */
 for (const sw of ['disable-renderer-backgrounding', 'disable-backgrounding-occluded-windows', 'disable-background-timer-throttling']) app.commandLine.appendSwitch(sw);
 app.setAppUserModelId('app.regis.desktop'); // Windows: groups the taskbar icon and lets notifications show as Regis
-let DRM = false; /* true only on the castlabs Electron build that ships Widevine (copy-protected audio) */
+let DRM = false;
+/* when the audio engine's signature file last changed (re-signing clears the page's "Regis can't play" note) */
+function drmSig() { try { return String(require('fs').statSync(process.execPath + '.sig').mtimeMs | 0); } catch (_) { return ''; } } /* true only on the castlabs Electron build that ships Widevine (copy-protected audio) */
 app.whenReady().then(async () => {
   try { const c = require('electron').components; if (c && c.whenReady) { await Promise.race([c.whenReady(), new Promise((_, no) => setTimeout(() => no(new Error('cdm timeout')), 30000))]); DRM = true; } } catch (_) { DRM = false; } /* never block start-up on it */
   if (process.platform !== 'darwin') Menu.setApplicationMenu(null); /* no File/Edit/View bar: Regis has its own controls */
@@ -144,7 +146,7 @@ app.whenReady().then(async () => {
     googleConfigured: !!(store.getMeta('gClientId', '') && store.getSecret('gSecret')), googleConnected: !!store.getSecret('gRefresh'),
     googleEmail: store.getMeta('gEmail', ''), anthropicKey: !!store.getSecret('anthropicKey'), usage: store.monthUsage(),
     canvasConnected: !!(store.getMeta('cvHost', '') && store.getSecret('cvToken')), canvasHost: (store.getMeta('cvHost', '') || '').replace(/^https?:\/\//, ''),
-    openAtLogin: app.getLoginItemSettings().openAtLogin, voice: true, version: runningVersion || app.getVersion(), shell: app.getVersion(), drm: DRM, updateUrl: updateUrl()
+    openAtLogin: app.getLoginItemSettings().openAtLogin, voice: true, version: runningVersion || app.getVersion(), shell: app.getVersion(), drm: DRM, drmSig: drmSig(), updateUrl: updateUrl()
   })));
   ipcMain.handle('app:saveGoogle', wrap(({ clientId, clientSecret }) => {
     if (clientId) store.setMeta('gClientId', String(clientId).trim()); if (clientSecret) store.setSecret('gSecret', String(clientSecret).trim()); return true; }));

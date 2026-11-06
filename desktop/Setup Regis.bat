@@ -42,13 +42,22 @@ if not exist "%~dp0node_modules\electron\dist\electron.exe" goto :noelectron
 node "%~dp0scripts\make-index.js"
 if errorlevel 1 goto :indexfail
 
-echo  Creating shortcuts...
+echo  Building the Regis app (Regis.exe) and its shortcuts...
+tasklist /FI "IMAGENAME eq Regis.exe" | find /i "Regis.exe" >nul
+if not errorlevel 1 (
+  echo  Regis is open. Quit it first: right-click its icon by the clock, Quit Regis. Then press any key.
+  pause >nul
+)
+node "%~dp0scripts\build-app.js" --install --no-sign
+if not errorlevel 1 goto :appdone
+echo  Could not build Regis.exe. Making a simple shortcut instead...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\make-shortcut.ps1"
 if errorlevel 1 (
   echo  PowerShell could not make the shortcut. Trying another way...
   cscript //nologo "%~dp0scripts\make-shortcut.vbs"
   if errorlevel 1 goto :noshortcut
 )
+:appdone
 echo.
 echo  Done. A "Regis" shortcut is now on your Desktop and in the Start menu.
 echo  Double-click it any time. You never need Node.js or a terminal again.
@@ -56,7 +65,9 @@ echo.
 echo  If the shortcut ever shows an error, double-click "Regis (show errors).bat" and read the message.
 echo.
 echo Setup finished OK >> "%LOG%"
-start "" "%~dp0Regis.vbs"
+if exist "%LOCALAPPDATA%\Programs\Regis\Regis.exe" (start "" "%LOCALAPPDATA%\Programs\Regis\Regis.exe") else (start "" "%~dp0Regis.vbs")
+findstr /c:"wvcus" "%~dp0node_modules\electron\package.json" >nul 2>nul
+if not errorlevel 1 echo  For Spotify playback inside Regis, also double-click "Enable Spotify audio" once.
 pause
 exit /b 0
 

@@ -8,6 +8,10 @@ Regis is the owner's personal command centre: mail, calendar, tasks, a built-in 
 - Every release: bump the version (`node scripts/set-version.js X.Y.Z`; it must increase, or devices ignore the update) and hand over **both** zips: `Regis-project.zip` (GitHub) and `Regis-app.zip` (desktop install). Keep version jumps small.
 - Never reproduce song lyrics. Lyrics come from LRCLIB at runtime.
 
+## Packaging
+- `scripts/build-app.js [--install] [--no-sign]` makes `desktop/dist/Regis/Regis.exe` (engine from `node_modules/electron/dist`, app in `resources/app`, icon via rcedit) and with `--install` copies it to `%LOCALAPPDATA%\Programs\Regis` and rewrites the Desktop/Start-menu shortcuts. `Setup Regis.bat` and `Install Regis.bat` run it. userData stays `AppData\Roamingegis`; localStorage for file:// is shared across folders, so settings carry over.
+- Renaming/re-iconing the exe invalidates the VMP signature: `drm.js sign` signs `node_modules/electron/dist` and the installed `Regis.exe`.
+
 ## Layout
 - `desktop/` (Electron app): `main.js`, `preload.js`, `lib/` (browser, google, updater, store), `page/regis.html` (the UI), `renderer/shim.js`, `scripts/make-index.js` (builds `renderer/index.html` with the Electron CSP), `scripts/drm.js` (opt-in Widevine build).
 - `web/`: `build.js` builds `web/dist` from `desktop/page/regis.html` (web CSP) plus `desktop-bundle.json`, the over-the-air update feed the desktop app downloads.
@@ -17,7 +21,7 @@ Regis is the owner's personal command centre: mail, calendar, tasks, a built-in 
 ## Build and test
 - `cd desktop && node scripts/make-index.js` after editing the page.
 - `cd desktop && npm test` (22 + 35 + 11), `cd web && node build.js && npm test` (17).
-- Electron UI test: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (53).
+- Electron UI tests: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (51) and `test/spotify.test.js` (9, fake Spotify SDK + Web API via `protocol.handle`).
 - jsdom suite lives outside the repo (`test/run.js`, about 510 checks) and may not be present.
 
 ## Gotchas
@@ -34,11 +38,14 @@ Regis is the owner's personal command centre: mail, calendar, tasks, a built-in 
 ## Open problems
 1. **In-app Spotify audio stops about 9 seconds in** (fixed in 1.7.7, not yet confirmed on the owner's machine). Cause: castlabs ECS ships only a development VMP signature (`electron.exe.sig`) and Spotify's licence server rejects it, so only the clear lead plays. `scripts/drm.js on|sign` now VMP-signs `node_modules/electron/dist` with castlabs EVS (`pip install castlabs-evs`, `python -m castlabs_evs.vmp sign-pkg`; one-time free EVS account, entered by the owner). Re-sign after every Electron reinstall. If it still fails, read the Playback report.
 2. Phone layout was rebuilt in 1.7.6 (bottom tab bar). Only checked in simulated iPhone screenshots, not on a device.
-3. Google sign-in in the built-in browser (1.7.7): Firefox identity on accounts.google.com only (`lib/browser.js` headers + per-navigation UA, `lib/bw-preload.js` hides `navigator.userAgentData`). Tested against the live sign-in page's fingerprint, not with a real account.
+3. Google sign-in in the built-in browser (1.7.9): plain Chrome UA everywhere plus a `window.chrome` surface (app, runtime, csi, loadTimes; functions report `[native code]`) injected by `lib/bw-preload.js` in the main world. Never call `wc.setUserAgent` during a navigation: it crashed Electron on the docs.google.com to accounts.google.com redirect (1.7.7/1.7.8). Not yet tested with a real account.
+
+## Notes from 1.7.9
+- Spotify rescue: `spRescue` (first `playback_error`, or the 1 s stall watchdog on `getCurrentState`) pauses the SDK, transfers to another device with `play:true`, and sets localStorage `regis-sp-drmbad` keyed by the engine signature's mtime (`getStatus().drmSig`); `spPlay2` then avoids the Regis device.
 
 ## Notes from 1.7.8
 - Design layer: the block starting "1.7.8 · Regis HUD design layer" at the end of the CSS. It only uses skin tokens, so it works for all skins; tokens `--surf`, `--edge`, `--depth`, `--hud*`, `--rctl`. Tactical and liquid glass keep their own radius.
-- Efficiency rules: animate only transform/opacity on HTML elements; no `backdrop-filter` on large surfaces (only with liquid glass); no animated shapes under blur; avoid rounded `overflow:hidden` around moving things. SVG CSS animations are paused and stepped by a 20 Hz driver (search "can't run on the graphics chip").
+- Efficiency rules: animate only transform/opacity on HTML elements; no `backdrop-filter` on large surfaces (only with liquid glass); no animated shapes under blur; avoid rounded `overflow:hidden` around moving things. Never animate parts inside an SVG: give the part its own SVG layer and animate the layer (`liftStatic`, `liftOver`, the home dial builder's `mk(..., "lift ...")`). Don't use `steps()` for motion (1.7.8 did; it looked laggy).
 - `html.away` (window hidden/minimised, sent by main as `win:vis`) pauses every animation and sets idle.
 - Perf numbers were measured with an Electron harness reading `app.getAppMetrics()` and CDP `Performance.getMetrics` per page.
 

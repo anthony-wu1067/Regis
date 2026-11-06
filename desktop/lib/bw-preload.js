@@ -3,18 +3,36 @@
    and tells Regis the host, username and password so Regis can offer to save them. It exposes nothing to the page. */
 const { ipcRenderer, contextBridge, webFrame } = require('electron');
 let last = '';
-/* On Google's sign-in pages Regis presents itself as Firefox (see lib/browser.js). Firefox has no navigator.userAgentData, so hide it
-   there too, or Google sees a mismatch and says "This browser or app may not be secure". Nothing changes on any other site. */
-if (location.protocol === 'https:' && /^accounts\.(google|youtube)\.com$/i.test(location.hostname)) {
-  const hide = function () {
-    try { delete Navigator.prototype.userAgentData; } catch (_) {}
-    var def = function (k, v) { try { Object.defineProperty(Navigator.prototype, k, { get: function () { return v; }, configurable: true }); } catch (_) {} };
-    def('vendor', ''); def('productSub', '20100101'); def('oscpu', navigator.platform === 'MacIntel' ? 'Intel Mac OS X 10.15' : navigator.platform.indexOf('Linux') === 0 ? 'Linux x86_64' : 'Windows NT 10.0; Win64; x64');
-    def('buildID', '20181001000000');
-    try { delete window.chrome; } catch (_) {} try { Object.defineProperty(window, 'chrome', { get: function () { return undefined; }, configurable: true }); } catch (_) {}
-  };
-  try { if (contextBridge && contextBridge.executeInMainWorld) contextBridge.executeInMainWorld({ func: hide }); else throw 0; }
-  catch (_) { try { webFrame.executeJavaScript('(' + hide.toString() + ')()'); } catch (_) {} }
+/* Give pages the window.chrome object real Chrome has (app, runtime, csi, loadTimes). Electron leaves it out, and Google's sign-in
+   treats that as an embedded browser: "This browser or app may not be secure". Runs in the page's own world before its scripts. */
+const chromeSurface = function () {
+  try {
+    var nat = new WeakSet(), T = Function.prototype.toString;
+    var mk = function (name, fn) { try { Object.defineProperty(fn, 'name', { value: name }); } catch (_) {} nat.add(fn); return fn; };
+    /* functions report themselves as built-in, like the real ones */
+    var ts = mk('toString', function toString() { return nat.has(this) ? 'function ' + (this.name || '') + '() { [native code] }' : T.call(this); });
+    Function.prototype.toString = ts;
+    var c = window.chrome && typeof window.chrome === 'object' ? window.chrome : {};
+    var tm = function () { return performance.timing || {}; }, nav = function () { return (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || {}; };
+    if (!c.app) c.app = { isInstalled: false, InstallState: { DISABLED: 'disabled', INSTALLED: 'installed', NOT_INSTALLED: 'not_installed' }, RunningState: { CANNOT_RUN: 'cannot_run', READY_TO_RUN: 'ready_to_run', RUNNING: 'running' },
+      getDetails: mk('getDetails', function () { return null; }), getIsInstalled: mk('getIsInstalled', function () { return false; }),
+      installState: mk('installState', function (cb) { if (typeof cb === 'function') setTimeout(function () { cb('not_installed'); }, 0); }), runningState: mk('runningState', function () { return 'cannot_run'; }) };
+    if (!c.runtime) c.runtime = { OnInstalledReason: { CHROME_UPDATE: 'chrome_update', INSTALL: 'install', SHARED_MODULE_UPDATE: 'shared_module_update', UPDATE: 'update' },
+      OnRestartRequiredReason: { APP_UPDATE: 'app_update', OS_UPDATE: 'os_update', PERIODIC: 'periodic' },
+      PlatformArch: { ARM: 'arm', ARM64: 'arm64', MIPS: 'mips', MIPS64: 'mips64', X86_32: 'x86-32', X86_64: 'x86-64' }, PlatformNaclArch: { ARM: 'arm', MIPS: 'mips', MIPS64: 'mips64', X86_32: 'x86-32', X86_64: 'x86-64' },
+      PlatformOs: { ANDROID: 'android', CROS: 'cros', FUCHSIA: 'fuchsia', LINUX: 'linux', MAC: 'mac', OPENBSD: 'openbsd', WIN: 'win' }, RequestUpdateCheckStatus: { NO_UPDATE: 'no_update', THROTTLED: 'throttled', UPDATE_AVAILABLE: 'update_available' },
+      connect: mk('connect', function () { throw new TypeError('Error in invocation of runtime.connect(optional string extensionId, optional object connectInfo): chrome.runtime.connect() called from a webpage must specify an Extension ID (string) for its first argument.'); }),
+      sendMessage: mk('sendMessage', function () { throw new TypeError('Error in invocation of runtime.sendMessage(optional string extensionId, any message, optional object options, optional function callback): chrome.runtime.sendMessage() called from a webpage must specify an Extension ID (string) for its first argument.'); }) };
+    if (!c.csi) c.csi = mk('csi', function () { var t = tm(); return { onloadT: t.domContentLoadedEventEnd || Date.now(), pageT: performance.now(), startE: t.navigationStart || Date.now(), tran: 15 }; });
+    if (!c.loadTimes) c.loadTimes = mk('loadTimes', function () { var t = tm(), n = nav(), p = (performance.getEntriesByType && performance.getEntriesByType('paint')[0]) || null, s = (t.navigationStart || 0) / 1000, pr = n.nextHopProtocol || 'h2';
+      return { commitLoadTime: (t.responseStart || 0) / 1000, connectionInfo: pr, finishDocumentLoadTime: (t.domContentLoadedEventEnd || 0) / 1000, finishLoadTime: (t.loadEventEnd || 0) / 1000, firstPaintAfterLoadTime: 0,
+        firstPaintTime: p ? s + p.startTime / 1000 : 0, navigationType: 'Other', npnNegotiatedProtocol: pr, requestTime: s, startLoadTime: s, wasAlternateProtocolAvailable: false, wasFetchedViaSpdy: pr === 'h2' || pr === 'h3', wasNpnNegotiated: true }; });
+    if (window.chrome !== c) Object.defineProperty(window, 'chrome', { value: c, writable: true, configurable: true, enumerable: true });
+  } catch (_) {}
+};
+if (/^https?:$/.test(location.protocol)) {
+  try { if (contextBridge && contextBridge.executeInMainWorld) contextBridge.executeInMainWorld({ func: chromeSurface }); else throw 0; }
+  catch (_) { try { webFrame.executeJavaScript('(' + chromeSurface.toString() + ')()'); } catch (_) {} }
 }
 const visible = (el) => { try { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch (_) { return false; } };
 function userFor(pw) {
