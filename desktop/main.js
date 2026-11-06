@@ -8,9 +8,10 @@ const { Anthropic } = require('./lib/anthropic');
 const { Canvas, normHost } = require('./lib/canvas');
 const { Mini } = require('./lib/mini');
 const { Updater } = require('./lib/updater');
-const { BrowserHost } = require('./lib/browser');
+const { BrowserHost, keyAction, PARTITION } = require('./lib/browser');
+const { Downloads, readFile } = require('./lib/downloads');
 
-let runningVersion = null, browserHost = null;
+let runningVersion = null, browserHost = null, linkInApp = false;
 let win = null, tray = null, quitting = false, capWin = null, mini = null, updater = null;
 const BUNDLED_PAGE = path.join(__dirname, 'renderer', 'index.html');
 const MINI_KEY = 'CommandOrControl+Shift+M';
@@ -82,8 +83,10 @@ function createWindow() {
     const onFail = (_e, code, _d, _u, isMainFrame) => { if (!isMainFrame || code === -3) return; win.webContents.removeListener('did-fail-load', onFail); updater.clear(); if (win && !win.isDestroyed()) win.loadFile(BUNDLED_PAGE); runningVersion = app.getVersion(); };
     win.webContents.on('did-fail-load', onFail); win.webContents.once('did-finish-load', () => { if (win && !win.isDestroyed()) win.webContents.removeListener('did-fail-load', onFail); });
   }
-  win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
-  win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('file:')) { e.preventDefault(); if (/^https?:/.test(url)) shell.openExternal(url); } });
+  /* web links from Regis (emails, calendar, ...) open in the Regis Browser when the page asked for that (Appearance option), else the default browser */
+  const openLink = (url) => { if (!/^https?:/i.test(url)) return; if (linkInApp && win && !win.isDestroyed()) win.webContents.send('app:link', url); else shell.openExternal(url); };
+  win.webContents.setWindowOpenHandler(({ url }) => { openLink(url); return { action: 'deny' }; });
+  win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('file:')) { e.preventDefault(); openLink(url); } });
   win.on('close', (e) => { if (!quitting) { e.preventDefault(); win.hide(); } }); // keep running in the tray so autopilot + scheduled sends continue
   win.webContents.on('did-finish-load', () => { if (pendingCaptures.length) win.webContents.send('capture:add', pendingCaptures.splice(0)); });
   win.webContents.on('before-input-event', (e, i) => { if (i.type === 'keyDown' && i.key === 'F11') { e.preventDefault(); win.setFullScreen(!win.isFullScreen()); } });
@@ -116,6 +119,7 @@ app.whenReady().then(async () => {
   session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) => cb(perm === 'media' || perm === 'protected-media-identifier'));
   session.defaultSession.setPermissionCheckHandler((_wc, perm) => perm === 'media' || perm === 'protected-media-identifier');
   ipcMain.handle('app:drm', wrap(() => DRM));
+  ipcMain.handle('app:linkMode', wrap((inApp) => { linkInApp = !!inApp; return linkInApp; }));
   /* a site's icon for a shortcut: fetched here (pages can't, because of web security rules); images only, small, http(s) sites only */
   ipcMain.handle('app:favicon', wrap(async (u) => {
     let host = ''; try { const x = new URL(String(u || '')); if (!/^https?:$/.test(x.protocol)) throw 0; host = x.hostname; } catch (_) { throw new Error('Not a web address'); }
@@ -173,7 +177,20 @@ app.whenReady().then(async () => {
   ipcMain.handle('app:saveUpdateUrl', wrap((u) => { store.setMeta('updateUrl', String(u || '').trim()); return true; }));
   ipcMain.handle('app:updateCheck', wrap(() => runCheck()));
   ipcMain.handle('app:updateApply', wrap(() => { const st = updater.current(); if (!st || !win) return false; runningVersion = st.version; win.loadFile(path.join(st.dir, 'index.html')); return true; }));
-  browserHost = new BrowserHost({ getWin: () => win, onKey: (k) => { if (win && !win.isDestroyed()) win.webContents.send('browser:key', k); }, onCred: (c) => { if (win && !win.isDestroyed()) win.webContents.send('browser:cred', c); }, shield: store.getMeta('bwShield', '1') !== '0', onPersist: (urls) => store.setMeta('bwTabs', JSON.stringify(urls)) });
+  const send = (ch, v) => { try { if (win && !win.isDestroyed()) win.webContents.send(ch, v); } catch (_) {} };
+  /* browsing history (for address-bar suggestions and Ctrl+H): newest first, one entry per address, last 2000 */
+  let HIST = []; try { HIST = JSON.parse(store.getMeta('bwHistory', '[]') || '[]'); } catch (_) {} let histT = null;
+  const histSave = () => { clearTimeout(histT); histT = setTimeout(() => store.setMeta('bwHistory', JSON.stringify(HIST.slice(0, 2000))), 1500); };
+  const histAdd = (h) => { const u = String(h.u || '').slice(0, 800); if (!/^https?:\/\//i.test(u)) return; const at = Date.now(); const i0 = HIST.findIndex((x) => x.u === u);
+    if (i0 >= 0) { const x = HIST.splice(i0, 1)[0]; if (h.t) x.t = String(h.t).slice(0, 200); if (at - (x.at || 0) > 30000) x.n = (x.n || 1) + 1; x.at = at; HIST.unshift(x); } else HIST.unshift({ u, t: String(h.t || '').slice(0, 200), at, n: 1 }); if (HIST.length > 2200) HIST.length = 2000; histSave(); };
+  const histFind = (q, n) => { q = String(q || '').toLowerCase().trim(); n = Math.max(1, Math.min(200, +n || 8)); if (!q) return HIST.slice(0, n);
+    const w = q.split(/\s+/); const sc = (x) => { const s2 = (x.u + ' ' + (x.t || '')).toLowerCase(); if (!w.every((k) => s2.indexOf(k) >= 0)) return -1; const host = x.u.replace(/^https?:\/\/(www\.)?/i, '').toLowerCase(); return (host.indexOf(q) === 0 ? 50 : 0) + Math.min(30, (x.n || 1) * 3) + Math.max(0, 20 - (Date.now() - x.at) / 864e5); };
+    return HIST.map((x) => [sc(x), x]).filter((p) => p[0] >= 0).sort((a, b) => b[0] - a[0]).slice(0, n).map((p) => p[1]); };
+  /* Easy Files: a site asked for a file; Regis's picker answers through these one-time tokens */
+  const filePend = new Map();
+  browserHost = new BrowserHost({ getWin: () => win, sleepMin: +store.getMeta('bwSleep', 30), onFind: (r) => send('browser:find', r), onHistory: histAdd, onFilePick: (r) => { filePend.set(r.token, { wc: r.wc, multiple: r.multiple, at: Date.now() }); if (filePend.size > 30) filePend.delete(filePend.keys().next().value); send('browser:filepick', { token: r.token, accept: r.accept, multiple: r.multiple, host: r.host, tab: r.tab }); }, onKey: (k) => { if (win && !win.isDestroyed()) win.webContents.send('browser:key', k); }, onCred: (c) => { if (win && !win.isDestroyed()) win.webContents.send('browser:cred', c); }, shield: store.getMeta('bwShield', '1') !== '0', onPersist: (urls) => store.setMeta('bwTabs', JSON.stringify(urls)) });
+  const dl = new Downloads({ dir: app.getPath('downloads'), load: () => { try { return JSON.parse(store.getMeta('downloads', '[]') || '[]'); } catch (_) { return []; } }, save: (l) => store.setMeta('downloads', JSON.stringify(l)), onChange: (l) => send('browser:downloads', l), onDone: (d) => send('browser:dldone', d) });
+  dl.attach(session.fromPartition(PARTITION));
   const bw = browserHost;
   ipcMain.handle('browser:state', wrap(() => { if (!bw.tabs.length) { let urls = []; try { urls = JSON.parse(store.getMeta('bwTabs', '[]') || '[]'); } catch (_) {} bw.init(); if (urls.length) bw.restore(urls); else bw.open(''); } return bw.snapshot(); }));
   ipcMain.handle('browser:open', wrap((u) => bw.open(u)));
@@ -185,10 +202,70 @@ app.whenReady().then(async () => {
   ipcMain.handle('browser:reload', wrap((id) => bw.reload(+id)));
   ipcMain.handle('browser:stop', wrap((id) => bw.stop(+id)));
   ipcMain.handle('browser:bounds', wrap((b) => bw.setBounds(b || {})));
-  ipcMain.handle('browser:show', wrap((v) => bw.show(!!v)));
+  ipcMain.handle('browser:show', wrap((v, snap) => bw.show(!!v, snap !== false)));
   ipcMain.on('bw:cred', (e, d) => { try { bw.cred(e.sender, d); } catch (_) {} });
   ipcMain.handle('browser:fill', wrap((id, user, pass) => bw.fill(+id, user, pass)));
   ipcMain.handle('browser:shield', wrap((on) => { store.setMeta('bwShield', on ? '1' : '0'); return bw.setShield(!!on); }));
+  ipcMain.handle('browser:move', wrap((id, to) => bw.move(+id, +to)));
+  ipcMain.handle('browser:duplicate', wrap((id) => bw.duplicate(+id)));
+  ipcMain.handle('browser:reopen', wrap(() => bw.reopen()));
+  ipcMain.handle('browser:mute', wrap((id, on) => bw.mute(+id, on === undefined ? undefined : !!on)));
+  ipcMain.handle('browser:find', wrap((id, text, o) => bw.find(+id, String(text || '').slice(0, 300), { back: !!(o && o.back), next: !!(o && o.next) })));
+  ipcMain.handle('browser:stopFind', wrap((id) => bw.stopFind(+id)));
+  ipcMain.handle('browser:print', wrap((id) => bw.print(+id)));
+  ipcMain.handle('browser:zoom', wrap((id, lv) => bw.zoom(+id, +lv)));
+  ipcMain.handle('browser:sleep', wrap((id) => bw.sleep(+id)));
+  ipcMain.handle('browser:setSleep', wrap((m) => { const v = bw.setSleep(+m); store.setMeta('bwSleep', v); return v; }));
+  ipcMain.handle('browser:viewKeys', wrap((k) => { keyAction.views = String(k || '').toLowerCase().replace(/[^a-z]/g, '').slice(0, 26); return keyAction.views; }));
+  ipcMain.handle('browser:history', wrap((q, n) => histFind(q, n)));
+  ipcMain.handle('browser:historyDel', wrap((u) => { HIST = HIST.filter((x) => x.u !== String(u)); histSave(); return true; }));
+  ipcMain.handle('browser:clear', wrap(async (o) => { o = o || {}; if (o.history) { HIST = []; histSave(); } if (o.downloads) dl.clear(); await bw.clearData({ cache: !!o.cache, cookies: !!o.cookies }); return true; }));
+  ipcMain.on('bw:filepick', (e, d) => { try { bw.filePick(e.sender, d); } catch (_) {} });
+  ipcMain.handle('browser:fileGive', wrap(async (token, c) => {
+    const p = filePend.get(String(token)); if (!p) return false; filePend.delete(String(token)); c = c || {};
+    if (p.wc.isDestroyed()) return false;
+    if (c.cancel) return true;
+    if (c.native) { p.wc.send('bw:files', { token, native: true }); return true; }
+    let files = [];
+    if (c.browse) { const r = await require('electron').dialog.showOpenDialog(win, { properties: ['openFile'].concat(p.multiple ? ['multiSelections'] : []) }); if (r.canceled) return false; files = (r.filePaths || []).slice(0, p.multiple ? 20 : 1).map(readFile); }
+    else files = (Array.isArray(c.ids) ? c.ids : []).slice(0, p.multiple ? 20 : 1).map((id) => dl.read(id));
+    if (files.length) p.wc.send('bw:files', { token, files: files.map((f) => ({ name: f.name, type: f.type, data: new Uint8Array(f.data.buffer, f.data.byteOffset, f.data.byteLength) })) });
+    return files.length;
+  }));
+  /* Office page: Word/Excel/PowerPoint files in Documents, Downloads, Desktop and OneDrive (newest first). Only files from this list can be opened. */
+  const OFFICE_EXT = /\.(docx?|docm|rtf|odt|xlsx?|xlsm|csv|ods|pptx?|pptm|odp)$/i; let officeSeen = new Set();
+  ipcMain.handle('office:recent', wrap(async () => {
+    const fsp = require('fs').promises, home = app.getPath('home'), roots = [];
+    const add = (p, label) => { if (p && !roots.some((r) => r.p.toLowerCase() === String(p).toLowerCase())) roots.push({ p, label }); };
+    add(app.getPath('documents'), 'Documents'); add(app.getPath('downloads'), 'Downloads'); add(app.getPath('desktop'), 'Desktop');
+    ['OneDrive', 'OneDriveConsumer', 'OneDriveCommercial'].forEach((k) => add(process.env[k], 'OneDrive'));
+    const out = []; let seen = 0;
+    const walk = async (dir, depth, label) => {
+      if (depth > 3 || seen > 6000) return; let ents = [];
+      try { ents = await fsp.readdir(dir, { withFileTypes: true }); } catch (_) { return; }
+      for (const e of ents) { seen++; if (seen > 6000) return; const n = e.name; if (n.startsWith('.') || n.startsWith('~$') || /^(node_modules|AppData|\$RECYCLE\.BIN)$/i.test(n)) continue; const p = path.join(dir, n);
+        if (e.isDirectory()) await walk(p, depth + 1, label);
+        else if (OFFICE_EXT.test(n)) { try { const st = await fsp.stat(p); out.push({ path: p, name: n, size: st.size, mtime: st.mtimeMs, where: label + (path.dirname(p).length > 0 && path.dirname(p) !== roots.find((r) => r.label === label).p ? ' › ' + path.basename(path.dirname(p)) : '') }); } catch (_) {} } }
+    };
+    for (const r of roots) await walk(r.p, 0, r.label);
+    const uniq = new Map(); out.forEach((f) => uniq.set(f.path.toLowerCase(), f));
+    const list = [...uniq.values()].sort((a, b) => b.mtime - a.mtime).slice(0, 200);
+    officeSeen = new Set(list.map((f) => f.path)); void home; return list;
+  }));
+  ipcMain.handle('office:open', wrap(async (p) => { p = String(p || ''); if (!officeSeen.has(p)) throw new Error('Refresh the list and try again.'); const e = await shell.openPath(p); if (e) throw new Error(e); return true; }));
+  ipcMain.handle('office:show', wrap((p) => { p = String(p || ''); if (!officeSeen.has(p)) throw new Error('Refresh the list and try again.'); shell.showItemInFolder(p); return true; }));
+  /* downloads list and actions (Ctrl+J panel) */
+  ipcMain.handle('dl:list', wrap(() => dl.list()));
+  ipcMain.handle('dl:open', wrap((id) => { const p = dl.pathOf(id); if (!p) throw new Error('That file is no longer there.'); return shell.openPath(p); }));
+  ipcMain.handle('dl:show', wrap((id) => { const p = dl.pathOf(id); if (p) shell.showItemInFolder(p); else shell.openPath(app.getPath('downloads')); return true; }));
+  ipcMain.handle('dl:cancel', wrap((id) => dl.cancel(id)));
+  ipcMain.handle('dl:pause', wrap((id) => dl.pause(id)));
+  ipcMain.handle('dl:resume', wrap((id) => dl.resume(id)));
+  ipcMain.handle('dl:remove', wrap((id) => dl.remove(id)));
+  ipcMain.handle('dl:clear', wrap(() => dl.clear()));
+  ipcMain.handle('dl:folder', wrap(() => shell.openPath(app.getPath('downloads'))));
+  /* a finished download as bytes, for an upload inside Regis itself */
+  ipcMain.handle('dl:read', wrap((id) => { const f = dl.read(id); return { name: f.name, type: f.type, data: new Uint8Array(f.data.buffer, f.data.byteOffset, f.data.byteLength) }; }));
   ipcMain.handle('win:fullscreen', wrap((on) => { if (!win) return false; win.setFullScreen(typeof on === 'boolean' ? on : !win.isFullScreen()); return win.isFullScreen(); }));
   ipcMain.handle('win:fsState', wrap(() => !!(win && win.isFullScreen())));
   ipcMain.handle('app:mini', wrap((on) => setMini(!!on)));

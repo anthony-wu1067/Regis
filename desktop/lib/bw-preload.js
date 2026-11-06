@@ -56,3 +56,22 @@ function send() {
 window.addEventListener('submit', send, true);
 window.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target && e.target.type === 'password') send(); }, true);
 window.addEventListener('click', (e) => { const b = e.target && e.target.closest && e.target.closest('button,input[type=submit],[role=button]'); if (b && grab()) setTimeout(send, 0); }, true);
+/* Easy Files: when the site opens its "upload a file" box, Regis offers your recent downloads first (and the normal file dialog).
+   The file you pick is handed to that upload box only; the site never sees anything else on your computer. */
+const picks = new Map(); let pickN = 0, bypass = null;
+window.addEventListener('click', (e) => {
+  const el = e.target; if (!el || el.tagName !== 'INPUT' || String(el.type).toLowerCase() !== 'file' || el.disabled) return;
+  if (bypass === el) { bypass = null; return; }
+  e.preventDefault(); e.stopImmediatePropagation();
+  const token = 'f' + (++pickN) + Math.random().toString(36).slice(2, 10); picks.set(token, el); if (picks.size > 20) picks.delete(picks.keys().next().value);
+  try { ipcRenderer.send('bw:filepick', { token, accept: String(el.accept || '').slice(0, 300), multiple: !!el.multiple }); } catch (_) {}
+}, true);
+ipcRenderer.on('bw:files', (_e, d) => {
+  const el = d && picks.get(d.token); if (!el) return; picks.delete(d.token);
+  if (d.native) { bypass = el; try { el.click(); } catch (_) {} return; }  /* Easy Files switched off: the site's own file box */
+  if (!Array.isArray(d.files) || !d.files.length) return;
+  try {
+    const dt = new DataTransfer(); (el.multiple ? d.files : d.files.slice(0, 1)).forEach((f) => dt.items.add(new File([f.data], String(f.name || 'file'), { type: String(f.type || ''), lastModified: Date.now() })));
+    el.files = dt.files; el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true }));
+  } catch (_) {}
+});

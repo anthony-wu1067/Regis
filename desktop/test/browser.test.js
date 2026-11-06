@@ -10,6 +10,9 @@ const srv = http.createServer((q, r) => {
   r.setHeader('content-type', 'text/html');
   if (q.url === '/a') r.end('<title>Page A</title><a id=l href="/b">go</a><img src="http://x.doubleclick.net/p.png"><p id=n>' + 'x' + '</p>');
   else if (q.url === '/b') r.end('<title>Page B</title>b');
+  else if (q.url === '/words') r.end('<title>Words</title><p>apple banana apple cherry apple</p>');
+  else if (q.url === '/up') r.end('<title>Upload</title><input id=f type=file multiple><script>document.getElementById("f").addEventListener("change",function(){document.title="got:"+[].map.call(this.files,function(x){return x.name+"/"+x.size}).join(",")})</script>');
+  else if (q.url === '/file.txt') { r.setHeader('content-type', 'text/plain'); r.setHeader('content-disposition', 'attachment; filename="notes.txt"'); r.end('hello regis'); return; }
   else if (q.url === '/login') r.end('<title>Login</title><form id=f onsubmit="return false"><input id=u name=username type=text><input id=p type=password></form><input id=hid type=password style="display:none">');
   else r.end('<title>Other</title>');
 });
@@ -23,10 +26,11 @@ app.whenReady().then(async () => {
   ok(/google\.com\/search/.test(resolveInput('javascript:alert(1)')) && /google\.com\/search/.test(resolveInput('file:///etc/passwd')), 'javascript: and file: never navigate');
   ok(resolveInput('') === '', 'empty stays empty');
   ok(hostBlocked('x.doubleclick.net') && !hostBlocked('google.com') && !hostBlocked('notdoubleclick.net'), 'shield host matching');
-  const win = new BrowserWindow({ width: 1200, height: 800, show: false }); await win.loadURL('data:text/html,<body>shell</body>');
+  const win = new BrowserWindow({ width: 1200, height: 800, show: true }); await win.loadURL('data:text/html,<body>shell</body>');
   const states = []; win.webContents.executeJavaScript('0');
-  const host = new BrowserHost({ getWin: () => win, onCred: (c) => creds.push(c), onPersist: (u) => { host._persisted = u; } });
+  const finds = [], picks = [], hist = []; const host = new BrowserHost({ getWin: () => win, onCred: (c) => creds.push(c), onPersist: (u) => { host._persisted = u; }, onFind: (r) => finds.push(r), onFilePick: (r) => picks.push(r), onHistory: (h) => hist.push(h) });
   ipcMain.on('bw:cred', (e, d) => host.cred(e.sender, d));
+  ipcMain.on('bw:filepick', (e, d) => host.filePick(e.sender, d));
   host.init();
   const a = host.open(''); ok(host.snapshot().tabs.length === 1 && host.snapshot().tabs[0].blank, 'new tab starts blank (start page)');
   host.show(true); host.setBounds({ x: 60, y: 120, width: 900, height: 600 }); ok(host.attached === null, 'blank tab attaches no web view');
@@ -47,7 +51,7 @@ app.whenReady().then(async () => {
   await wc.executeJavaScript("window.open('/other')", true); ok(await until(() => host.tabs.length === 2), 'window.open opens a new tab inside Regis'); 
   ok(host.active === host.tabs[1].id, 'new tab becomes active');
   host.activate(a); ok(host.active === a && host.attached === host.tabs[0].view, 'switching tabs swaps the view');
-  host.show(false); ok(host.attached === null && !win.contentView.children.some((c) => host.tabs.some((t) => t.view === c)), 'hiding removes the view (so Regis dialogs can show)');
+  const shot = await host.show(false); ok(host.attached === null && host.tabs.every((t) => !t.view || t.vis === false), 'hiding makes the page invisible (so Regis dialogs can show)'); ok(/^data:image\/jpeg;base64,/.test(shot.snap || ''), 'hiding hands Regis a snapshot of the page to show meanwhile (no blank flash)');
   host.show(true);
   ok(await until(() => Array.isArray(host._persisted), 4000) && Array.isArray(host._persisted) && host._persisted.length >= 1 && host._persisted.every((u) => /^https?:/.test(u)), 'open tabs are remembered');
   // password manager: detect a login form, fill it, and notice a submitted login
@@ -91,5 +95,33 @@ app.whenReady().then(async () => {
     ok(j.chrome === 'object' && j.keys >= 4, 'Google sign-in page sees a full window.chrome');
     ok(!/Electron|regis/i.test(sent[sent.length - 1]['User-Agent'] || ''), 'requests to Google carry no Electron or app name');
   }
+  // 1.8.2 engine: tab order, duplicate, reopen, mute, find, history, sleeping tabs, downloads, Easy Files, shortcuts
+  ok(keyAction({ type: 'keyDown', key: 't', control: true, shift: true }) === 'reopen' && keyAction({ type: 'keyDown', key: 'f', control: true }) === 'find' && keyAction({ type: 'keyDown', key: '2', control: true }) === 'tab2' && keyAction({ type: 'keyDown', key: 'm', alt: true }) === 'view-m' && keyAction({ type: 'keyDown', key: 'q', alt: true }) === null, 'new shortcuts: Ctrl+Shift+T, Ctrl+F, Ctrl+1-9, Alt+page letter (other Alt keys stay with the site)');
+  const t1 = host.tabs[0].id; host.go(t1, base + '/a'); await until(() => host._tab(t1).title === 'Page A');
+  const t2 = host.open(base + '/b'), t3 = host.open(base + '/words'); await until(() => host._tab(t3).title === 'Words');
+  host.move(t3, 0); ok(host.tabs[0].id === t3, 'a tab can be moved to another position');
+  const d = host.duplicate(t2); await until(() => host._tab(d) && host._tab(d).title === 'Page B'); ok(host.tabs.findIndex((x) => x.id === d) === host.tabs.findIndex((x) => x.id === t2) + 1, 'duplicate opens a copy right after the tab');
+  host.close(d); const back = host.reopen(); ok(back && /\/b$/.test(host._tab(back).url), 'Ctrl+Shift+T brings back the closed tab');
+  ok(host.mute(t2, true) === true && host._tab(t2).muted && host.tabs[0].view.webContents.isAudioMuted() === false && host._tab(t2).view.webContents.isAudioMuted(), 'a tab can be muted on its own');
+  host.activate(t3); host.find(t3, 'apple'); ok(await until(() => finds.some((r) => r.tab === t3 && r.matches === 3)), 'find in page counts the matches (3)');
+  host.find(t3, 'apple', { next: true }); host.stopFind(t3);
+  ok(hist.some((h) => /\/words$/.test(h.u)), 'visited pages are recorded for history and suggestions');
+  host.activate(t1); host._tab(t2).last = Date.now() - 3600e3; host.sleepMin = 30; const n = host._sleepIdle();
+  ok(n >= 1 && host._tab(t2).asleep && !host._tab(t2).view && host.snapshot().tabs.find((x) => x.id === t2).asleep, 'an unused tab goes to sleep and frees its memory');
+  host.activate(t2); ok(!!host._tab(t2).view && !host._tab(t2).asleep, 'opening a sleeping tab wakes it'); ok(await until(() => host._tab(t2).title === 'Page B'), 'and it reloads its page');
+  host.sleepMin = 0;
+  // downloads
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'regis-dl-')); const { Downloads } = require('../lib/downloads'); const done = [];
+  const dl = new Downloads({ dir, onDone: (x) => done.push(x) }); dl.attach(host.ses);
+  host._wc(t1).downloadURL(base + '/file.txt'); ok(await until(() => done.length === 1, 8000), 'a download finishes');
+  const fl = dl.list()[0]; ok(fl && fl.name === 'notes.txt' && fs.readFileSync(fl.path, 'utf8') === 'hello regis' && path.dirname(fl.path) === dir, 'it is saved to the downloads folder under its own name');
+  host._wc(t1).downloadURL(base + '/file.txt'); await until(() => done.length === 2, 8000); ok(dl.list()[0].name === 'notes (1).txt', 'a second copy does not overwrite the first');
+  // Easy Files: the site's file box asks Regis first, then gets exactly the picked file
+  const tu = host.open(base + '/up'); await until(() => host._tab(tu).title === 'Upload'); await sleep(300);
+  await host._wc(tu).executeJavaScript('document.getElementById("f").click()', true);
+  ok(await until(() => picks.some((r) => r.tab === tu && r.multiple === true)), "opening a site's upload box asks Regis first (Easy Files)");
+  const pk = picks.find((r) => r.tab === tu), f = dl.read(fl.id);
+  pk.wc.send('bw:files', { token: pk.token, files: [{ name: f.name, type: f.type, data: new Uint8Array(f.data) }] });
+  ok(await until(() => host._tab(tu).title === 'got:notes.txt/11'), 'the picked download lands in the site\'s upload box (' + host._tab(tu).title + ')');
   host.destroy(); srv.close(); console.log(pass + ' passed, ' + fail + ' failed'); app.exit(fail ? 1 : 0);
 });

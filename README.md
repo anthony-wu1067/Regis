@@ -84,6 +84,20 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.2 A fuller browser, Office page, scalable page switcher
+
+- **Tabs:** drag to reorder; drag onto a group's name (or a tab in a group) to join it, anywhere else to leave. The ⊞ button is gone: right-click a tab for New tab, Reload, Duplicate, Mute, Bookmark, Copy link, Add to group, Put to sleep, Close, Close others, Close to the right, Reopen closed tab. Tabs show the site's icon and a speaker when they play sound (click it to mute).
+- **Sleeping tabs:** tabs you haven't opened for a while (30 min by default; Appearance > Browser) give their memory back and reload when you open them. Tabs playing sound stay awake.
+- **No more blank flashes:** when a menu or dialog covers the page, a snapshot of the page stays underneath, and switching tabs no longer detaches and re-attaches pages.
+- **Downloads** (Ctrl+J or the arrow in the address bar): saved to your Downloads folder, with progress, pause/resume/cancel, open and show in folder. **Easy Files:** when a website or Regis asks for a file, your recent downloads come first, plus Browse this computer.
+- **Also new:** Find in page (Ctrl+F), History (Ctrl+H) and address-bar suggestions from history and bookmarks, Clear browsing data, Print (Ctrl+P), zoom indicator, Ctrl+1 to 9 for tabs, Ctrl+Shift+T to reopen, spelling suggestions, Save/Copy image and Inspect on right-click.
+- **Alt + first letter** switches pages from anywhere, even inside a web page: Alt+H Home, Alt+W Workspace, Alt+M Music, Alt+B Browser, Alt+O Office.
+- **Page switcher** is built from one list of pages, so new pages slot in: icons with names (icons only once there are more than five in the bar), pages can be moved under a ⋯ menu in Appearance > Pages, and the phone tab bar shows up to five with More beyond that.
+- **Office page:** new Word, Excel and PowerPoint files on the web (word.new, excel.new, powerpoint.new, saved to OneDrive), Microsoft 365 home and OneDrive in the Regis Browser, and the Office files in Documents, Downloads, Desktop and OneDrive listed newest first, opened in your desktop Office apps.
+- **Priority colours are back** on email (HIGH red, MED amber, LOW green) and tasks (P1/P2/P3), with a matching edge on each row.
+- **Links in emails open in the Regis Browser** (Appearance > Browser > Open links in the Regis Browser to change it).
+- Updating: the desktop app changed, so run *Install Regis* once.
+
 ## 1.8.1 Spotify stays within its limits, space bar
 
 - **"Spotify needs a break" fixed at the cause.** Spotify allows personal apps only a modest number of requests. Regis checked Spotify every 5 seconds even while minimised or in the tray (about 17,000 times a day), and after every player event. Now: nothing while minimised or hidden, every 5 s only while something plays elsewhere, every 15 s when paused, every 30 s when Regis itself plays (its own player tells it what's on). Library, Home sections, playlists and albums are reused for 5 to 15 minutes instead of being fetched each time.
