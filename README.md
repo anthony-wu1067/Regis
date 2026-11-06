@@ -84,6 +84,16 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.0 Spotify-style library, smooth scrolling and lyrics, custom icons
+
+- **Music library like the Spotify app.** New playlist (the + in Your Library), Edit details (name, description, public or private), Delete, Save to / Remove from Library, Copy link. Every song has a ⋯ menu (also on right-click): Add to queue, Add to playlist (or a new one), Remove from this playlist, Like, Go to album or artist, Copy link. Folders can be renamed (✎).
+- **Seek bar:** the coloured fill follows the knob instantly while you drag, and moves smoothly while a song plays instead of jumping once a second.
+- **Lyrics:** the Lyrics button opens them and a second press closes them (it lights up while open). Lines now switch exactly on time (they were checked only every 0.35 s, and the network delay wasn't counted), and light up 0.35 s early so they're on screen as the words start. Adjust it in Appearance → Spotify → Lyrics timing.
+- **Smooth scrolling everywhere.** Long lists scrolled at about 30 fps because rows sliding under the mouse kept changing their hover look, forcing a full-page layout every frame. Hover now pauses while you scroll: a 300-song playlist scrolls at a steady 60 fps.
+- **Custom icons** for sidebar shortcuts, favourites and bookmarks: 26 preset icons, 10 colours or any colour, your own picture (shrunk to a small square), or the site's own icon (desktop app). Sidebar: Edit, then Icon. Favourites: Edit favourites, then ✎. Bookmarks bar: Edit, then click a bookmark to rename it, change its icon or delete it.
+- The address bar text no longer starts right against the lock.
+- Updating: the desktop app changed (site icons), so run *Install Regis* once.
+
 ## 1.7.9 Regis.exe, Google Docs crash, dependable Spotify, smooth motion
 
 - **Regis is now a real app: `Regis.exe`.** Like a game folder: it installs to `AppData\Local\Programs\Regis`, and the Desktop and Start-menu shortcuts point at `Regis.exe` itself (no more "electron.exe has been changed or moved"). *Setup Regis* builds and installs it; *Install Regis* rebuilds it after an update. Your data and settings are kept.

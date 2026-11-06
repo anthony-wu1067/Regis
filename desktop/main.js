@@ -116,6 +116,16 @@ app.whenReady().then(async () => {
   session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) => cb(perm === 'media' || perm === 'protected-media-identifier'));
   session.defaultSession.setPermissionCheckHandler((_wc, perm) => perm === 'media' || perm === 'protected-media-identifier');
   ipcMain.handle('app:drm', wrap(() => DRM));
+  /* a site's icon for a shortcut: fetched here (pages can't, because of web security rules); images only, small, http(s) sites only */
+  ipcMain.handle('app:favicon', wrap(async (u) => {
+    let host = ''; try { const x = new URL(String(u || '')); if (!/^https?:$/.test(x.protocol)) throw 0; host = x.hostname; } catch (_) { throw new Error('Not a web address'); }
+    const r = await require('electron').net.fetch('https://www.google.com/s2/favicons?sz=128&domain=' + encodeURIComponent(host));
+    if (!r.ok) throw new Error('No icon found');
+    const type = String(r.headers.get('content-type') || '').split(';')[0].trim();
+    if (!/^image\/(png|x-icon|vnd\.microsoft\.icon|jpeg|gif|webp|svg\+xml)$/.test(type)) throw new Error('Not an image');
+    const b = Buffer.from(await r.arrayBuffer()); if (b.length > 400000) throw new Error('Icon too large');
+    return 'data:' + type + ';base64,' + b.toString('base64');
+  }));
   /* Vault device key: lets this computer fill and save logins without the master password. Kept only when the OS can protect it
      (Windows DPAPI / macOS Keychain via safeStorage); never written in a readable form. */
   const vaultSafe = () => { try { return safeStorage.isEncryptionAvailable(); } catch (_) { return false; } };

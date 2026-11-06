@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('regisBridge', {
   notify: (title, body) => call('app:notify', title, body),
   spotifyAuth: (url) => call('spotify:auth', url), drm: () => call('app:drm'),
   vaultKey: { get: () => call('vault:keyGet'), set: (k) => call('vault:keySet', k) },
+  favicon: (u) => call('app:favicon', u),
   onVis: (cb) => { ipcRenderer.on('win:vis', (_e, v) => { try { cb(!!v); } catch (_) {} }); },
   saveUpdateUrl: (u) => call('app:saveUpdateUrl', u), updateCheck: () => call('app:updateCheck'), updateApply: () => call('app:updateApply'),
   onUpdate: (cb) => { ipcRenderer.on('update:ready', (_e, v) => { try { cb(String(v)); } catch (_) {} }); },

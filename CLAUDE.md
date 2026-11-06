@@ -9,7 +9,8 @@ Regis is the owner's personal command centre: mail, calendar, tasks, a built-in 
 - Never reproduce song lyrics. Lyrics come from LRCLIB at runtime.
 
 ## Packaging
-- `scripts/build-app.js [--install] [--no-sign]` makes `desktop/dist/Regis/Regis.exe` (engine from `node_modules/electron/dist`, app in `resources/app`, icon via rcedit) and with `--install` copies it to `%LOCALAPPDATA%\Programs\Regis` and rewrites the Desktop/Start-menu shortcuts. `Setup Regis.bat` and `Install Regis.bat` run it. userData stays `AppData\Roamingegis`; localStorage for file:// is shared across folders, so settings carry over.
+- `scripts/build-app.js [--install] [--no-sign]` makes `desktop/dist/Regis/Regis.exe` (engine from `node_modules/electron/dist`, app in `resources/app`, icon via rcedit) and with `--install` copies it to `%LOCALAPPDATA%\Programs\Regis` and rewrites the Desktop/Start-menu shortcuts. `Setup Regis.bat` and `Install Regis.bat` run it. userData stays `AppData\Roaming
+egis`; localStorage for file:// is shared across folders, so settings carry over.
 - Renaming/re-iconing the exe invalidates the VMP signature: `drm.js sign` signs `node_modules/electron/dist` and the installed `Regis.exe`.
 
 ## Layout
@@ -21,7 +22,7 @@ Regis is the owner's personal command centre: mail, calendar, tasks, a built-in 
 ## Build and test
 - `cd desktop && node scripts/make-index.js` after editing the page.
 - `cd desktop && npm test` (22 + 35 + 11), `cd web && node build.js && npm test` (17).
-- Electron UI tests: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (51) and `test/spotify.test.js` (9, fake Spotify SDK + Web API via `protocol.handle`).
+- Electron UI tests: `xvfb-run -a node_modules/electron/dist/electron --no-sandbox test/browser.test.js` (51) and `test/spotify.test.js` (9, fake Spotify SDK + Web API via `protocol.handle`), `test/music.test.js` (21: library management, seek, lyrics timing, 300-row scroll smoothness), `test/browser-ui.test.js` (16: icons, address bar).
 - jsdom suite lives outside the repo (`test/run.js`, about 510 checks) and may not be present.
 
 ## Gotchas
@@ -34,11 +35,18 @@ Regis is the owner's personal command centre: mail, calendar, tasks, a built-in 
 - The main script is one IIFE ending in `boot();
 })();`. Add new code inside it, before `boot();`, or it can't see the page's functions.
 - Don't name CSS custom properties `--rc` (it's the constellation mask image).
+- The click router's variables are `act` (the action) and `b` (the button), not `a`. Library rows use `.sp-mv` for an absolutely placed button: don't reuse that class.
+- Hover changes during scrolling forced a full layout per frame; the capture scroll listener adds `.scr` to the scrolling element (children get `pointer-events:none` for 150 ms). `content-visibility` on rows made it worse.
 
 ## Open problems
 1. **In-app Spotify audio stops about 9 seconds in** (fixed in 1.7.7, not yet confirmed on the owner's machine). Cause: castlabs ECS ships only a development VMP signature (`electron.exe.sig`) and Spotify's licence server rejects it, so only the clear lead plays. `scripts/drm.js on|sign` now VMP-signs `node_modules/electron/dist` with castlabs EVS (`pip install castlabs-evs`, `python -m castlabs_evs.vmp sign-pkg`; one-time free EVS account, entered by the owner). Re-sign after every Electron reinstall. If it still fails, read the Playback report.
 2. Phone layout was rebuilt in 1.7.6 (bottom tab bar). Only checked in simulated iPhone screenshots, not on a device.
-3. Google sign-in in the built-in browser (1.7.9): plain Chrome UA everywhere plus a `window.chrome` surface (app, runtime, csi, loadTimes; functions report `[native code]`) injected by `lib/bw-preload.js` in the main world. Never call `wc.setUserAgent` during a navigation: it crashed Electron on the docs.google.com to accounts.google.com redirect (1.7.7/1.7.8). Not yet tested with a real account.
+3. Google sign-in in the built-in browser (since 1.7.9): plain Chrome UA everywhere plus a `window.chrome` surface (app, runtime, csi, loadTimes; functions report `[native code]`) injected by `lib/bw-preload.js` in the main world. Never call `wc.setUserAgent` during a navigation: it crashed Electron on the docs.google.com to accounts.google.com redirect (1.7.7/1.7.8). Not yet tested with a real account.
+
+## Notes from 1.8.0
+- Music: `spLibAct` handles the library actions (`sp-tm` song menu, `sp-pnew/pledit/pldel/plfol/plunf/pllink`, `sp-fren`); playlist songs go through `spItems` (tries `/items`, falls back to `/tracks`); new playlists `POST /me/playlists` with a `/users/{id}/playlists` fallback. Forms use `data-sp-form`.
+- Progress bar: `spBarLoop` (rAF while playing and visible). Lyrics: `spLyNext` schedules the exact next line change; lead is option `lyoff` (default 350 ms); poll position is anchored at the request midpoint.
+- Icons: items carry `g` ("@key" into `BWI`), `c` (colour) and optional `img` (96 px PNG data URL); `icOpen({k:"sb"|"fav"|"mark",...})`. Site icons come from main (`app:favicon`, Google s2, images only).
 
 ## Notes from 1.7.9
 - Spotify rescue: `spRescue` (first `playback_error`, or the 1 s stall watchdog on `getCurrentState`) pauses the SDK, transfers to another device with `play:true`, and sets localStorage `regis-sp-drmbad` keyed by the engine signature's mtime (`getStatus().drmSig`); `spPlay2` then avoids the Regis device.
