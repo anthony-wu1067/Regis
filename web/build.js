@@ -20,7 +20,7 @@ const touchCss = '<style id="touch">body{-webkit-text-size-adjust:100%;overscrol
   const src = fs.readFileSync(path.join(desk, 'page', 'regis.html'), 'utf8');
   const title = (src.match(/<title>[\s\S]*?<\/title>/) || ['<title>Regis</title>'])[0];
   const body = src.replace(/<title>[\s\S]*?<\/title>/, '').replace(/<meta name="claude:viewport-fit-sides"[^>]*>/, '');
-  const csp = "default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob:; connect-src 'self' https: data: blob:; worker-src 'self' blob:; manifest-src 'self'";
+  const csp = "default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://sdk.scdn.co 'wasm-unsafe-eval'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https: data: blob:; worker-src 'self' blob:; manifest-src 'self'; frame-src https://open.spotify.com https://sdk.scdn.co";
   const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">' +
     '<meta http-equiv="Content-Security-Policy" content="' + csp + '">' + title +
     '<meta name="theme-color" content="#0b0a12"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Regis">' +
