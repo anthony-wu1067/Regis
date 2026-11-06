@@ -48,7 +48,15 @@ async function sign() {
   if (!py) { console.log('\n  Signing needs Python 3, which is not installed.\n  1. Install it from https://www.python.org/downloads/ (tick "Add python.exe to PATH").\n  2. Close this window, then run "Enable Spotify audio" again.\n'); return 1; }
   const P = (args) => run(py[0], py.slice(1).concat(args));
   console.log('\n  Step 2 of 2: signing Regis for Spotify (castlabs EVS)...\n');
-  if (P(['-m', 'pip', 'install', '--upgrade', '--quiet', 'castlabs-evs']).status !== 0) { console.log('\n  Could not install the castlabs signing tool. Check your internet connection and try again.\n'); return 1; }
+  if (P(['-m', 'pip', 'install', '--upgrade', '--quiet', '--no-warn-script-location', '--disable-pip-version-check', 'castlabs-evs']).status !== 0) { console.log('\n  Could not install the castlabs signing tool. Check your internet connection and try again.\n'); return 1; }
+  /* no castlabs account on this computer yet: ask first, so the tool's own "Account Name" prompt never appears out of nowhere */
+  const cfg = process.env.EVS_CONFIG_FILE || path.join(require('os').homedir(), '.config', 'evs', 'config.json');
+  if (!fs.existsSync(cfg)) {
+    console.log('\n  Spotify only plays inside apps signed by castlabs (free). This needs a free castlabs EVS account, once.');
+    const a = (await ask('  Do you already have a castlabs EVS account? Type y or n, then press Enter: ')).toLowerCase();
+    console.log(a.startsWith('y') ? '\n  Sign in with your castlabs account name and password:\n' : '\n  Creating your free account. Use a real email: castlabs sends a code to confirm it, which you type here.\n');
+    if (P(['-m', 'castlabs_evs.account', a.startsWith('y') ? 'reauth' : 'signup']).status !== 0) { console.log('\n  The account step did not finish. Run "Enable Spotify audio" again to retry.\n'); return 1; }
+  }
   console.log('  Signing: ' + dirs.join('  and  ') + '\n');
   let r = P(['-m', 'castlabs_evs.vmp', 'sign-pkg'].concat(dirs));
   if (r.status !== 0) {
