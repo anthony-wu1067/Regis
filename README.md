@@ -84,6 +84,26 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.7.5 (continued) Lyrics card and Spotify audio inside Regis
+
+- **Lyrics** now live in a small card in the right-hand column of Music (five lines, the current one highlighted). The expand button (or the lyrics button in the player bar) opens the full lyrics page in the main pane, time-synced; click a line to jump there. On phones the player bar button opens that page directly.
+- **Copy-protected audio on desktop.** Standard Electron has no Widevine, so Regis could only remote-control other Spotify devices. To let Regis play audio itself, double-click `Enable Spotify audio` (.bat on Windows, .command on Mac) in the Regis app folder, with Regis closed. It installs the castlabs build of Electron, which includes Widevine. Restart Regis, then pick "Regis" in the Music device menu. `Disable Spotify audio` goes back. Reinstall Regis-app.zip once for this release (shell files changed).
+- Caveat: that build is development-signed. Widevine and Spotify acceptance depend on your machine and could not be tested in the build environment.
+- The web/PWA version already plays audio through the Spotify Web Player in the browser.
+
+## 1.7.5 Music upgrade, Home fit, header
+- Music search: typing shows a Spotify-style suggestion list (words, songs, artists, albums, playlists) with arrow-key navigation. The page only changes when you press Enter or pick a result.
+- Lyrics (free, from LRCLIB): player bar and Now Playing have a Lyrics button; synced lines highlight as the song plays and you can click a line to jump there. Songs without lyrics say so.
+- Playlists: all of them load now (not just the first 50). Spotify's API doesn't expose your folders, so Regis has its own: the folder icon in Your Library makes one and the ⋯ on a playlist moves it in. They are saved on this device.
+- Audio: on the web the Regis web player now starts by itself and becomes your speaker when nothing else is playing. The desktop app cannot play audio itself (it controls Spotify on another device; the device button shows which). The bar shows the current device.
+- Music has its own Appearance button, plus "Tint from artwork" and "Compact lists" switches. Cleaner depth: artwork-tinted glow, glowing section markers, lifted cards, slimmer seek/volume bars.
+- Header: Alerts now sits next to Daily brief. The More menu no longer has it.
+- Home: no scrolling, the dial fits the window, and the boxes around the hour/minute/second numbers are gone.
+- Browser: the view switcher's Home button is no longer clipped by the tab strip.
+
+## 1.7.4 No focus glow on text boxes
+Typing boxes (address bar, search, forms, command bar) no longer get a glowing ring or colour change when focused. Buttons keep their keyboard focus ring. Page-only change.
+
 ## 1.7.3 Browser tabs no longer dark
 The slim header was drawn on top of the tab strip and tinted every tab with a dark film. The header now sits underneath, and tabs, the + button and the strip have lighter surfaces with clearer text. Page-only change; no reinstall.
 

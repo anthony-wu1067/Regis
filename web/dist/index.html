@@ -1172,7 +1172,7 @@ html:not([data-view="work"]) .top{grid-template-columns:1fr auto!important;min-h
 html:not([data-view="work"]) .top .right{align-items:flex-end}
 @media (max-width:760px){html:not([data-view="work"]) .top .tools{display:none}html[data-view] .top .right{width:100%;align-items:stretch}.vsw{width:100%}.vsw button{flex:1}}
 /* home stage */
-.hm-stage{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,min(76vh,50vw)) minmax(230px,1fr);gap:26px;align-items:center;padding:6px 0 18px;min-height:calc(100vh - 190px)}
+.hm-stage{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,min(76vh,calc(100dvh - 250px),50vw)) minmax(230px,1fr);gap:26px;align-items:center;padding:6px 0 18px;min-height:calc(100vh - 190px)}
 .hm-col{display:flex;flex-direction:column;gap:16px;min-width:0}
 .hm-mid{position:relative;width:100%;aspect-ratio:1}
 .hm-core{position:absolute;inset:0}
@@ -1811,7 +1811,7 @@ html.sp-rp-on .sp-app{grid-template-columns:var(--sp-sw,300px) minmax(0,1fr) 320
 .sp-mc{position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden;background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 28%,transparent) 0,transparent 340px),var(--panel)}
 .sp-top{flex:none;display:flex;align-items:center;gap:8px;padding:12px 20px}
 .sp-hist{background:rgba(0,0,0,.32);color:var(--fg)}.sp-hist:disabled{opacity:.35;cursor:default}
-.sp-gs{position:relative;flex:1;max-width:420px;margin-left:8px;display:block}.sp-gs svg{position:absolute;left:15px;top:50%;translate:0 -50%;width:18px;height:18px;stroke:var(--fg3);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none}.sp-gs input{width:100%;height:42px;border-radius:999px;padding:0 16px 0 42px;box-sizing:border-box}
+.sp-gs{position:relative;flex:1;max-width:420px;margin-left:8px;display:block}.sp-gs>svg{position:absolute;left:15px;top:50%;translate:0 -50%;width:18px;height:18px;stroke:var(--fg3);fill:none;stroke-width:2;stroke-linecap:round;pointer-events:none}.sp-gs input{width:100%;height:42px;border-radius:999px;padding:0 16px 0 42px;box-sizing:border-box}
 .sp-who{margin-left:auto;flex:none;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--bg);font:700 13px var(--f-body)}
 .sp-sc{flex:1;min-height:0;overflow:auto;padding:4px 24px 36px;scrollbar-width:thin;container-type:inline-size}
 .sp-h{margin:8px 0 16px;font:700 30px var(--f-body);letter-spacing:-.02em}
@@ -1851,7 +1851,7 @@ html.sp-rp-on .sp-app{grid-template-columns:var(--sp-sw,300px) minmax(0,1fr) 320
 .sp-heart{opacity:0}.sp-tr:hover .sp-heart,.sp-heart[aria-pressed=true],.sp-heart:focus-visible{opacity:1}
 @media (hover:none){.sp-heart{opacity:1}.sp-pbtn{opacity:1;transform:none}}
 .sp-rpn{display:none;flex-direction:column;gap:14px;overflow:auto;padding:16px;min-height:0;min-width:0;scrollbar-width:thin}html.sp-rp-on .sp-rpn{display:flex}
-.sp-rp-h{font:700 15px var(--f-body)}.sp-rp-art{aspect-ratio:1;border-radius:12px;overflow:hidden;background:rgba(127,127,150,.2);display:grid;place-items:center;font-size:64px;color:var(--fg3);box-shadow:0 16px 40px -14px rgba(0,0,0,.7)}.sp-rp-art img{width:100%;height:100%;object-fit:cover;display:block}
+.sp-rp-h{display:flex;align-items:center;justify-content:space-between;gap:10px;font:700 15px var(--f-body)}.sp-rp-h .sp-lnk{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}.sp-rp-h .btn{flex:none}.sp-rp-art{aspect-ratio:1;border-radius:12px;overflow:hidden;background:rgba(127,127,150,.2);display:grid;place-items:center;font-size:64px;color:var(--fg3);box-shadow:0 16px 40px -14px rgba(0,0,0,.7)}.sp-rp-art img{width:100%;height:100%;object-fit:cover;display:block}
 .sp-rp-t b{display:block;font:700 22px var(--f-body);letter-spacing:-.01em}.sp-rp-t div{color:var(--fg3);font-size:14px;margin-top:2px}
 .sp-rp-n{background:rgba(127,127,150,.14);border-radius:12px;padding:10px 6px 6px}.sp-rp-nh{display:flex;justify-content:space-between;padding:0 8px 6px;font:600 13px var(--f-body);color:var(--fg2)}
 .sp-rp-e{margin:auto;text-align:center;color:var(--fg3)}.sp-rp-e b{display:block;color:var(--fg);margin-bottom:4px}
@@ -1871,7 +1871,7 @@ html.sp-rp-on .sp-app{grid-template-columns:var(--sp-sw,300px) minmax(0,1fr) 320
   .sp-hd{flex-direction:column;align-items:flex-start;gap:14px}.sp-hd img,.sp-hi{width:min(60vw,220px);height:auto;aspect-ratio:1}
   .sp-tr,.sp-th{grid-template-columns:28px 40px minmax(0,1fr) 34px 34px}.sp-tr>:nth-child(4),.sp-tr>:nth-child(6),.sp-th>:nth-child(4),.sp-th>:nth-child(6){display:none}
   .sp-qk{grid-template-columns:repeat(2,minmax(0,1fr))}.sp-row,.sp-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
-  .sp-np{grid-template-columns:minmax(0,1fr) auto;bottom:calc(74px + env(safe-area-inset-bottom,0px))}.sp-np-v{display:none}.sp-np-c{grid-column:1/-1;order:3}.sp-bar{max-width:100%}
+  .sp-np{grid-template-columns:minmax(0,1fr) auto;bottom:calc(74px + env(safe-area-inset-bottom,0px))}.sp-np-v>:not([data-act="sp-lyx"]){display:none}.sp-np-c{grid-column:1/-1;order:3}.sp-bar{max-width:100%}
 }
 @container (max-width:820px){.sp-top2{grid-template-columns:minmax(0,1fr)}}
 @container (max-width:560px){.sp-tr,.sp-th{grid-template-columns:28px 40px minmax(0,1fr) 34px 34px}.sp-tr>:nth-child(4),.sp-tr>:nth-child(6),.sp-th>:nth-child(4),.sp-th>:nth-child(6){display:none}.sp-hd{flex-direction:column;align-items:flex-start}.sp-hd img,.sp-hi{width:min(60%,220px);height:auto;aspect-ratio:1}}
@@ -1888,6 +1888,66 @@ html[data-view="browser"] .bw-tab.on span{font-weight:600}
 html[data-view="browser"] .bw-tab .x,html[data-view="browser"] .bw-new{color:var(--fg2)}
 html[data-view="browser"] .bw-tabs{background:color-mix(in srgb,var(--fg) 8%,var(--bg))}
 html:not(.mob)[data-view="browser"] .bw-tabs{background:transparent}
+/* v1.7.4 no focus highlight on text fields, anywhere (buttons keep their keyboard focus ring) */
+input:focus,input:focus-visible,select:focus,select:focus-visible,textarea:focus,textarea:focus-visible,[contenteditable]:focus,[contenteditable]:focus-visible,
+html[data-look] input:focus,html[data-look] select:focus,html[data-look] textarea:focus,
+.cmd:focus-within,.bw-addr:focus-within,html[data-look] .bw-addr:focus-within,html[data-look="refined"] .bw-search input:focus,.bw-search input:focus,.sp-gs input:focus{outline:none!important;box-shadow:none!important;animation:none!important}
+input:focus,select:focus,textarea:focus,.cmd:focus-within,.bw-addr:focus-within{border-color:var(--line2)!important}
+/* ---- v1.7.5 Music refinement, Home fit, tab strip clear zone ---- */
+html:not(.mob)[data-view="browser"] .bw-tabs{right:var(--bwr,420px)}
+html[data-view="home"],html[data-view="home"] body{overflow:hidden;height:100%;overscroll-behavior:none}
+#w-s,#w-m,#w-h{display:none}
+.sp-card,.sp-mc,.sp-rpn{box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 26px 50px -30px rgba(0,0,0,.8)}
+.sp-mc>*{position:relative;z-index:1}.sp-mc>.sp-top{z-index:6}.sp-rpn>*{position:relative;z-index:1}
+.sp-mc::before,.sp-rpn::before{content:"";position:absolute;left:0;right:0;top:0;height:380px;background:var(--hero,none) center 25%/cover no-repeat;filter:blur(64px) saturate(1.6);opacity:.4;transform:scale(1.5);transform-origin:top;pointer-events:none;-webkit-mask-image:linear-gradient(#000,transparent);mask-image:linear-gradient(#000,transparent);transition:opacity .4s}
+.sp-rpn::before{background-image:var(--art,none);height:320px}
+html.sp-notint .sp-mc::before,html.sp-notint .sp-rpn::before{display:none}
+.sp-nav button{position:relative;transition:color .2s,background .2s}.sp-nav button:hover{background:rgba(127,127,150,.1)}
+.sp-nav button[aria-current=true]::before{content:"";position:absolute;left:0;top:22%;bottom:22%;width:3px;border-radius:0 3px 3px 0;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.sp-lib-top{display:flex;align-items:center;justify-content:space-between;padding-right:10px}.sp-lib-top .sp-lib-h{flex:1;font:600 11.5px var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--fg3)}.sp-lib-top .sp-lib-h:hover{color:var(--fg)}
+.sp-sec h3{display:flex;align-items:center;gap:10px}.sp-sec h3::before{content:"";width:3px;height:17px;border-radius:2px;background:var(--accent);box-shadow:0 0 10px var(--accent);flex:none}
+.sp-h{display:flex;align-items:center;gap:12px}.sp-h::before{content:"";width:4px;height:26px;border-radius:2px;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+.sp-cd{border:1px solid transparent;transition:background .25s,transform .3s var(--ease,ease),border-color .25s,box-shadow .3s}
+.sp-cd:hover{transform:translateY(-3px);background:rgba(127,127,150,.1);border-color:var(--line);box-shadow:0 20px 32px -22px rgba(0,0,0,.85)}
+.sp-cv{box-shadow:0 12px 26px -12px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.06)}
+.sp-q{border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}.sp-q:hover{border-color:var(--line2)}
+.sp-top{background:linear-gradient(180deg,rgba(0,0,0,.22),transparent)}
+.sp-gs{max-width:540px}.sp-gs input{background:rgba(0,0,0,.3);border:1px solid var(--line);transition:background .2s,border-color .2s}.sp-gs input:hover{border-color:var(--line2)}
+.sp-lk{margin-left:auto;display:inline-flex;align-items:center;gap:8px;flex:none}.sp-lk+.sp-who{margin-left:0}
+.sp-sg{position:absolute;left:20px;right:20px;max-width:640px;top:calc(100% - 6px);z-index:40;max-height:min(72vh,540px);overflow:auto;padding:6px;border-radius:16px;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);border:1px solid var(--line2);box-shadow:0 34px 64px -22px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.08);scrollbar-width:thin}.sp-sg[hidden]{display:none}
+.sp-sgh{display:flex;justify-content:space-between;align-items:center;padding:6px 10px 8px;font:500 11px var(--f-mono);color:var(--fg3);letter-spacing:.06em;text-transform:uppercase}.sp-sgh kbd{border:1px solid var(--line2);border-radius:5px;padding:1px 6px;margin-right:4px;font:inherit;color:var(--fg2)}
+.sp-sgi{display:flex;align-items:center;border-radius:10px}.sp-sgi.on,.sp-sgi:hover{background:rgba(127,127,150,.18)}
+.sp-sgr{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:transparent;color:var(--fg);padding:7px 10px;cursor:pointer;text-align:left;font:inherit}
+.sp-sgq{flex:none;width:40px;height:40px;display:grid;place-items:center;color:var(--fg3)}.sp-sgq svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}
+.sp-sgt{flex:none;width:44px;height:44px;border-radius:6px;overflow:hidden;display:grid;place-items:center;background:rgba(127,127,150,.22);color:var(--fg3)}.sp-sgt.rd{border-radius:50%}.sp-sgt img{width:100%;height:100%;object-fit:cover}
+.sp-sgx{min-width:0;display:flex;flex-direction:column;font-size:14.5px;color:var(--fg2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sp-sgx.t{display:block;font-size:15px}.sp-sgx b{color:var(--fg);font-weight:700}.sp-sgx small{font-size:12.5px;color:var(--fg3);overflow:hidden;text-overflow:ellipsis}
+.sp-sga{flex:none;width:30px;height:30px;margin-right:8px;border-radius:50%;border:1.5px solid var(--fg3);background:transparent;color:var(--fg2);font-size:18px;line-height:1;cursor:pointer;padding:0}.sp-sga:hover{border-color:var(--fg);color:var(--fg)}
+.sp-ly{max-width:760px;padding:8px 0 40vh}.sp-lyh{display:flex;align-items:center;gap:14px;margin:6px 0 22px}.sp-lyh img{width:64px;height:64px;border-radius:10px;box-shadow:0 12px 26px -10px rgba(0,0,0,.7)}.sp-lyh b{font:700 20px var(--f-body)}.sp-lyh div div{color:var(--fg3);font-size:14px}
+.sp-ly p{margin:0;padding:9px 0;font:700 clamp(22px,3vw,34px)/1.25 var(--f-body);letter-spacing:-.01em;color:color-mix(in srgb,var(--fg) 34%,transparent);transition:color .35s,text-shadow .35s,transform .35s;cursor:pointer;transform-origin:left center}
+.sp-ly p:hover{color:color-mix(in srgb,var(--fg) 62%,transparent)}.sp-ly p.past{color:color-mix(in srgb,var(--fg) 52%,transparent)}.sp-ly p.on{color:var(--fg);text-shadow:0 0 34px var(--accent-soft);transform:scale(1.03)}
+.sp-ly p:empty::before{content:"♪";opacity:.4}.sp-ly.plain p{cursor:default;font-size:19px;font-weight:500;color:var(--fg2)}
+.sp-lw{position:relative}.sp-mv{position:absolute;right:8px;top:50%;translate:0 -50%;opacity:0;border:0;background:transparent;color:var(--fg3);width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:17px;line-height:1;padding:0}.sp-lw:hover .sp-mv,.sp-mv:focus-visible{opacity:1}.sp-mv:hover{background:rgba(127,127,150,.22);color:var(--fg)}
+.sp-fh{display:flex;align-items:center;margin:8px 0 2px}.sp-ft{flex:1;min-width:0;display:flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--fg2);font:600 11.5px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;padding:8px 10px;cursor:pointer;text-align:left}.sp-ft b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sp-ft svg{width:12px;height:12px;flex:none;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;transition:transform .2s}.sp-ft[aria-expanded=true] svg{transform:rotate(90deg)}.sp-ft small{margin-left:auto;color:var(--fg3);font:inherit}
+.sp-fx{opacity:0;border:0;background:transparent;color:var(--fg3);width:26px;height:26px;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;padding:0}.sp-fh:hover .sp-fx,.sp-fx:focus-visible{opacity:1}.sp-fx:hover{color:var(--fg);background:rgba(127,127,150,.2)}
+.sp-fnf{display:flex;gap:6px;padding:0 14px 8px}.sp-fnf[hidden]{display:none}.sp-fnf input{flex:1;min-width:0;height:32px;border-radius:999px;padding:0 12px;font-size:13px}
+.sp-fm{position:fixed;z-index:70;min-width:210px;max-height:60vh;overflow:auto;padding:6px;border-radius:14px;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(30px) saturate(1.8);backdrop-filter:blur(30px) saturate(1.8);border:1px solid var(--line2);box-shadow:0 30px 60px -20px rgba(0,0,0,.85)}.sp-fm[hidden]{display:none}
+.sp-fm-h{padding:6px 10px;font:600 10.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fg3)}.sp-fm button{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--fg);padding:8px 10px;border-radius:9px;cursor:pointer;font:500 14px var(--f-body)}.sp-fm button:hover{background:rgba(127,127,150,.18)}.sp-fm button[aria-current=true]{color:var(--accent)}
+.sp-devn{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 10.5px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}.sp-devn.off{color:var(--fg3)}
+.sp-np .sp-play{box-shadow:inset 0 0 0 1px rgba(255,255,255,.14),0 10px 24px -8px var(--accent)}
+.sp-np input[type=range]{-webkit-appearance:none;appearance:none;height:14px;padding:0;background:transparent;cursor:pointer;--p:0%}
+.sp-np input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--accent) var(--p),color-mix(in srgb,var(--fg) 20%,transparent) var(--p))}
+.sp-np input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;margin-top:-4px;border-radius:50%;background:var(--fg);box-shadow:0 0 10px var(--accent);opacity:0;transition:opacity .15s}
+.sp-np input[type=range]:hover::-webkit-slider-thumb,.sp-np input[type=range]:focus-visible::-webkit-slider-thumb{opacity:1}
+.sp-np input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:color-mix(in srgb,var(--fg) 20%,transparent)}.sp-np input[type=range]::-moz-range-progress{height:4px;border-radius:2px;background:var(--accent)}.sp-np input[type=range]::-moz-range-thumb{width:12px;height:12px;border:0;border-radius:50%;background:var(--fg);opacity:0}.sp-np input[type=range]:hover::-moz-range-thumb{opacity:1}
+@media (min-width:861px){html[data-view="music"] .sp-np{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 70%,transparent),transparent) top center/46% 1px no-repeat,color-mix(in srgb,var(--bg) 86%,transparent);box-shadow:0 -22px 44px -26px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.06)}}
+html.sp-dense .sp-tr{padding-top:1px;padding-bottom:1px}html.sp-dense .sp-tr>img{width:32px;height:32px}html.sp-dense .sp-lr{padding-top:3px;padding-bottom:3px}html.sp-dense .sp-li{width:38px;height:38px}
+@media (max-width:1180px){.sp-devn{display:none}.sp-lk span{display:none}}
+@media (max-width:860px){.sp-lk{margin-left:auto}}
+/* ---- v1.7.6 lyrics: mini card + full-screen view ---- */
+.sp-rp-ly{background:rgba(127,127,150,.14);border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px}
+.sp-rp-lh{display:flex;align-items:center;justify-content:space-between;font:600 11px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fg3)}.sp-rp-lh .sp-ic{width:28px;height:28px}.sp-rp-lh .sp-ic svg{width:16px;height:16px}
+.sp-rp-lb{margin-top:4px;cursor:pointer;min-height:110px}.sp-rp-lb p{margin:0;padding:4px 0;font:600 15px/1.35 var(--f-body);color:color-mix(in srgb,var(--fg) 38%,transparent);transition:color .3s;overflow-wrap:anywhere}
+.sp-rp-lb p.on{color:var(--fg);font-size:17px;text-shadow:0 0 22px var(--accent-soft)}.sp-rp-lb p.n{color:var(--fg3);font-weight:500;font-size:13.5px}
 /* browser: centred icons, favourites editing, background layers */
 .bw-ic b,.bw-t i{display:grid;place-items:center;line-height:1;text-align:center}
 .bw-ic b span,.bw-t i span{display:block;line-height:1;transform:translateY(.02em)}
@@ -1946,14 +2006,13 @@ html.lite .bw-lay i{filter:none!important;translate:none!important}
   <div class="sp-np-t"><img id="sp-art" alt="" width="52" height="52"><div class="sp-np-i"><button class="sp-nm" id="sp-nm" data-act="sp-nav" data-t="queue">Nothing playing</button><button class="sp-ar" id="sp-ar" data-act="sp-nav">Pick something to play</button></div><button class="sp-ic" id="sp-lk" data-act="sp-like" aria-pressed="false" aria-label="Like this song"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></button></div>
   <div class="sp-np-c"><div class="sp-btns"><button class="sp-ic" data-act="sp-ctl" data-k="shuffle" id="sp-sh" aria-label="Shuffle" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 7h3.5a4 4 0 0 1 3.3 1.8l2.4 3.4a4 4 0 0 0 3.3 1.8H20M4 17h3.5a4 4 0 0 0 3.3-1.8M13.2 8.8A4 4 0 0 1 16.5 7H20M17 4l3 3-3 3M17 14l3 3-3 3"/></svg></button><button class="sp-ic" data-act="sp-ctl" data-k="prev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M7 5v14M19 6v12l-9-6z"/></svg></button><button class="sp-play" data-act="sp-ctl" data-k="toggle" id="sp-pp" aria-label="Play"><svg viewBox="0 0 24 24" id="sp-ppi"><path d="M8 5v14l11-7z"/></svg></button><button class="sp-ic" data-act="sp-ctl" data-k="next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M17 5v14M5 6v12l9-6z"/></svg></button><button class="sp-ic" data-act="sp-ctl" data-k="repeat" id="sp-rp" aria-label="Repeat" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 11V9a3 3 0 0 1 3-3h12M16 3l3 3-3 3M20 13v2a3 3 0 0 1-3 3H5M8 21l-3-3 3-3"/></svg></button></div>
     <div class="sp-bar"><span id="sp-t0">0:00</span><input type="range" id="sp-seek" min="0" max="1000" value="0" aria-label="Position"><span id="sp-t1">0:00</span></div></div>
-  <div class="sp-np-v"><button class="sp-ic" data-act="sp-rpt" id="sp-rpb" aria-pressed="true" aria-label="Now playing view" title="Now playing view"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M14 5v14"/></svg></button><button class="sp-ic" data-act="sp-nav" data-t="queue" aria-label="Queue" title="Queue"><svg viewBox="0 0 24 24"><path d="M4 7h12M4 12h12M4 17h7M18 14v6M15 17h6"/></svg></button><button class="sp-ic" data-act="sp-dev" aria-label="Devices" id="sp-devb"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M9 20h6M12 16v4"/></svg></button><svg class="sp-vi" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10zM16 9a4 4 0 0 1 0 6"/></svg><input type="range" id="sp-vol" min="0" max="100" value="50" aria-label="Volume"></div>
+  <div class="sp-np-v"><button class="sp-ic" data-act="sp-lyx" aria-label="Lyrics" title="Lyrics"><svg viewBox="0 0 24 24"><path d="M4 7h10M4 12h8M4 17h6M17 16V7l3-1"/><circle cx="15.5" cy="16.5" r="1.5"/></svg></button><button class="sp-ic" data-act="sp-rpt" id="sp-rpb" aria-pressed="true" aria-label="Now playing view" title="Now playing view"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M14 5v14"/></svg></button><button class="sp-ic" data-act="sp-nav" data-t="queue" aria-label="Queue" title="Queue"><svg viewBox="0 0 24 24"><path d="M4 7h12M4 12h12M4 17h7M18 14v6M15 17h6"/></svg></button><span class="sp-devn" id="sp-devn"></span><button class="sp-ic" data-act="sp-dev" aria-label="Devices" id="sp-devb"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="2"/><path d="M9 20h6M12 16v4"/></svg></button><svg class="sp-vi" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10zM16 9a4 4 0 0 1 0 6"/></svg><input type="range" id="sp-vol" min="0" max="100" value="50" aria-label="Volume"></div>
   <div class="sp-devs" id="sp-devs" hidden></div>
 </div>
 <div id="more-pop" role="menu" aria-label="More actions" hidden>
   <button role="menuitem" data-act="compose-new"><span>Write an email</span></button>
   <button role="menuitem" data-act="pages-order"><span>Reorder pages</span></button>
   <button role="menuitem" data-act="capture"><span>Quick capture</span><kbd>Q</kbd></button>
-  <button role="menuitem" data-act="bell"><span>Alerts</span><em id="bell-n" hidden></em></button>
   <button role="menuitem" data-act="refresh"><span>Refresh</span><kbd>R</kbd></button>
   <button role="menuitem" data-act="vt-open" id="btn-vault"><span>Vault</span></button>
   <button role="menuitem" data-act="open-setup"><span>Connect &amp; Setup</span></button>
@@ -1997,6 +2056,7 @@ html.lite .bw-lay i{filter:none!important;translate:none!important}
       <div class="vsw" id="vsw" role="tablist" aria-label="View"><button role="tab" data-act="view" data-v="home" aria-selected="true">Home</button><button role="tab" data-act="view" data-v="work" aria-selected="false">Workspace</button><button role="tab" data-act="view" data-v="music" aria-selected="false">Music</button><button role="tab" data-act="view" data-v="browser" aria-selected="false">Browser</button></div>
       <div class="tools">
         <button class="btn sm pri" data-act="brief-day">Daily brief</button>
+        <button class="btn sm bell" data-act="bell" aria-label="Alerts">Alerts<em id="bell-n" hidden></em></button>
         <button class="btn sm look-btn" data-act="look" aria-haspopup="dialog" aria-expanded="false"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h7M13 4h1M2 12h1M7 12h7M2 8h3M9 8h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><circle cx="11" cy="4" r="1.8" fill="currentColor"/><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="7" cy="8" r="1.8" fill="currentColor"/></svg> Appearance</button>
         <button class="btn sm ic" data-act="fs" id="btn-fs" title="Full screen (F11)" aria-label="Full screen" aria-pressed="false"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path class="fs-in" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><path class="fs-out" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg></button>
         <button class="btn sm ic more-btn" data-act="more" id="btn-more" aria-haspopup="menu" aria-expanded="false" aria-label="More actions" title="More"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg><em id="more-n" hidden></em></button>
@@ -2064,7 +2124,8 @@ html.lite .bw-lay i{filter:none!important;translate:none!important}
           </nav>
         </div>
         <div class="sp-card sp-lib">
-          <button class="sp-lib-h" data-act="sp-nav" data-t="library"><svg viewBox="0 0 24 24"><path d="M5 4v16M10 4v16M15 6l4 14"/></svg>Your Library</button>
+          <div class="sp-lib-top"><button class="sp-lib-h" data-act="sp-nav" data-t="library"><svg viewBox="0 0 24 24"><path d="M5 4v16M10 4v16M15 6l4 14"/></svg>Your Library</button><button class="sp-ic" data-act="sp-fnew" aria-label="New folder" title="New folder"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 10.5v5M9.5 13h5"/></svg></button></div>
+          <form class="sp-fnf" id="sp-fnf" data-actsubmit="sp-fnew" autocomplete="off" hidden><input id="sp-fn" placeholder="Folder name" aria-label="Folder name" maxlength="40"><button class="btn sm pri" type="submit">Add</button></form>
           <div class="sp-tabs sp-lt" id="sp-lt"><button data-act="sp-lf" data-k="playlists" aria-pressed="true">Playlists</button><button data-act="sp-lf" data-k="albums" aria-pressed="false">Albums</button><button data-act="sp-lf" data-k="artists" aria-pressed="false">Artists</button></div>
           <input class="sp-lq" id="sp-lq" type="search" placeholder="Search in Your Library" aria-label="Filter your library" autocomplete="off">
           <div class="sp-pls" id="sp-pls"></div>
@@ -2075,7 +2136,9 @@ html.lite .bw-lay i{filter:none!important;translate:none!important}
         <div class="sp-top">
           <button class="sp-ic sp-hist" id="sp-bk" data-act="sp-hist" data-d="-1" aria-label="Back" disabled><svg viewBox="0 0 24 24"><path d="m14.5 6-6 6 6 6"/></svg></button>
           <button class="sp-ic sp-hist" id="sp-fw" data-act="sp-hist" data-d="1" aria-label="Forward" disabled><svg viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"/></svg></button>
-          <form class="sp-gs" data-actsubmit="sp-search" autocomplete="off"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="sp-q" type="search" placeholder="What do you want to play?" aria-label="Search Spotify" autocomplete="off"></form>
+          <form class="sp-gs" data-actsubmit="sp-search" autocomplete="off"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="sp-q" type="search" placeholder="What do you want to play?" aria-label="Search Spotify" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sp-sg"></form>
+          <div class="sp-sg" id="sp-sg" role="listbox" hidden></div>
+          <button class="btn sm sp-lk" data-act="sp-look" aria-label="Appearance for Music" title="Appearance"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h7M13 4h1M2 12h1M7 12h7M2 8h3M9 8h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><circle cx="11" cy="4" r="1.8" fill="currentColor"/><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="7" cy="8" r="1.8" fill="currentColor"/></svg><span>Appearance</span></button>
           <span class="sp-who" id="sp-who" aria-hidden="true"></span>
         </div>
         <div class="sp-sc" id="sp-main" aria-live="polite"></div>
@@ -3595,11 +3658,12 @@ function voMove(v,d){var i=VORD.indexOf(v),j=i+d;if(i<0||j<0||j>=VORD.length)ret
 (function(){var o=lsj("regis-vord",null);if(o&&o.length===VIEWS.length&&VIEWS.every(function(v){return o.indexOf(v)>=0}))VORD=o.slice();voApply()})();
 
 /* ---------- Spotify (sign-in with PKCE, Web API, optional in-browser player) ---------- */
-var SP={cid:lsj("regis-sp-cid",""),tok:lsj("regis-sp-tok",null),me:null,st:null,devs:[],pl:null,view:{t:"home"},liked:{},sdk:null,sdkDev:"",tickT:0,pollN:0,loadT:0,hist:[],hi:-1,lf:"playlists",lc:{},qn:[],rpId:null,rp:lsj("regis-sp-rp",true)!==false};
+var SP={cid:lsj("regis-sp-cid",""),tok:lsj("regis-sp-tok",null),me:null,st:null,devs:[],pl:null,view:{t:"home"},liked:{},sdk:null,sdkDev:"",tickT:0,pollN:0,loadT:0,hist:[],hi:-1,lf:"playlists",lc:{},qn:[],rpId:null,fo:lsj("regis-sp-fold",{f:[],m:{}}),ly:{},sg:{items:[],i:-1,t:0,q:""},curId:"",rp:lsj("regis-sp-rp",true)!==false};
 function mvLayout(){var tp=document.querySelector(".top");if(tp){var b=Math.ceil(tp.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty("--mvtop",b+"px")}}
 window.addEventListener("resize",function(){if(S.view==="music")mvLayout()});
 function spOn(){return !!(SP.cid&&SP.tok)}
 function spDesk(){return !!(APP&&APP.spotifyAuth)}
+function spPlayerOK(){return !!SP.drm||spWebOK()}
 function spWebOK(){return !spDesk()&&location.protocol==="https:"&&!/claude|anthropic|usercontent/i.test(location.hostname)}
 function spRedirect(){return spDesk()?"http://127.0.0.1:8888/callback":location.origin+location.pathname}
 function b64u(buf){var a=new Uint8Array(buf),t="",i;for(i=0;i<a.length;i++)t+=String.fromCharCode(a[i]);return btoa(t).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
@@ -3621,14 +3685,15 @@ async function spApi(m,path,body,again){var o={method:m,headers:{Authorization:"
   var j=await r.json().catch(function(){return null});
   if(!r.ok){var e=new Error((j&&j.error&&j.error.message)||("Spotify error "+r.status));e.status=r.status;e.reason=j&&j.error&&j.error.reason;if(r.status===429)e.message="Spotify asks for a short pause. Try again in a moment.";throw e}
   return j}
-function spErr(e){var m=(e&&e.message)||"Spotify didn’t answer.";if(e&&e.reason==="PREMIUM_REQUIRED")m="Spotify Premium is needed to control playback.";else if(e&&(e.reason==="NO_ACTIVE_DEVICE"||e.status===404&&/device/i.test(m)))m="Nothing is playing yet. Open Spotify on a device, or pick one with the screen button.";toast(m,"bad")}
-function spOut(){SP.hist=[];SP.hi=-1;SP.lc={};SP.rpId=null;SP.tok=null;SP.me=null;SP.st=null;SP.pl=null;SP.opened=0;lsw("regis-sp-tok",null);clearInterval(SP.tickT);SP.tickT=0;spShow()}
+function spErr(e){var m=(e&&e.message)||"Spotify didn’t answer.";if(e&&e.reason==="PREMIUM_REQUIRED")m="Spotify Premium is needed to control playback.";else if(e&&(e.reason==="NO_ACTIVE_DEVICE"||e.status===404&&/device/i.test(m)))m=spDesk()&&!SP.drm?"No speaker found. This copy of Regis can’t play audio itself yet: run “Enable Spotify audio” in the Regis folder, or open the Spotify app on this computer or your phone and pick it with the device button.":"No speaker found. Open Spotify on a device, or pick “Regis in this browser” with the device button.";toast(m,"bad")}
+function spOut(){SP.hist=[];SP.hi=-1;SP.lc={};SP.rpId=null;SP.tok=null;SP.me=null;SP.st=null;SP.pl=null;SP.opened=0;lsw("regis-sp-tok",null);clearInterval(SP.tickT);SP.tickT=0;clearInterval(SP.lyT);SP.lyT=0;spShow()}
 function spShow(){var on=spOn();var a=$("#sp-app"),b=$("#sp-setup");if(!a)return;a.hidden=!on;b.hidden=on;var np=$("#sp-np");if(np)np.hidden=!(on&&(S.view==="music"||opGet("spbar"))&&S.view!=="browser");
   document.documentElement.classList.toggle("sp-bar-on",!!(on&&np&&!np.hidden));document.documentElement.classList.toggle("sp-on",on);document.documentElement.classList.toggle("sp-rp-on",!!SP.rp);var rb=$("#sp-rpb");if(rb)rb.setAttribute("aria-pressed",String(!!SP.rp));
   var u=$("#sp-weburi");if(u)u.textContent=spRedirect();var c=$("#sp-cid");if(c&&!c.value)c.value=SP.cid||"";var w=$("#sp-warn");if(w)w.textContent=(!spDesk()&&!spWebOK())?"Sign-in needs the Regis desktop app or your own web address. It can’t run inside Claude’s artifact view.":"";
   $("#sp-sub").textContent=on&&SP.me?"Signed in as "+(SP.me.display_name||SP.me.id)+(SP.me.product&&SP.me.product!=="premium"?" · "+SP.me.product+" plan (playback needs Premium)":""):"Spotify inside Regis.";
-  if(on){if(!SP.opened){SP.opened=1;spLoadMe().then(function(){spOpen(SP.view)})}else spLoadMe();spNavRender();if(!SP.tickT)SP.tickT=setInterval(spTick,1000);spPoll()}else{muRender()}}
-async function spLoadMe(){if(SP.me&&SP.pl)return;try{SP.me=SP.me||await spApi("GET","/me");var l=await spApi("GET","/me/playlists?limit=50");SP.pl=(l&&l.items)||[];spPls();var m=$("#sp-me");if(m)m.innerHTML='<span>'+esc(SP.me.display_name||SP.me.id)+'</span><button class="btn sm ghost" data-act="sp-out">Sign out</button>';$("#sp-sub").textContent="Signed in as "+(SP.me.display_name||SP.me.id)+(SP.me.product&&SP.me.product!=="premium"?" · "+SP.me.product+" plan (playback needs Premium)":"");var wh=$("#sp-who");if(wh){wh.textContent=(SP.me.display_name||SP.me.id||"?").trim().charAt(0).toUpperCase();wh.title=SP.me.display_name||SP.me.id}}catch(e){if(e.status===401||e.status===403)toast(e.message+" If this is a new app, add your email under User Management in the Spotify dashboard.","bad");else spErr(e)}}
+  if(on&&spPlayerOK())spSdk();
+  if(on){if(!SP.opened){SP.opened=1;spLoadMe().then(function(){spOpen(SP.view)})}else spLoadMe();spNavRender();if(!SP.tickT)SP.tickT=setInterval(spTick,1000);if(!SP.lyT)SP.lyT=setInterval(spLyrSync,350);spPoll()}else{muRender()}}
+async function spLoadMe(){if(SP.me&&SP.pl)return;try{SP.me=SP.me||await spApi("GET","/me");var l=await spApi("GET","/me/playlists?limit=50"),all=(l&&l.items)||[],pg=0;while(l&&l.next&&pg++<9){l=await spApi("GET",l.next.replace("https://api.spotify.com/v1",""));all=all.concat(l.items||[])}SP.pl=all.filter(Boolean);spPls();var m=$("#sp-me");if(m)m.innerHTML='<span>'+esc(SP.me.display_name||SP.me.id)+'</span><button class="btn sm ghost" data-act="sp-out">Sign out</button>';$("#sp-sub").textContent="Signed in as "+(SP.me.display_name||SP.me.id)+(SP.me.product&&SP.me.product!=="premium"?" · "+SP.me.product+" plan (playback needs Premium)":"");var wh=$("#sp-who");if(wh){wh.textContent=(SP.me.display_name||SP.me.id||"?").trim().charAt(0).toUpperCase();wh.title=SP.me.display_name||SP.me.id}}catch(e){if(e.status===401||e.status===403)toast(e.message+" If this is a new app, add your email under User Management in the Spotify dashboard.","bad");else spErr(e)}}
 function spStart(){SP.hist=[];SP.hi=-1;SP.lc={};SP.me=null;SP.pl=null;SP.view={t:"home"};SP.opened=1;spShow();setView("music",true);return spLoadMe().then(function(){spOpen({t:"home"})})}
 function spBoot(){var q=new URLSearchParams(location.search),code=q.get("code"),err=q.get("error");if(!code&&!err)return;
   var pk=null;try{pk=JSON.parse(sessionStorage.getItem("regis-sp-pk")||"null");sessionStorage.removeItem("regis-sp-pk")}catch(_){}
@@ -3651,22 +3716,33 @@ function spSec(t,body){return body?'<section class="sp-sec"><div class="sp-sh"><
 function spRow(h){return h?'<div class="sp-row">'+h+'</div>':""}
 function spLr(kind,x,sub,round){var im=spImg(x.images,64),cur=SP.view.t===kind&&SP.view.id===x.id;
   return '<button class="sp-lr" data-act="sp-nav" data-t="'+kind+'" data-id="'+esc(x.id)+'" aria-current="'+cur+'"><span class="sp-li'+(round?" rd":"")+'">'+(im?'<img src="'+esc(im)+'" alt="" loading="lazy">':'♫')+'</span><span class="sp-lx"><b>'+esc(x.name)+'</b><small>'+sub+'</small></span></button>'}
+function spFoSave(){lsw("regis-sp-fold",SP.fo)}
 function spPls(){var e=$("#sp-pls");if(!e)return;var q=(($("#sp-lq")||{}).value||"").trim().toLowerCase(),k=SP.lf,h="",L;
   $$("#sp-lt button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.k===k))});
   if(k==="playlists"){if(!q||"liked songs".indexOf(q)>=0)h+='<button class="sp-lr" data-act="sp-nav" data-t="liked" aria-current="'+(SP.view.t==="liked")+'"><span class="sp-li lk"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></span><span class="sp-lx"><b>Liked Songs</b><small>Playlist · Your saved songs</small></span></button>';
-    h+=(SP.pl||[]).filter(function(p){return p&&(!q||p.name.toLowerCase().indexOf(q)>=0)}).map(function(p){return spLr("playlist",p,"Playlist · "+esc((p.owner&&p.owner.display_name)||"Spotify"))}).join("")}
+    var pls=(SP.pl||[]).filter(function(p){return p&&(!q||p.name.toLowerCase().indexOf(q)>=0)}),F=SP.fo.f,known={};
+    var row=function(p){return '<div class="sp-lw">'+spLr("playlist",p,"Playlist · "+esc((p.owner&&p.owner.display_name)||"Spotify"))+'<button class="sp-mv" data-act="sp-fmv" data-id="'+esc(p.id)+'" aria-label="Move to a folder" title="Move to a folder">⋯</button></div>'};
+    F.forEach(function(f){known[f.id]=1;var mine=pls.filter(function(p){return SP.fo.m[p.id]===f.id});if(q&&!mine.length)return;var open=f.o||!!q;
+      h+='<div class="sp-fh"><button class="sp-ft" data-act="sp-ftog" data-id="'+esc(f.id)+'" aria-expanded="'+open+'"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg><b>'+esc(f.n)+'</b><small>'+mine.length+'</small></button><button class="sp-fx" data-act="sp-fdel" data-id="'+esc(f.id)+'" aria-label="Remove folder '+esc(f.n)+'" title="Remove folder">×</button></div>';
+      if(open)h+=mine.map(row).join("")});
+    h+=pls.filter(function(p){return !known[SP.fo.m[p.id]]}).map(row).join("")}
   else{L=SP.lc[k];
     if(L===undefined&&spOn()){SP.lc[k]=null;(k==="albums"?spApi("GET","/me/albums?limit=50").then(function(r){return (r.items||[]).map(function(x){return x.album})}):spApi("GET","/me/following?type=artist&limit=50").then(function(r){return (r.artists&&r.artists.items)||[]})).then(function(r){SP.lc[k]=r;spPls()}).catch(function(){SP.lc[k]=[];spPls()})}
     if(L===undefined||L===null)h='<div class="sp-load">Loading…</div>';
     else h=L.filter(function(x){return x&&(!q||x.name.toLowerCase().indexOf(q)>=0)}).map(function(x){return k==="albums"?spLr("album",x,"Album · "+esc((x.artists||[]).map(function(a){return a.name}).join(", "))):spLr("artist",x,"Artist",1)}).join("")}
   e.innerHTML=h||'<div class="note" style="padding:6px 12px">Nothing here yet.</div>'}
+function spFMenu(btn){var m=$("#sp-fm");if(!m){m=document.createElement("div");m.id="sp-fm";m.className="sp-fm";m.hidden=true;document.body.appendChild(m)}
+  var id=btn.dataset.id,cur=SP.fo.m[id]||"";SP.fmPl=id;
+  m.innerHTML='<div class="sp-fm-h">Move to folder</div><button data-act="sp-fset" data-id="'+esc(id)+'" data-f="" aria-current="'+(cur==="")+'">No folder</button>'+SP.fo.f.map(function(f){return '<button data-act="sp-fset" data-id="'+esc(id)+'" data-f="'+esc(f.id)+'" aria-current="'+(cur===f.id)+'">'+esc(f.n)+'</button>'}).join("")+'<button data-act="sp-fset" data-id="'+esc(id)+'" data-f="+">New folder…</button>';
+  var r=btn.getBoundingClientRect();m.hidden=false;m.style.left=Math.min(r.right+6,innerWidth-m.offsetWidth-8)+"px";m.style.top=Math.min(r.top,innerHeight-m.offsetHeight-8)+"px"}
 function spNavRender(){$$("#sp-app .sp-nav button").forEach(function(b){b.setAttribute("aria-current",String(b.dataset.t===SP.view.t))});spPls()}
+function spHero(){var mc=$(".sp-mc"),im=$("#sp-main .sp-hd img"),u=im&&im.getAttribute("src");if(mc)mc.style.setProperty("--hero",u?'url("'+u.replace(/"/g,"%22")+'")':"none")}
 function spHistUi(){var b=$("#sp-bk"),f=$("#sp-fw");if(b)b.disabled=SP.hi<=0;if(f)f.disabled=SP.hi>=SP.hist.length-1}
 async function spOpen(v,np){SP.view=v;
   if(!np){var cur=SP.hist[SP.hi];if(cur&&JSON.stringify(cur)===JSON.stringify(v)){}else if(cur&&cur.t==="search"&&v.t==="search")SP.hist[SP.hi]=v;else{SP.hist=SP.hist.slice(0,SP.hi+1);SP.hist.push(v);if(SP.hist.length>40)SP.hist.shift();SP.hi=SP.hist.length-1}}
   spHistUi();var qi=$("#sp-q");if(qi&&document.activeElement!==qi)qi.value=v.t==="search"?(v.q||""):"";
   spNavRender();var m=$("#sp-main");if(!m)return;var keep=v.t==="search"&&m.querySelector(".sp-sec,.sp-bw"),tok=++SP.loadT;if(!keep)m.innerHTML='<div class="sp-load">Loading…</div>';
-  try{var h=await spPage(v);if(tok!==SP.loadT)return;m.innerHTML=h;if(!keep)m.scrollTop=0;spHearts()}catch(e){if(tok!==SP.loadT)return;m.innerHTML='<div class="empty">'+esc(e.message||"Spotify didn’t answer.")+'</div>'}}
+  try{var h=await spPage(v);if(tok!==SP.loadT)return;m.innerHTML=h;if(!keep)m.scrollTop=0;spHearts();spHero();SP.lyI=-2;spLyrSync()}catch(e){if(tok!==SP.loadT)return;m.innerHTML='<div class="empty">'+esc(e.message||"Spotify didn’t answer.")+'</div>'}}
 async function spPage(v){var g=function(p){return spApi("GET",p).catch(function(){return null})},h="",r;
   if(v.t==="home"){var hr=new Date().getHours(),W=hr<5?"Still up?":hr<12?"Good morning":hr<17?"Good afternoon":"Good evening";
     var res=await Promise.all([g("/me/player/recently-played?limit=30"),g("/me/top/artists?limit=10&time_range=medium_term"),g("/me/top/tracks?limit=10&time_range=short_term"),g("/browse/new-releases?limit=12")]);
@@ -3690,6 +3766,12 @@ async function spPage(v){var g=function(p){return spApi("GET",p).catch(function(
     if(tab==="albums"){r=await spApi("GET","/me/albums?limit=40");return '<h2 class="sp-h">Your Library</h2>'+tabs+'<div class="sp-grid">'+((r.items||[]).map(function(x){return spCard(x.album,"album")}).join("")||'<div class="empty">No saved albums.</div>')+'</div>'}
     if(tab==="artists"){r=await spApi("GET","/me/following?type=artist&limit=40");return '<h2 class="sp-h">Your Library</h2>'+tabs+'<div class="sp-grid">'+((r.artists&&r.artists.items||[]).map(function(x){return spCard(x,"artist",1)}).join("")||'<div class="empty">You don’t follow any artists yet.</div>')+'</div>'}
     return '<h2 class="sp-h">Your Library</h2>'+tabs+'<div class="sp-grid">'+(SP.pl||[]).map(function(x){return spCard(x,"playlist")}).join("")+'</div>'}
+  if(v.t==="lyrics"){var lt=SP.st&&SP.st.item;if(!lt)return '<h2 class="sp-h">Lyrics</h2><div class="empty">Play a song and its lyrics show up here.</div>';
+    var ly=await spLyrics(lt),im=spImg(lt.album&&lt.album.images,128),hd='<div class="sp-lyh">'+(im?'<img src="'+esc(im)+'" alt="">':"")+'<div><b>'+esc(lt.name)+'</b><div>'+esc((lt.artists||[]).map(function(a){return a.name}).join(", "))+'</div></div></div>';
+    if(ly===false)return hd+'<div class="empty">Couldn’t reach the lyrics service. Check your connection and try again.</div>';
+    if(!ly)return hd+'<div class="empty">No lyrics are available for this song.</div>';
+    if(ly.inst)return hd+'<div class="empty">This one is instrumental.</div>';
+    return hd+(ly.sync?'<div class="sp-ly" id="sp-ly">'+ly.sync.map(function(l,i){return '<p data-i="'+i+'" data-act="sp-seekto" data-ms="'+l.t+'">'+esc(l.s)+'</p>'}).join("")+'</div>':'<div class="sp-ly plain">'+ly.plain.split("\n").map(function(l){return '<p>'+esc(l)+'</p>'}).join("")+'</div>')+'<p class="note" style="margin-top:28px">Lyrics from LRCLIB.</p>'}
   if(v.t==="queue"){r=await spApi("GET","/me/player/queue");var cu=r&&r.currently_playing;return '<h2 class="sp-h">Queue</h2>'+spSec("Now playing",cu?'<div class="sp-tl">'+spTrackRow(cu,0,"",1)+'</div>':'<div class="empty">Nothing is playing.</div>')+spSec("Next up",'<div class="sp-tl">'+((r&&r.queue)||[]).slice(0,30).map(function(t,i){return spTrackRow(t,i,"",1)}).join("")+'</div>')}
   if(v.t==="playlist"){var pl=await spApi("GET","/playlists/"+v.id+"?fields=id,name,uri,description,images,owner(display_name),tracks(total)"),tr;
     try{tr=await spApi("GET","/playlists/"+v.id+"/tracks?limit=100&fields=items(track(id,uri,name,explicit,duration_ms,artists(id,name),album(id,name,images)))")}catch(e){tr=null;if(e.status===403||e.status===404)return spHead(pl.name,"By "+esc((pl.owner&&pl.owner.display_name)||"Spotify"),spImg(pl.images,300),pl.uri,[],0,"Playlist")+'<div class="empty">Spotify doesn’t share the songs of this playlist with personal apps. Press play to listen to it.</div>';throw e}
@@ -3703,24 +3785,66 @@ async function spPage(v){var g=function(p){return spApi("GET",p).catch(function(
 function spHead(name,sub,img,ctx,uris,round,kind){return '<div class="sp-hd">'+(img?'<img class="'+(round?"rd":"")+'" src="'+esc(img)+'" alt="" width="232" height="232">':'<div class="sp-hi">♫</div>')+'<div class="sp-hx">'+(kind?'<small>'+esc(kind)+'</small>':"")+'<h2>'+esc(name)+'</h2><p>'+sub+'</p></div></div><div class="sp-hb">'+((ctx||uris.length)?'<button class="sp-play big" data-act="sp-play" data-ctx="'+esc(ctx||"")+'" data-uris="'+esc(uris.slice(0,100).join(","))+'" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>':"")+'</div>'}
 async function spHearts(){var ids=[].slice.call(document.querySelectorAll("#sp-main .sp-heart")).map(function(b){return b.dataset.id}).filter(function(x,i,a){return x&&a.indexOf(x)===i}).slice(0,50);if(!ids.length)return;
   try{var r=await spApi("GET","/me/tracks/contains?ids="+ids.join(","));ids.forEach(function(id,i){SP.liked[id]=!!r[i]});$$("#sp-main .sp-heart").forEach(function(b){b.setAttribute("aria-pressed",String(!!SP.liked[b.dataset.id]))})}catch(_){}}
+/* lyrics (LRCLIB: free, no key) */
+function spLrc(t){var out=[];String(t||"").split("\n").forEach(function(l){var m=l.match(/^\[(\d+):(\d+(?:\.\d+)?)\]\s?(.*)$/);if(m)out.push({t:Math.round((+m[1]*60+ +m[2])*1000),s:m[3]})});return out}
+async function spLyrics(t){if(SP.ly[t.id]!==undefined)return SP.ly[t.id];var ar=(t.artists&&t.artists[0]&&t.artists[0].name)||"",o=null;
+  try{var r=await fetch("https://lrclib.net/api/get?"+new URLSearchParams({track_name:t.name,artist_name:ar,album_name:(t.album&&t.album.name)||"",duration:Math.round((t.duration_ms||0)/1000)}));
+    if(r.ok)o=await r.json();else if(r.status===404){var r2=await fetch("https://lrclib.net/api/search?"+new URLSearchParams({track_name:t.name,artist_name:ar}));if(r2.ok){var a=await r2.json();o=(a||[]).filter(function(x){return x.syncedLyrics||x.plainLyrics}).sort(function(x,y){return (y.syncedLyrics?1:0)-(x.syncedLyrics?1:0)})[0]||null}}else return false}catch(_){return false}
+  var res=null;if(o){if(o.instrumental)res={inst:1};else{var sy=o.syncedLyrics?spLrc(o.syncedLyrics):[];if(sy.length)res={sync:sy};else if(o.plainLyrics)res={plain:o.plainLyrics}}}
+  SP.ly[t.id]=res;return res}
+function spLyIdx(){var t=SP.st&&SP.st.item,L=t&&SP.ly[t.id];if(!L||!L.sync)return -2;var p=(SP.base||0)+(SP.st.is_playing?Date.now()-SP.at:0),i=-1,n;for(n=0;n<L.sync.length;n++){if(L.sync[n].t<=p+250)i=n;else break}return i}
+function spLyMiniRender(i){var b=$("#sp-rplb");if(!b)return;var t=SP.st&&SP.st.item;if(!t){b.innerHTML='<p class="n">Play a song to see its lyrics.</p>';return}
+  var L=SP.ly[t.id];if(L===undefined){b.innerHTML='<p class="n">Loading lyrics…</p>';return}
+  if(L===false){b.innerHTML='<p class="n">Lyrics unavailable right now.</p>';return}
+  if(!L){b.innerHTML='<p class="n">No lyrics for this song.</p>';return}
+  if(L.inst){b.innerHTML='<p class="n">Instrumental.</p>';return}
+  if(L.sync){if(i===undefined)i=spLyIdx();var from=Math.max(0,i-1);b.innerHTML=L.sync.slice(from,from+5).map(function(l,k){return '<p'+(from+k===i?' class="on"':"")+'>'+(esc(l.s)||"♪")+'</p>'}).join("");return}
+  b.innerHTML=L.plain.split("\n").filter(Boolean).slice(0,5).map(function(l){return '<p>'+esc(l)+'</p>'}).join("")}
+function spLyrTrack(){var t=SP.st&&SP.st.item;if(!t)return;if(!(SP.rp&&S.view==="music"))return;
+  if(SP.ly[t.id]!==undefined){spLyMiniRender();return}
+  spLyMiniRender();spLyrics(t).then(function(){if(SP.st&&SP.st.item&&SP.st.item.id===t.id)spLyMiniRender()})}
+function spLyrSync(){if(document.hidden||S.view!=="music")return;var i=spLyIdx();if(i===-2||i===SP.lyI)return;SP.lyI=i;spLyMiniRender(i);
+  var box=$("#sp-ly");if(box){var ps=box.children,n;for(n=0;n<ps.length;n++){ps[n].classList.toggle("on",n===i);ps[n].classList.toggle("past",n<i)}var el=ps[Math.max(i,0)];if(el&&el.scrollIntoView){try{el.scrollIntoView({block:"center",behavior:"smooth"})}catch(_){}}}}
+/* search suggestions */
+function spSgClose(){var d=$("#sp-sg");if(d){d.hidden=true;d.innerHTML=""}var q=$("#sp-q");if(q)q.setAttribute("aria-expanded","false");SP.sg.items=[];SP.sg.i=-1}
+function spSgBold(txt,q){var l=txt.toLowerCase(),i=l.indexOf(q.toLowerCase());return i<0?esc(txt):esc(txt.slice(0,i))+'<b>'+esc(txt.slice(i,i+q.length))+'</b>'+esc(txt.slice(i+q.length))}
+async function spSgFetch(q){var tok=++SP.sg.t;
+  try{var r=await spApi("GET","/search?q="+encodeURIComponent(q)+"&type=track,artist,album,playlist&limit=4");if(tok!==SP.sg.t||($("#sp-q").value||"").trim()!==q)return;
+    var T=((r.tracks&&r.tracks.items)||[]).filter(Boolean),A=((r.artists&&r.artists.items)||[]).filter(Boolean),B=((r.albums&&r.albums.items)||[]).filter(Boolean),P=((r.playlists&&r.playlists.items)||[]).filter(Boolean),seen={},tx=[],ql=q.toLowerCase();
+    T.map(function(x){return x.name}).concat(A.map(function(x){return x.name}),B.map(function(x){return x.name}),P.map(function(x){return x.name})).forEach(function(n){var c=n.replace(/\s*[\-\(\[].*$/,"").trim(),k=c.toLowerCase();if(c&&!seen[k]&&k.indexOf(ql)===0&&k!==ql&&tx.length<4){seen[k]=1;tx.push({k:"q",q:c})}});
+    var its=tx.concat(T.slice(0,3).map(function(x){return {k:"track",x:x}}),A.slice(0,2).map(function(x){return {k:"artist",x:x}}),B.slice(0,1).map(function(x){return {k:"album",x:x}}),P.slice(0,1).map(function(x){return {k:"playlist",x:x}}));
+    SP.sg.items=its;SP.sg.i=-1;SP.sg.q=q;spSgRender()}catch(_){}}
+function spSgRender(){var d=$("#sp-sg"),q=SP.sg.q;if(!d)return;var its=SP.sg.items;if(!its.length){spSgClose();return}
+  d.innerHTML='<div class="sp-sgh"><span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span><span><kbd>Enter</kbd> Search</span></div>'+its.map(function(it,i){var on=i===SP.sg.i?" on":"";
+    if(it.k==="q")return '<div class="sp-sgi'+on+'" role="option"><button class="sp-sgr" data-act="sp-sgp" data-i="'+i+'" tabindex="-1"><span class="sp-sgq"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><span class="sp-sgx t">'+spSgBold(it.q,q)+'</span></button></div>';
+    var x=it.x,im=spImg(it.k==="track"?(x.album&&x.album.images):x.images,64),sub=it.k==="track"?"Song • "+esc((x.artists||[]).map(function(a){return a.name}).join(", ")):it.k==="artist"?"Artist":it.k==="album"?"Album • "+esc((x.artists||[]).map(function(a){return a.name}).join(", ")):"Playlist • "+esc((x.owner&&x.owner.display_name)||"Spotify");
+    return '<div class="sp-sgi'+on+'" role="option"><button class="sp-sgr" data-act="sp-sgp" data-i="'+i+'" tabindex="-1"><span class="sp-sgt'+(it.k==="artist"?" rd":"")+'">'+(im?'<img src="'+esc(im)+'" alt="">':"♫")+'</span><span class="sp-sgx"><b>'+esc(x.name)+'</b><small>'+sub+'</small></span></button>'+(it.k==="track"?'<button class="sp-sga" data-act="sp-queue" data-uri="'+esc(x.uri)+'" aria-label="Add to queue" title="Add to queue" tabindex="-1">+</button>':"")+'</div>'}).join("");
+  d.hidden=false;$("#sp-q").setAttribute("aria-expanded","true")}
+function spSgPick(i){var it=SP.sg.items[i];if(!it)return;spSgClose();
+  if(it.k==="q"){var qi=$("#sp-q");if(qi)qi.value=it.q;spOpen({t:"search",q:it.q})}
+  else if(it.k==="track")spPlay({uris:[it.x.uri]});
+  else spOpen({t:it.k,id:it.x.id})}
 /* player */
 async function spPoll(){if(!spOn()||document.hidden)return;try{var r=await spApi("GET","/me/player");SP.st=r;SP.at=Date.now();SP.base=r?r.progress_ms:0;spNP()}catch(e){if(e.status===401)spOut()}}
 function spTick(){if(!spOn()||document.hidden)return;var np=$("#sp-np");if(!np||np.hidden)return;SP.pollN=(SP.pollN+1)%5;if(!SP.pollN)spPoll();else if(SP.st&&SP.st.is_playing&&SP.st.item){var p=Math.min(SP.st.item.duration_ms,(SP.base||0)+Date.now()-SP.at);spBar(p)}}
-function spBar(p){var d=SP.st&&SP.st.item?SP.st.item.duration_ms:0,sk=$("#sp-seek");if(sk&&!SP.drag)sk.value=d?Math.round(p/d*1000):0;$("#sp-t0").textContent=spDur(p);$("#sp-t1").textContent=spDur(d)}
+function spBar(p){var d=SP.st&&SP.st.item?SP.st.item.duration_ms:0,sk=$("#sp-seek");if(sk&&!SP.drag)sk.value=d?Math.round(p/d*1000):0;if(sk)sk.style.setProperty("--p",(sk.value/10)+"%");$("#sp-t0").textContent=spDur(p);$("#sp-t1").textContent=spDur(d)}
 function spNP(){var st=SP.st,t=st&&st.item;$("#sp-nm").textContent=t?t.name:"Nothing playing";var ar=$("#sp-ar");ar.textContent=t?(t.artists||[]).map(function(a){return a.name}).join(", "):"Pick something to play";ar.dataset.id=t&&t.artists&&t.artists[0]?t.artists[0].id:"";ar.dataset.t="artist";$("#sp-nm").dataset.t=t&&t.album?"album":"queue";$("#sp-nm").dataset.id=t&&t.album?t.album.id:"";
   var im=t&&t.album?spImg(t.album.images,64):"";var a=$("#sp-art");a.style.visibility=im?"visible":"hidden";if(im&&a.src!==im)a.src=im;
   $("#sp-pp").setAttribute("aria-label",st&&st.is_playing?"Pause":"Play");$("#sp-ppi").innerHTML=st&&st.is_playing?'<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>':'<path d="M8 5v14l11-7z"/>';
   $("#sp-sh").setAttribute("aria-pressed",String(!!(st&&st.shuffle_state)));$("#sp-rp").setAttribute("aria-pressed",String(!!(st&&st.repeat_state&&st.repeat_state!=="off")));
-  if(st&&st.device&&st.device.volume_percent!=null&&!SP.vdrag)$("#sp-vol").value=st.device.volume_percent;
+  if(st&&st.device&&st.device.volume_percent!=null&&!SP.vdrag){var vl=$("#sp-vol");vl.value=st.device.volume_percent;vl.style.setProperty("--p",vl.value+"%")}
+  var dn=$("#sp-devn");if(dn){dn.textContent=st&&st.device?st.device.name:"No device";dn.classList.toggle("off",!(st&&st.device))}
+  var tid=t?t.id:"";if(SP.curId!==tid){SP.curId=tid;SP.lyI=-2;SP.lyMi=-3;spLyrTrack();if(SP.view&&SP.view.t==="lyrics"&&S.view==="music")spOpen({t:"lyrics"},1)}
   var lk=$("#sp-lk");if(t){lk.setAttribute("aria-pressed",String(!!SP.liked[t.id]));if(SP.liked[t.id]===undefined)spApi("GET","/me/tracks/contains?ids="+t.id).then(function(r){SP.liked[t.id]=!!r[0];lk.setAttribute("aria-pressed",String(!!r[0]))}).catch(function(){})}
   spBar(SP.base||0);spRpLoad();$$("#sp-main .sp-tr").forEach(function(r){r.classList.toggle("cur",!!(t&&r.dataset.id===t.id))})}
 function spRpn(){var e=$("#sp-rpn");if(!e)return;var t=SP.st&&SP.st.item;
   if(!t){e.innerHTML='<div class="sp-rp-e"><b>Nothing playing</b><small>Pick something and it shows up here.</small></div>';return}
   var im=spImg(t.album&&t.album.images,640),nx=SP.qn[0];
-  e.innerHTML='<div class="sp-rp-h"><button class="sp-lnk" data-act="sp-nav" data-t="album" data-id="'+esc(t.album&&t.album.id||"")+'">'+esc(t.album?t.album.name:"Now playing")+'</button></div><div class="sp-rp-art">'+(im?'<img src="'+esc(im)+'" alt="">':'<i>♫</i>')+'</div><div class="sp-rp-t"><b>'+esc(t.name)+'</b><div>'+spArts(t.artists)+'</div></div>'+
+  e.style.setProperty("--art",im?'url("'+String(im).replace(/"/g,"%22")+'")':"none");
+  e.innerHTML='<div class="sp-rp-h"><button class="sp-lnk" data-act="sp-nav" data-t="album" data-id="'+esc(t.album&&t.album.id||"")+'">'+esc(t.album?t.album.name:"Now playing")+'</button></div><div class="sp-rp-art">'+(im?'<img src="'+esc(im)+'" alt="">':'<i>♫</i>')+'</div><div class="sp-rp-t"><b>'+esc(t.name)+'</b><div>'+spArts(t.artists)+'</div></div><div class="sp-rp-ly"><div class="sp-rp-lh"><span>Lyrics</span><button class="sp-ic" data-act="sp-lyx" aria-label="Expand lyrics to full screen" title="Expand"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg></button></div><div class="sp-rp-lb" id="sp-rplb" data-act="sp-lyx"></div></div>'+
    (nx?'<div class="sp-rp-n"><div class="sp-rp-nh"><span>Next in queue</span><button class="sp-lnk" data-act="sp-nav" data-t="queue">Open queue</button></div><button class="sp-lr" data-act="sp-play" data-uri="'+esc(nx.uri)+'"><span class="sp-li">'+(nx.album&&nx.album.images&&nx.album.images.length?'<img src="'+esc(spImg(nx.album.images,64))+'" alt="">':'♫')+'</span><span class="sp-lx"><b>'+esc(nx.name)+'</b><small>'+esc((nx.artists||[]).map(function(a){return a.name}).join(", "))+'</small></span></button></div>':"")}
-function spRpLoad(){var t=SP.st&&SP.st.item,id=t?t.id:"";if(id===SP.rpId)return;SP.rpId=id;SP.qn=[];spRpn();if(!t||!SP.rp)return;spApi("GET","/me/player/queue").then(function(r){if(SP.rpId===id){SP.qn=((r&&r.queue)||[]).slice(0,1);spRpn()}}).catch(function(){})}
-async function spPlay(body,dev){var q=dev?"?device_id="+dev:(SP.st&&SP.st.device?"":(SP.devs[0]?"?device_id="+SP.devs[0].id:""));try{await spApi("PUT","/me/player/play"+q,body);setTimeout(spPoll,500)}catch(e){if(e.status===404){var d=await spDevices();if(d.length){try{await spApi("PUT","/me/player",{device_ids:[d[0].id],play:false});await spApi("PUT","/me/player/play?device_id="+d[0].id,body);setTimeout(spPoll,600);return}catch(e2){spErr(e2);return}}}spErr(e)}}
+function spRpLoad(){var t=SP.st&&SP.st.item,id=t?t.id:"";if(id===SP.rpId)return;SP.rpId=id;SP.qn=[];spRpn();spLyMiniRender();spLyrTrack();if(!t||!SP.rp)return;spApi("GET","/me/player/queue").then(function(r){if(SP.rpId===id){SP.qn=((r&&r.queue)||[]).slice(0,1);spRpn()}}).catch(function(){})}
+async function spPlay(body,dev){var q=dev?"?device_id="+dev:(SP.st&&SP.st.device?"":(SP.sdkDev?"?device_id="+SP.sdkDev:(SP.devs[0]?"?device_id="+SP.devs[0].id:"")));try{await spApi("PUT","/me/player/play"+q,body);setTimeout(spPoll,500)}catch(e){if(e.status===404){var d=await spDevices();if(d.length){try{await spApi("PUT","/me/player",{device_ids:[d[0].id],play:false});await spApi("PUT","/me/player/play?device_id="+d[0].id,body);setTimeout(spPoll,600);return}catch(e2){spErr(e2);return}}}spErr(e)}}
 async function spDevices(){try{var r=await spApi("GET","/me/player/devices");SP.devs=(r&&r.devices)||[]}catch(_){SP.devs=[]}return SP.devs}
 async function spCtl(k){if(!SP.st&&k!=="toggle"){await spPoll()}
   try{if(k==="toggle"){if(SP.st&&SP.st.is_playing)await spApi("PUT","/me/player/pause");else await spPlay(undefined)}
@@ -3731,11 +3855,12 @@ async function spCtl(k){if(!SP.st&&k!=="toggle"){await spPoll()}
 async function spDevMenu(){var m=$("#sp-devs");if(!m.hidden){m.hidden=true;return}await spDevices();
   var list=SP.devs.map(function(d){return '<button data-act="sp-xfer" data-id="'+esc(d.id)+'" aria-current="'+!!d.is_active+'">'+esc(d.name)+'<small>'+esc(d.type)+(d.is_active?" · playing here":"")+'</small></button>'});
   if(SP.sdkDev)list.unshift('<button data-act="sp-xfer" data-id="'+esc(SP.sdkDev)+'">Regis in this browser<small>Web player</small></button>');
-  else if(spWebOK())list.push('<button data-act="sp-sdk">Play in this browser<small>Turn on the Regis web player</small></button>');
+  else if(spPlayerOK())list.push('<button data-act="sp-sdk">Play in this browser<small>Turn on the Regis web player</small></button>');
+  if(spDesk()&&!SP.drm)list.push('<button data-act="sp-drmhelp">Play inside Regis<small>Needs a one-time setup</small></button>');
   m.innerHTML=list.join("")||'<div class="note" style="padding:10px">No Spotify devices found. Open Spotify on your phone or computer, then try again.</div>';m.hidden=false}
-function spSdk(){if(SP.sdk||!spWebOK())return;var sc=document.createElement("script");sc.src="https://sdk.scdn.co/spotify-player.js";sc.async=true;document.head.appendChild(sc);
-  window.onSpotifyWebPlaybackSDKReady=function(){try{SP.sdk=new Spotify.Player({name:"Regis",getOAuthToken:function(cb){spFresh().then(cb)},volume:.6});SP.sdk.addListener("ready",function(x){SP.sdkDev=x.device_id;toast("Regis web player is ready. Pick it in the device list.","good")});SP.sdk.addListener("authentication_error",function(){toast("Spotify needs you to sign in again.","bad")});SP.sdk.addListener("account_error",function(){toast("The web player needs Spotify Premium.","bad")});SP.sdk.addListener("initialization_error",function(){toast("This browser can’t play Spotify here.","bad")});SP.sdk.connect()}catch(_){}}}
-async function spAct(b){var a=b.dataset.act,d=b.dataset;
+function spSdk(){if(SP.sdk||SP.sdkTried||!spPlayerOK())return;SP.sdkTried=1;var sc=document.createElement("script");sc.src="https://sdk.scdn.co/spotify-player.js";sc.async=true;document.head.appendChild(sc);
+  window.onSpotifyWebPlaybackSDKReady=function(){try{SP.sdk=new Spotify.Player({name:"Regis",getOAuthToken:function(cb){spFresh().then(cb)},volume:.6});SP.sdk.addListener("ready",function(x){SP.sdkDev=x.device_id;spPoll().then(function(){if(!SP.st||!SP.st.device){spApi("PUT","/me/player",{device_ids:[x.device_id],play:false}).then(function(){setTimeout(spPoll,500)}).catch(function(){})}})});SP.sdk.addListener("authentication_error",function(){toast("Spotify needs you to sign in again.","bad")});SP.sdk.addListener("account_error",function(){toast("The web player needs Spotify Premium.","bad")});SP.sdk.addListener("initialization_error",function(){toast("This browser can’t play Spotify here.","bad")});SP.sdk.connect()}catch(_){}}}
+async function spAct(b){var a=b.dataset.act,d=b.dataset;if(SP.sdk&&SP.sdk.activateElement&&(a==="sp-play"||a==="sp-ctl"))try{SP.sdk.activateElement()}catch(_){}
   if(a==="sp-nav"){var v={t:d.t,id:d.id};if(d.t==="library")v.tab=d.tab;if(d.t==="liked")v.off=+d.off||0;if(d.t==="search")v.q="";if(!d.t||(d.t==="artist"&&!d.id)||(d.t==="album"&&!d.id))return;if(S.view!=="music")setView("music",true);spOpen(v);if(d.t==="search"){var qi=$("#sp-q");if(qi)setTimeout(function(){qi.focus()},30)}}
   else if(a==="sp-play"){var body=d.uri?(d.ctx?{context_uri:d.ctx,offset:{uri:d.uri}}:{uris:[d.uri]}):d.uris&&!d.ctx?{uris:d.uris.split(",")}:{context_uri:d.ctx};spPlay(body)}
   else if(a==="sp-ctl")spCtl(d.k);
@@ -3745,6 +3870,16 @@ async function spAct(b){var a=b.dataset.act,d=b.dataset;
   else if(a==="sp-xfer"){$("#sp-devs").hidden=true;try{await spApi("PUT","/me/player",{device_ids:[d.id],play:!!(SP.st&&SP.st.is_playing)});setTimeout(spPoll,600)}catch(e){spErr(e)}}
   else if(a==="sp-sdk"){$("#sp-devs").hidden=true;spSdk();toast("Starting the web player…")}
   else if(a==="sp-out")spOut();
+  else if(a==="sp-look")lookOpenPage("Music","Spotify");
+  else if(a==="sp-lyx"){spOpen({t:"lyrics"})}
+  else if(a==="sp-drmhelp"){$("#sp-devs").hidden=true;toast("To play Spotify inside Regis: close Regis, open the Regis folder, double-click “Enable Spotify audio”, then start Regis again.")}
+  else if(a==="sp-seekto"){var ms=+d.ms;if(ms>=0)spApi("PUT","/me/player/seek?position_ms="+ms).then(function(){SP.base=ms;SP.at=Date.now();setTimeout(spPoll,300)}).catch(spErr)}
+  else if(a==="sp-sgp")spSgPick(+d.i);
+  else if(a==="sp-fnew"){var f=$("#sp-fnf");f.hidden=!f.hidden;if(!f.hidden)$("#sp-fn").focus()}
+  else if(a==="sp-ftog"){var fo=SP.fo.f.find(function(x){return x.id===d.id});if(fo){fo.o=!fo.o;spFoSave();spPls()}}
+  else if(a==="sp-fdel"){SP.fo.f=SP.fo.f.filter(function(x){return x.id!==d.id});Object.keys(SP.fo.m).forEach(function(k){if(SP.fo.m[k]===d.id)delete SP.fo.m[k]});spFoSave();spPls()}
+  else if(a==="sp-fmv")spFMenu(b);
+  else if(a==="sp-fset"){var mm=$("#sp-fm");if(mm)mm.hidden=true;if(d.f==="+"){SP.fpend=d.id;var ff=$("#sp-fnf");ff.hidden=false;$("#sp-fn").focus();return}if(d.f)SP.fo.m[d.id]=d.f;else delete SP.fo.m[d.id];spFoSave();spPls()}
   else if(a==="sp-hist"){var n=SP.hi+(+d.d||0);if(n<0||n>=SP.hist.length)return;SP.hi=n;spOpen(SP.hist[n],1)}
   else if(a==="sp-lf"){SP.lf=d.k;spPls()}
   else if(a==="sp-all"){var sc=b.closest(".sp-sec");if(sc){var o=sc.classList.toggle("open");b.textContent=o?"Show less":"Show all"}}
@@ -3752,16 +3887,22 @@ async function spAct(b){var a=b.dataset.act,d=b.dataset;
   else if(a==="sp-rpt"){SP.rp=!SP.rp;lsw("regis-sp-rp",SP.rp);document.documentElement.classList.toggle("sp-rp-on",SP.rp);b.setAttribute("aria-pressed",String(SP.rp));if(SP.rp){SP.rpId="";spRpLoad()}}}
 document.addEventListener("input",function(e){var t=e.target;if(!t||!t.id)return;
   if(t.id==="sp-seek"){SP.drag=1;var dd=SP.st&&SP.st.item?SP.st.item.duration_ms:0;$("#sp-t0").textContent=spDur(t.value/1000*dd)}
-  else if(t.id==="sp-q"){clearTimeout(SP.qt);SP.qt=setTimeout(function(){var q=t.value.trim();if(q.length>=2||(!q&&SP.view.t==="search"))spOpen({t:"search",q:q})},380)}
+  else if(t.id==="sp-q"){clearTimeout(SP.qt);SP.qt=setTimeout(function(){var q=t.value.trim();if(q.length>=2)spSgFetch(q);else spSgClose()},200)}
   else if(t.id==="sp-lq")spPls();
-  else if(t.id==="sp-vol"){SP.vdrag=1;clearTimeout(SP.vt);SP.vt=setTimeout(function(){spApi("PUT","/me/player/volume?volume_percent="+t.value).catch(spErr);SP.vdrag=0},250)}});
+  else if(t.id==="sp-vol"){t.style.setProperty("--p",t.value+"%");SP.vdrag=1;clearTimeout(SP.vt);SP.vt=setTimeout(function(){spApi("PUT","/me/player/volume?volume_percent="+t.value).catch(spErr);SP.vdrag=0},250)}});
 document.addEventListener("change",function(e){var t=e.target;if(t&&t.id==="sp-seek"){var dd=SP.st&&SP.st.item?SP.st.item.duration_ms:0,ms=Math.round(t.value/1000*dd);spApi("PUT","/me/player/seek?position_ms="+ms).then(function(){SP.base=ms;SP.at=Date.now();SP.drag=0}).catch(function(e2){SP.drag=0;spErr(e2)})}});
 document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches)return;
   if(f.matches("[data-actsubmit=sp-save]")){e.preventDefault();var c=$("#sp-cid").value.trim();if(!/^[0-9a-f]{32}$/i.test(c)){toast("A Spotify Client ID is 32 letters and numbers.","bad");return}SP.cid=c;lsw("regis-sp-cid",c);spAuth()}
-  else if(f.matches("[data-actsubmit=sp-search]")){e.preventDefault();clearTimeout(SP.qt);spOpen({t:"search",q:$("#sp-q").value.trim()})}});
-document.addEventListener("click",function(e){var m=$("#sp-devs");if(m&&!m.hidden&&!e.target.closest("#sp-devs,#sp-devb"))m.hidden=true});
+  else if(f.matches("[data-actsubmit=sp-fnew]")){e.preventDefault();var nm=$("#sp-fn").value.trim();if(!nm)return;var id="f"+Date.now().toString(36);SP.fo.f.push({id:id,n:nm.slice(0,40),o:true});if(SP.fpend){SP.fo.m[SP.fpend]=id;SP.fpend=""}spFoSave();$("#sp-fn").value="";f.hidden=true;spPls()}
+  else if(f.matches("[data-actsubmit=sp-search]")){e.preventDefault();clearTimeout(SP.qt);spSgClose();spOpen({t:"search",q:$("#sp-q").value.trim()})}});
+document.addEventListener("keydown",function(e){var t=e.target;if(!t||t.id!=="sp-q")return;var n=SP.sg.items.length;
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){if(!n)return;e.preventDefault();SP.sg.i=(SP.sg.i+(e.key==="ArrowDown"?1:-1)+n+1)%(n+1);if(SP.sg.i===n)SP.sg.i=-1;spSgRender();var on=$("#sp-sg .on");if(on&&on.scrollIntoView)on.scrollIntoView({block:"nearest"})}
+  else if(e.key==="Enter"&&SP.sg.i>=0){e.preventDefault();spSgPick(SP.sg.i)}
+  else if(e.key==="Escape"){spSgClose()}});
+document.addEventListener("click",function(e){if(!e.target.closest(".sp-gs,#sp-sg"))spSgClose();var fm=$("#sp-fm");if(fm&&!fm.hidden&&!e.target.closest("#sp-fm,.sp-mv"))fm.hidden=true;var m=$("#sp-devs");if(m&&!m.hidden&&!e.target.closest("#sp-devs,#sp-devb"))m.hidden=true});
 document.addEventListener("visibilitychange",function(){if(!document.hidden)spPoll()});
 setTimeout(spBoot,900);
+setTimeout(function(){if(APP&&APP.drm)APP.drm().then(function(v){SP.drm=!!v;if(SP.drm)spShow()}).catch(function(){})},400);
 /* ---------- executive home ---------- */
 var HD={last:{}};
 function hdSet(id,txt){var e=document.getElementById(id);if(e&&HD.last[id]!==txt){HD.last[id]=txt;e.textContent=txt}}
@@ -3869,7 +4010,7 @@ function bwActive(){return BW.st.tabs.find(function(t){return t.id===BW.st.activ
 function bwOverlay(){var m=$("#modal"),l=$("#look"),a=$("#alert-pop"),mp=$("#more-pop");return !!((m&&!m.hidden)||(l&&!l.hidden)||(a&&!a.hidden)||(mp&&!mp.hidden))}
 var bwBR=0,bwBK="";
 function bwBounds(){if(bwBR)return;bwBR=requestAnimationFrame(function(){bwBR=0;if(!bwNative()||S.view!=="browser")return;var st=$("#bw-stage");if(!st)return;var r=st.getBoundingClientRect(),k=[r.left,r.top,r.width,r.height].map(Math.round).join();if(k===bwBK)return;bwBK=k;APP.browser.bounds({x:r.left,y:r.top,width:r.width,height:r.height}).catch(function(){})})}
-function bwLayout(){var tp=document.querySelector(".top");if(tp){var b=Math.ceil(tp.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty("--bwtop",b+"px")}bwBounds()}
+function bwLayout(){var tp=document.querySelector(".top");if(tp){var b=Math.ceil(tp.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty("--bwtop",b+"px");var rt=tp.querySelector(".right");if(rt){var l=Math.floor(rt.getBoundingClientRect().left);if(l>0)document.documentElement.style.setProperty("--bwr",Math.max(120,innerWidth-l+12)+"px")}}bwBounds()}
 function bwSync(){if(!bwNative())return;bwBK="";APP.browser.show(S.view==="browser"&&!bwOverlay()).then(bwBounds).catch(function(){})}
 function bwRender(st){if(st)BW.st=st;var s2=BW.st,act=bwActive(),nat=bwNative();
   setH($("#bw-tabs"),nat?tgTabsHtml(s2.tabs,s2.active)+'<button class="bw-new" data-act="bw-new" aria-label="New tab" title="New tab">+</button>':"");
@@ -4145,6 +4286,8 @@ function bwSkyOn(){return opGet("bwstar")}
   oS("track",P,"Mouse tracking","Parallax, tilt and the light that follow your pointer. Turn off for a still screen",true);
   oC("clkcol",C,"Clock colour","Arcs, star web and pointer. Leave unset to follow the theme and background colour",function(v){var R=document.documentElement;if(v==null)R.style.removeProperty("--clk");else R.style.setProperty("--clk",v)});
   oS("arcspin",C,"Spin the arcs","The arcs turn with the seconds ring, the opposite way to the minutes ring",true);
+  oS("sptint",SPG,"Tint from artwork","Colour the glow behind pages and Now Playing from the cover art",true,function(v){document.documentElement.classList.toggle("sp-notint",!v)});
+  oS("spdense",SPG,"Compact lists","Tighter song and library rows",false,function(v){document.documentElement.classList.toggle("sp-dense",!!v)});
   oS("spbar",SPG,"Now-playing bar on every page","Keep the Spotify controls at the bottom while you work",false,function(v){document.documentElement.classList.toggle("o-spbar",!!v);try{spShow()}catch(_){}});
   oS("hgleam",C,"Clock gleam","The soft light that sweeps across the clock",true);
   oS("pxfade",M,"Pixel transitions","The pixelated fade between Home, Workspace and Browser",true);
@@ -4647,7 +4790,7 @@ document.addEventListener("click",async function(ev){
     case "vo-up":voMove(b.dataset.v,-1);break;
     case "vo-down":voMove(b.dataset.v,1);break;
     case "vo-reset":VORD=VIEWS.slice();lsw("regis-vord",VORD);voApply();break;
-    case "sp-nav":case "sp-play":case "sp-ctl":case "sp-like":case "sp-queue":case "sp-dev":case "sp-xfer":case "sp-sdk":case "sp-out":case "sp-hist":case "sp-lf":case "sp-all":case "sp-genre":case "sp-rpt":spAct(b);break;
+    case "sp-nav":case "sp-play":case "sp-ctl":case "sp-like":case "sp-queue":case "sp-dev":case "sp-xfer":case "sp-sdk":case "sp-out":case "sp-hist":case "sp-lf":case "sp-all":case "sp-genre":case "sp-rpt":case "sp-look":case "sp-fnew":case "sp-ftog":case "sp-fdel":case "sp-fmv":case "sp-fset":case "sp-sgp":case "sp-seekto":case "sp-lyx":case "sp-drmhelp":spAct(b);break;
     case "app-go":appGo(b.dataset.u);break;
     case "mu-pick":MU.sel=+b.dataset.i;muSave();muRender();break;
     case "mu-del":MU.list.splice(+b.dataset.i,1);if(MU.sel>=MU.list.length)MU.sel=Math.max(0,MU.list.length-1);muSave();muRender();break;
