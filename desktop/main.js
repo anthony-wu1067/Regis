@@ -11,6 +11,7 @@ const { Updater } = require('./lib/updater');
 const { BrowserHost, keyAction, PARTITION } = require('./lib/browser');
 const { Downloads, readFile } = require('./lib/downloads');
 const { OfficeDock } = require('./lib/office');
+const { Extensions } = require('./lib/extensions');
 
 let runningVersion = null, browserHost = null, linkInApp = false, officeDock = null, officeBye = false;
 let win = null, tray = null, quitting = false, capWin = null, mini = null, updater = null;
@@ -195,7 +196,47 @@ app.whenReady().then(async () => {
   const dl = new Downloads({ dir: app.getPath('downloads'), load: () => { try { return JSON.parse(store.getMeta('downloads', '[]') || '[]'); } catch (_) { return []; } }, save: (l) => store.setMeta('downloads', JSON.stringify(l)), onChange: (l) => send('browser:downloads', l), onDone: (d) => send('browser:dldone', d) });
   dl.attach(session.fromPartition(PARTITION));
   const bw = browserHost;
-  ipcMain.handle('browser:state', wrap(() => { if (!bw.tabs.length) { let urls = []; try { urls = JSON.parse(store.getMeta('bwTabs', '[]') || '[]'); } catch (_) {} bw.init(); if (urls.length) bw.restore(urls); else bw.open(''); } return bw.snapshot(); }));
+  /* 1.8.5 Chrome extensions, loaded into the browser's session only (never into Regis's own pages) */
+  const bses = session.fromPartition(PARTITION);
+  const exts = new Extensions({ root: path.join(app.getPath('userData'), 'extensions'), getSession: () => bses, chromeVersion: process.versions.chrome, onChange: (l) => send('ext:list', l) });
+  try { const pf = exts.preloadFile(); bses.registerPreloadScript({ type: 'frame', id: 'regis-ext', filePath: pf }); bses.registerPreloadScript({ type: 'service-worker', id: 'regis-ext-sw', filePath: pf }); } catch (e) { console.warn('extension preload', e.message); }
+  const isExtUrl = (u) => /^chrome-extension:\/\//.test(String(u || ''));
+  const extOf = (u) => { const m = String(u || '').match(/^chrome-extension:\/\/([a-p]{32})\//); return m ? m[1] : ''; };
+  /* extension pages that need a window of their own (options, pages they open) */
+  const extWindow = (u) => { const w2 = new BrowserWindow({ width: 980, height: 720, backgroundColor: '#0a0713', title: 'Extension', autoHideMenuBar: true, webPreferences: { partition: PARTITION, sandbox: true, contextIsolation: true } }); w2.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) { bw.open(url); send('ext:showBrowser'); } else if (isExtUrl(url)) extWindow(url); return { action: 'deny' }; }); w2.loadURL(u).catch(() => {}); return w2; };
+  const extMsg = (extId, m) => {
+    if (!m || typeof m !== 'object') return;
+    if (m.t === 'badge') exts.setBadge(extId, m.text);
+    else if (m.t === 'note' && Notification.isSupported()) { try { new Notification({ title: String(m.title || 'Extension').slice(0, 80), body: String(m.body || '').slice(0, 300) }).show(); } catch (_) {} }
+    else if (m.t === 'open' && m.url) { const u = String(m.url); if (isExtUrl(u)) extWindow(u); else if (/^https?:/.test(u)) { bw.open(u); send('ext:showBrowser'); } }
+    else if (m.t === 'options') { const rid = exts.byExt(extId), e = exts.list().find((x) => x.id === rid); if (e && e.options) extWindow(exts.pageUrl(rid, e.options)); }
+  };
+  ipcMain.on('ext:msg', (e, m) => { const id = extOf(e.senderFrame && e.senderFrame.url); if (id) extMsg(id, m); });
+  ipcMain.handle('ext:tabs', (e, q) => (isExtUrl(e.senderFrame && e.senderFrame.url) ? bw.extTabs(q || {}) : []));
+  try { bses.serviceWorkers.on('running-status-changed', (d) => { try { const sw = bses.serviceWorkers.getWorkerFromVersionID(d.versionId); if (!sw || sw.__regis || !isExtUrl(sw.scope)) return; sw.__regis = true; const id = extOf(sw.scope);
+    sw.ipc.handle('ext:tabs', (_e, q) => bw.extTabs(q || {})); sw.ipc.on('ext:msg', (_e, m) => extMsg(id, m)); } catch (_) {} }); } catch (_) {}
+  /* the toolbar popup: a small borderless window under the button, closed when it loses focus */
+  let extPop = null;
+  const openPopup = async (rid, at) => {
+    const e = exts.list().find((x) => x.id === rid); if (!e || !e.popup) throw new Error('This extension has no popup.');
+    if (extPop && !extPop.isDestroyed()) extPop.close();
+    const p = new BrowserWindow({ parent: win, show: false, frame: false, resizable: false, skipTaskbar: true, width: 360, height: 420, backgroundColor: '#1b1a24', webPreferences: { partition: PARTITION, sandbox: true, contextIsolation: true } });
+    extPop = p; p.on('blur', () => { setTimeout(() => { if (!p.isDestroyed() && !p.isFocused()) p.close(); }, 150); });
+    p.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) { bw.open(url); send('ext:showBrowser'); } else if (isExtUrl(url)) extWindow(url); return { action: 'deny' }; });
+    const cb = win.getContentBounds(), x = Math.round(cb.x + (+at.x || 0)), y = Math.round(cb.y + (+at.y || 0));
+    await p.loadURL(exts.pageUrl(rid, e.popup)).catch(() => {});
+    const fit = async () => { try { if (p.isDestroyed()) return; const r = await p.webContents.executeJavaScript('[Math.max(document.documentElement.scrollWidth,document.body?document.body.scrollWidth:0),Math.max(document.documentElement.scrollHeight,document.body?document.body.scrollHeight:0)]'); const w2 = Math.min(800, Math.max(200, r[0] | 0)), h2 = Math.min(600, Math.max(80, r[1] | 0)); if (!p.isDestroyed()) p.setBounds({ x: Math.max(cb.x, x - w2), y, width: w2, height: h2 }); } catch (_) {} };
+    await fit(); if (!p.isDestroyed()) { p.show(); p.focus(); } setTimeout(fit, 400); setTimeout(fit, 1200); return true;
+  };
+  const extReady = exts.loadAll().catch(() => {});
+  ipcMain.handle('ext:list', wrap(async () => { await extReady; return exts.list(); }));
+  ipcMain.handle('ext:install', wrap((link) => exts.installStore(String(link || ''))));
+  ipcMain.handle('ext:installPick', wrap(async (folder) => { const r = await require('electron').dialog.showOpenDialog(win, folder ? { title: 'Choose an unpacked extension folder', properties: ['openDirectory'] } : { title: 'Choose an extension file', properties: ['openFile'], filters: [{ name: 'Chrome extension', extensions: ['crx', 'zip'] }] }); if (r.canceled || !r.filePaths.length) return null; return folder ? exts.installFolder(r.filePaths[0]) : exts.installFile(r.filePaths[0]); }));
+  ipcMain.handle('ext:on', wrap((id, on) => exts.setOn(String(id), !!on)));
+  ipcMain.handle('ext:remove', wrap((id) => exts.remove(String(id))));
+  ipcMain.handle('ext:popup', wrap((id, at) => openPopup(String(id), at || {})));
+  ipcMain.handle('ext:options', wrap((id) => { const e = exts.list().find((x) => x.id === String(id)); if (!e || !e.options) throw new Error('This extension has no options page.'); extWindow(exts.pageUrl(e.id, e.options)); return true; }));
+  ipcMain.handle('browser:state', wrap(async () => { await extReady; return (() => { if (!bw.tabs.length) { let urls = []; try { urls = JSON.parse(store.getMeta('bwTabs', '[]') || '[]'); } catch (_) {} bw.init(); if (urls.length) bw.restore(urls); else bw.open(''); } return bw.snapshot(); })(); }));
   ipcMain.handle('browser:open', wrap((u) => bw.open(u)));
   ipcMain.handle('browser:close', wrap((id) => bw.close(+id)));
   ipcMain.handle('browser:activate', wrap((id) => bw.activate(+id)));
@@ -207,6 +248,7 @@ app.whenReady().then(async () => {
   ipcMain.handle('browser:bounds', wrap((b) => bw.setBounds(b || {})));
   ipcMain.handle('browser:show', wrap((v, snap) => bw.show(!!v, snap !== false)));
   ipcMain.on('bw:cred', (e, d) => { try { bw.cred(e.sender, d); } catch (_) {} });
+  ipcMain.on('bw:shieldOn', (e) => { e.returnValue = !!bw.shield; });
   ipcMain.handle('browser:fill', wrap((id, user, pass) => bw.fill(+id, user, pass)));
   ipcMain.handle('browser:shield', wrap((on) => { store.setMeta('bwShield', on ? '1' : '0'); return bw.setShield(!!on); }));
   ipcMain.handle('browser:move', wrap((id, to) => bw.move(+id, +to)));

@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld('regisBridge', {
   onVis: (cb) => { ipcRenderer.on('win:vis', (_e, v) => { try { cb(!!v); } catch (_) {} }); },
   saveUpdateUrl: (u) => call('app:saveUpdateUrl', u), updateCheck: () => call('app:updateCheck'), updateApply: () => call('app:updateApply'),
   onUpdate: (cb) => { ipcRenderer.on('update:ready', (_e, v) => { try { cb(String(v)); } catch (_) {} }); },
+  /* 1.8.5 Chrome extensions in the Regis Browser */
+  ext: { list: () => call('ext:list'), install: (link) => call('ext:install', link), installPick: (folder) => call('ext:installPick', !!folder), on: (id, v) => call('ext:on', id, !!v), remove: (id) => call('ext:remove', id),
+    popup: (id, at) => call('ext:popup', id, at), options: (id) => call('ext:options', id), onList: (cb) => { ipcRenderer.on('ext:list', (_e, l) => { try { cb(l); } catch (_) {} }); }, onShowBrowser: (cb) => { ipcRenderer.on('ext:showBrowser', () => { try { cb(); } catch (_) {} }); } },
   browser: {
     state: () => call('browser:state'), open: (u) => call('browser:open', u), close: (id) => call('browser:close', id), activate: (id) => call('browser:activate', id),
     go: (id, text) => call('browser:go', id, text), back: (id) => call('browser:back', id), forward: (id) => call('browser:forward', id), reload: (id) => call('browser:reload', id), stop: (id) => call('browser:stop', id),

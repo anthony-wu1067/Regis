@@ -34,6 +34,62 @@ if (/^https?:$/.test(location.protocol)) {
   try { if (contextBridge && contextBridge.executeInMainWorld) contextBridge.executeInMainWorld({ func: chromeSurface }); else throw 0; }
   catch (_) { try { webFrame.executeJavaScript('(' + chromeSurface.toString() + ')()'); } catch (_) {} }
 }
+/* YouTube without ads (Shield on). Runs in YouTube's own page world before its scripts (injected by bw-preload.js).
+   1. Ad data is removed from the player's instructions before the player reads them (JSON.parse, fetch/Response.json,
+      and the ytInitialPlayerResponse / ytInitialData values YouTube puts in the page), so no ad is scheduled.
+   2. If an ad still starts, it is muted, skipped to its end and its Skip button pressed.
+   3. Ad boxes in the feed, beside videos and over the player are hidden.
+   It never sends anything anywhere and touches only youtube.com pages. */
+const ytClean = function () {
+  try {
+    if (window.__regisYt) return; Object.defineProperty(window, '__regisYt', { value: true });
+    var KEYS = ['adPlacements', 'playerAds', 'adSlots', 'adBreakHeartbeatParams', 'adSafetyReason'];
+    var strip = function (o, depth) {
+      if (!o || typeof o !== 'object' || depth > 6) return o;
+      for (var i = 0; i < KEYS.length; i++) if (KEYS[i] in o) { try { delete o[KEYS[i]]; } catch (_) {} }
+      if (o.playerResponse) strip(o.playerResponse, depth + 1);
+      if (Array.isArray(o)) { for (var j = 0; j < o.length && j < 8; j++) strip(o[j], depth + 1); }
+      else if (o.response && typeof o.response === 'object') strip(o.response, depth + 1);
+      /* feed and search results: drop ad cards */
+      var c = o.contents || (o.richGridRenderer && o.richGridRenderer.contents);
+      if (Array.isArray(c)) for (var k = c.length - 1; k >= 0; k--) { var it = c[k]; if (it && (it.adSlotRenderer || (it.richItemRenderer && it.richItemRenderer.content && it.richItemRenderer.content.adSlotRenderer))) c.splice(k, 1); }
+      return o;
+    };
+    var P = JSON.parse;
+    JSON.parse = function parse() { var r = P.apply(this, arguments); try { if (r && typeof r === 'object' && (r.adPlacements || r.playerAds || r.adSlots || r.playerResponse || r.contents)) strip(r, 0); } catch (_) {} return r; };
+    try { Object.defineProperty(JSON.parse, 'toString', { value: function () { return 'function parse() { [native code] }'; } }); } catch (_) {}
+    var RJ = Response.prototype.json;
+    Response.prototype.json = function json() { return RJ.apply(this, arguments).then(function (r) { try { strip(r, 0); } catch (_) {} return r; }); };
+    ['ytInitialPlayerResponse', 'ytInitialData'].forEach(function (name) {
+      var v; try { v = window[name]; } catch (_) {}
+      try { Object.defineProperty(window, name, { configurable: true, get: function () { return v; }, set: function (x) { v = strip(x, 0); } }); } catch (_) {}
+    });
+    /* hide ad boxes */
+    var css = 'ytd-ad-slot-renderer,ytd-in-feed-ad-layout-renderer,ytd-banner-promo-renderer,ytd-statement-banner-renderer,ytd-display-ad-renderer,ytd-promoted-sparkles-web-renderer,ytd-promoted-video-renderer,ytd-compact-promoted-video-renderer,ytd-companion-slot-renderer,ytd-player-legacy-desktop-watch-ads-renderer,ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],#masthead-ad,#player-ads,#panels ytd-ads-engagement-panel-content-renderer,.ytp-ad-overlay-container,.ytp-ad-image-overlay,.ytp-suggested-action,ytd-rich-item-renderer:has(> #content > ytd-ad-slot-renderer),ytd-rich-section-renderer:has(ytd-statement-banner-renderer),tp-yt-paper-dialog:has(ytd-enforcement-message-view-model){display:none!important}';
+    var addCss = function () { if (document.getElementById('regis-yt')) return; var s = document.createElement('style'); s.id = 'regis-yt'; s.textContent = css; (document.head || document.documentElement).appendChild(s); };
+    if (document.documentElement) addCss(); document.addEventListener('DOMContentLoaded', addCss);
+    /* an ad that still plays: mute it, jump to its end, press Skip; then put the sound back */
+    var muted = false;
+    var check = function () {
+      var p = document.getElementById('movie_player'), v = p && p.querySelector('video');
+      if (p && v && p.classList.contains('ad-showing')) {
+        if (!v.muted) { v.muted = true; muted = true; }
+        try { if (isFinite(v.duration) && v.duration > 0 && v.currentTime < v.duration - 0.1) v.currentTime = v.duration - 0.05; } catch (_) {}
+        try { v.playbackRate = 16; } catch (_) {}
+        var b = p.querySelector('.ytp-skip-ad-button,.ytp-ad-skip-button,.ytp-ad-skip-button-modern,button[id^="skip-button"]'); if (b) b.click();
+      } else if (v && muted) { muted = false; v.muted = false; try { if (v.playbackRate === 16) v.playbackRate = 1; } catch (_) {} }
+      /* "Ad blockers are not allowed" box: close it and carry on playing */
+      var d = document.querySelector('ytd-enforcement-message-view-model'); if (d) { var dlg = d.closest('tp-yt-paper-dialog'); if (dlg) dlg.remove(); var bd = document.querySelector('tp-yt-iron-overlay-backdrop'); if (bd) bd.remove(); if (v && v.paused) v.play().catch(function () {}); }
+    };
+    /* watch only the player's class (YouTube marks it "ad-showing"), plus a slow timer as a backup */
+    var watched = null; setInterval(function () { var p = document.getElementById('movie_player'); if (p && p !== watched) { watched = p; new MutationObserver(check).observe(p, { attributes: true, attributeFilter: ['class'] }); } check(); }, 700);
+  } catch (_) {}
+};
+/* only on YouTube, and only while the Browser's Shield is on */
+if (/(^|\.)youtube\.com$/i.test(location.hostname)) {
+  let on = true; try { on = ipcRenderer.sendSync('bw:shieldOn') !== false; } catch (_) {}
+  if (on) { try { if (contextBridge && contextBridge.executeInMainWorld) contextBridge.executeInMainWorld({ func: ytClean }); else throw 0; } catch (_) { try { webFrame.executeJavaScript('(' + ytClean.toString() + ')()'); } catch (_) {} } }
+}
 const visible = (el) => { try { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch (_) { return false; } };
 function userFor(pw) {
   const scope = pw.form || document;

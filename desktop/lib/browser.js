@@ -83,6 +83,15 @@ class BrowserHost {
   }
   _win() { const w = this.getWin && this.getWin(); return w && !w.isDestroyed() ? w : null; }
   _tab(id) { return this.tabs.find((t) => t.id === id); }
+  /* chrome.tabs for extensions: Regis's tabs in Chrome's shape (ids are the tabs' webContents ids) */
+  extTabs(q) {
+    q = q || {}; const glob = (p) => { p = String(p); if (p === '<all_urls>') return /^(https?|file|ftp):/; return new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$'); };
+    const urls = q.url ? [].concat(q.url).map(glob) : null, title = q.title ? glob(q.title) : null;
+    return this.tabs.map((t, i) => { const wc = t.view && !t.view.webContents.isDestroyed() ? t.view.webContents : null; if (!wc) return null;
+      return { id: wc.id, index: i, windowId: 1, active: t.id === this.active, highlighted: t.id === this.active, selected: t.id === this.active, url: t.url || wc.getURL(), title: t.title || wc.getTitle(), status: t.loading ? 'loading' : 'complete',
+        favIconUrl: '', incognito: false, pinned: false, audible: !!t.audible, discarded: false, autoDiscardable: true, groupId: -1, mutedInfo: { muted: !!t.muted }, width: 1200, height: 800 }; })
+      .filter((x) => x && (q.active === undefined || x.active === !!q.active) && (!urls || urls.some((r) => r.test(x.url))) && (!title || title.test(x.title)) && (q.status === undefined || x.status === q.status) && (q.audible === undefined || x.audible === !!q.audible));
+  }
   snapshot() {
     return { active: this.active, shield: this.shield, blocked: this.blocked,
       tabs: this.tabs.map((t) => ({ id: t.id, title: t.title, url: t.url, loading: t.loading, blank: !t.view && !t.asleep, canBack: t.canBack, canFwd: t.canFwd, secure: /^https:/i.test(t.url), login: !!t.login,

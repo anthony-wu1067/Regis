@@ -14,6 +14,7 @@ const FAKE_SDK = `window.Spotify={Player:function(o){var L={},self=this;window._
   this.nextTrack=function(){return Promise.resolve()};this.previousTrack=function(){return Promise.resolve()};this.seek=function(){return Promise.resolve()};this.activateElement=function(){};
   this.getCurrentState=function(){return Promise.resolve(Object.assign({},window.__sp.state))}}};setTimeout(function(){window.onSpotifyWebPlaybackSDKReady&&window.onSpotifyWebPlaybackSDKReady()},50);`;
 let device = 'regis-dev', PLAYING = true;
+const track2 = { id: 't2', uri: 'spotify:track:t2', name: 'Song Two', duration_ms: 180000, artists: [{ id: 'a2', name: 'Other Artist' }], album: { id: 'al2', name: 'Album Two', images: [] } };
 const track = { id: 't1', uri: 'spotify:track:t1', name: 'Song One', duration_ms: 200000, artists: [{ id: 'a1', name: 'Artist' }], album: { id: 'al1', name: 'Album', images: [] } };
 function api(method, url, body) {
   const u = new URL(url), p = u.pathname.replace('/v1', '');
@@ -24,7 +25,8 @@ function api(method, url, body) {
   if (p === '/me/playlists') return [200, { items: [], next: null }];
   if (p === '/me/player/devices') return [200, { devices: devs }];
   if (p === '/me/player' && method === 'GET') return !device ? [204, ''] : [200, { device: devs.find((d) => d.id === device), is_playing: PLAYING, progress_ms: 9000, item: track, shuffle_state: false, repeat_state: 'off' }];
-  if (p === '/me/player/queue') return [200, { queue: [] }];
+  /* like Spotify right after a song change: the queue still starts with the song now playing */
+  if (p === '/me/player/queue') return [200, { currently_playing: track, queue: [track, track2] }];
   if (p.startsWith('/me/tracks/contains')) return [200, [false]];
   if (method !== 'GET') return [204, ''];
   return [200, { items: [] }];
@@ -68,5 +70,9 @@ app.whenReady().then(async () => {
   await J('localStorage.removeItem("regis-sp-drmbad")'); device = 'regis-dev'; PLAYING = true; await sleep(13000); /* wait out the rescue cooldown */
   const n2 = calls.length; await J('window.__sp.state={paused:false,loading:false,position:10000,duration:200000}');
   ok(await until(() => Promise.resolve(calls.slice(n2).some((c) => /"device_ids":\["pc1"\],"play":true/.test(c))), 9000), 'audio that silently stops (stuck position) is noticed within a few seconds and moved');
+  // 4) Up next shows the next song, not the one playing (Spotify's queue can still start with the current song)
+  await J("var b=document.querySelector('[data-act=sp-rpt]');if(b&&!document.documentElement.classList.contains('sp-rp-on'))b.click()"); await sleep(2500);
+  const rp = await J('var e=document.getElementById("sp-rpn");return e?e.textContent:""');
+  ok(/Song Two/.test(rp), 'Up next shows the next song (' + (rp.match(/Song \w+/g) || []).join(', ') + ')');
   console.log(pass + ' passed, ' + fail + ' failed'); app.exit(fail ? 1 : 0);
 });

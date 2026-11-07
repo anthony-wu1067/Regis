@@ -89,8 +89,13 @@ class OfficeDock {
         if (mine && owner) { try { d.docked = !!(await this._cmd({ op: 'dock', h: w.h, owner })); } catch (_) {} if (d.docked) { this.active = w.h; if (this.expect && this.expect.k === w.k) this.expect = null; await this.place(true); } }
       } else { d.t = title; d.docked = !!w.docked; }
     }
+    /* the last file of an app closed: if that app now has nothing open, let it quit instead of idling in the background */
+    const had = {}; this.docs.forEach((d) => { if (d.docked) had[d.k] = 1; });
     for (const h of [...this.docs.keys()]) if (!seen.has(h)) { this.docs.delete(h); if (this.active === h) { const next = [...this.docs.values()].find((x) => x.docked); this.active = next ? next.h : 0; if (next) await this.place(false); } }
+    Object.keys(had).forEach((k) => { if (![...this.docs.values()].some((d) => d.k === k)) this._cmd({ op: 'quitIdle', k }, 20000).catch(() => {}); });
     if (this.expect && Date.now() > this.expect.until) this.expect = null;
+    /* Office keeps its own title bar now, so it could be dragged away: put it back */
+    if (this.visible) await this.place(false);
     this._emit(); return this.state();
   }
   _loop() { clearTimeout(this.timer); const busy = this.visible || this.expect; if (!this.ps && !busy) return; this.timer = setTimeout(() => { this.scan().catch(() => {}).then(() => this._loop()); }, busy ? 800 : 4000); }

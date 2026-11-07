@@ -84,6 +84,15 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.5 Extensions, ad-free YouTube, new presets, Office ribbon back
+
+- **Chrome extensions in the Regis Browser:** press the puzzle button > Manage extensions and paste a Chrome Web Store link, or open an extension's page in the Chrome Web Store and press **Add to Regis**. Installed extensions show in the toolbar; press one to open its popup. Turn them on or off, open their options or remove them in the same place. Tested with Dark Reader and Google Translate. A few Chrome-only parts aren't available (the blocking rules some ad blockers use; signing in through Chrome), and Regis says so for an extension that needs them.
+- **YouTube without ads** while the Browser's Shield is on: ad data is removed before the player sees it, any ad that still starts is muted and skipped, and ad boxes are hidden.
+- **Three presets** in Appearance > Colour: **Cyberpunk** (neon city with rain and holo tags), **Blackwall** (red firewall lattice with drifting shards) and **Holo HUD** (gold and cyan rings and readouts). Each sets the colours and an animated background, drawn off the main thread. The colours and backgrounds can also be picked on their own.
+- **Office:** the ribbon, title row and status bar are back, so the key tips (Alt) and every Office shortcut work. Regis now keeps Office's own title bar instead of removing it. An Office app Regis opened also quits once its last file is closed, instead of idling in the background.
+- **Spotify Up next** shows the next song, not the one playing.
+- Updating: the desktop app changed, so run *Install Regis* once.
+
 ## 1.8.4 Office inside Regis, Chrome-style tabs, smoother Home
 
 - **Office page (desktop app on Windows):** the real Word, Excel and PowerPoint, docked inside Regis. A sidebar switches between Files and the three apps; open documents show as tabs along the top. New, Open… and Templates start or open documents straight into Regis, and every Office keyboard shortcut works because it is the actual desktop app (Keys in the sidebar lists the common ones). Pop out moves a document back to its own window; Office files you opened elsewhere can be brought in. When Regis quits, documents become normal windows again, so nothing is lost.
