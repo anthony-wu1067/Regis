@@ -10,8 +10,9 @@ const { Mini } = require('./lib/mini');
 const { Updater } = require('./lib/updater');
 const { BrowserHost, keyAction, PARTITION } = require('./lib/browser');
 const { Downloads, readFile } = require('./lib/downloads');
+const { OfficeDock } = require('./lib/office');
 
-let runningVersion = null, browserHost = null, linkInApp = false;
+let runningVersion = null, browserHost = null, linkInApp = false, officeDock = null, officeBye = false;
 let win = null, tray = null, quitting = false, capWin = null, mini = null, updater = null;
 const BUNDLED_PAGE = path.join(__dirname, 'renderer', 'index.html');
 const MINI_KEY = 'CommandOrControl+Shift+M';
@@ -76,6 +77,8 @@ function createWindow() {
   /* Background throttling is off (so Spotify keeps playing), which also hides minimise/tray from the page. Tell it, so visuals can pause. */
   const vis = (v) => () => { try { if (win && !win.isDestroyed()) win.webContents.send('win:vis', v); } catch (_) {} };
   win.on('hide', vis(false)); win.on('minimize', vis(false)); win.on('show', vis(true)); win.on('restore', vis(true));
+  /* docked Office windows follow the Regis window */
+  ['move', 'resize', 'maximize', 'unmaximize', 'enter-full-screen', 'leave-full-screen', 'hide', 'show', 'minimize', 'restore'].forEach((ev) => win.on(ev, () => { if (officeDock) officeDock.follow(); }));
   const staged = updater && updater.current();      // a newer interface downloaded over the air, if any
   runningVersion = staged ? staged.version : app.getVersion();
   win.loadFile(staged ? path.join(staged.dir, 'index.html') : BUNDLED_PAGE);
@@ -253,6 +256,21 @@ app.whenReady().then(async () => {
     officeSeen = new Set(list.map((f) => f.path)); void home; return list;
   }));
   ipcMain.handle('office:open', wrap(async (p) => { p = String(p || ''); if (!officeSeen.has(p)) throw new Error('Refresh the list and try again.'); const e = await shell.openPath(p); if (e) throw new Error(e); return true; }));
+  officeDock = new OfficeDock(() => win, path.join(__dirname, 'lib', 'office-dock.ps1'));
+  officeDock.onState = (st) => { try { if (win && !win.isDestroyed()) win.webContents.send('office:dock', st); } catch (_) {} };
+  const needDock = () => { if (!officeDock.available()) throw new Error('Docking Office apps needs Windows.'); return officeDock; };
+  ipcMain.handle('office:dockApps', wrap(() => (officeDock.available() ? officeDock.apps() : null)));
+  ipcMain.handle('office:dockState', wrap(() => needDock().state()));
+  ipcMain.handle('office:dockShow', wrap((v, h, f) => needDock().show(!!v, +h || 0, !!f)));
+  ipcMain.handle('office:dockBounds', wrap((r) => { if (officeDock.available()) officeDock.bounds(r || {}); return true; }));
+  ipcMain.handle('office:dockNew', wrap((k) => needDock().create(String(k || ''))));
+  ipcMain.handle('office:dockStart', wrap((k) => needDock().start(String(k || ''))));
+  ipcMain.handle('office:dockPick', wrap((k) => needDock().pick(String(k || ''))));
+  ipcMain.handle('office:dockOpen', wrap((p) => { p = String(p || ''); if (!officeSeen.has(p)) throw new Error('Refresh the list and try again.'); return needDock().openPath(p); }));
+  ipcMain.handle('office:dockClose', wrap((h) => needDock().close(+h)));
+  ipcMain.handle('office:dockAdopt', wrap((h) => needDock().adopt(+h)));
+  ipcMain.handle('office:dockRelease', wrap((h) => needDock().release(+h)));
+  ipcMain.handle('office:dockFocus', wrap(() => needDock().focus()));
   ipcMain.handle('office:show', wrap((p) => { p = String(p || ''); if (!officeSeen.has(p)) throw new Error('Refresh the list and try again.'); shell.showItemInFolder(p); return true; }));
   /* downloads list and actions (Ctrl+J panel) */
   ipcMain.handle('dl:list', wrap(() => dl.list()));
@@ -289,6 +307,8 @@ app.whenReady().then(async () => {
   } catch (_) { /* tray unsupported: closing the window will still just hide it */ }
   try { globalShortcut.register(MINI_KEY, () => { showWindow(); setMini(!(mini && mini.on)); }); } catch (_) { /* shortcut unsupported */ }
   try { if (!globalShortcut.register(CAPTURE_KEY, openCapture)) console.warn('Quick capture shortcut is taken by another app.'); } catch (_) { /* shortcut unsupported */ }
+  /* give docked Office windows their frames back before the Regis window goes away */
+  app.on('before-quit', (e) => { if (officeDock && officeDock.ps && !officeBye) { e.preventDefault(); officeBye = true; quitting = true; officeDock.releaseAll().finally(() => app.quit()); return; } });
   app.on('before-quit', () => { quitting = true; try { browserHost && browserHost.destroy(); } catch (_) {} globalShortcut.unregisterAll(); store.flush(); });
   app.on('activate', showWindow);
 });

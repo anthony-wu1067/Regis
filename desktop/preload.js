@@ -32,7 +32,12 @@ contextBridge.exposeInMainWorld('regisBridge', {
     onDownloads: (cb) => { ipcRenderer.on('browser:downloads', (_e, l) => { try { cb(l); } catch (_) {} }); },
     onDlDone: (cb) => { ipcRenderer.on('browser:dldone', (_e, d) => { try { cb(d); } catch (_) {} }); }
   },
-  office: { recent: () => call('office:recent'), open: (p) => call('office:open', p), show: (p) => call('office:show', p) },
+  office: { recent: () => call('office:recent'), open: (p) => call('office:open', p), show: (p) => call('office:show', p),
+    /* 1.8.4: the desktop Word, Excel and PowerPoint docked inside Regis */
+    dock: { apps: () => call('office:dockApps'), state: () => call('office:dockState'), show: (v, h, focus) => call('office:dockShow', !!v, h || 0, !!focus), bounds: (r) => call('office:dockBounds', r),
+      create: (k) => call('office:dockNew', k), start: (k) => call('office:dockStart', k), pick: (k) => call('office:dockPick', k), open: (p) => call('office:dockOpen', p),
+      close: (h) => call('office:dockClose', h), adopt: (h) => call('office:dockAdopt', h), release: (h) => call('office:dockRelease', h), focus: () => call('office:dockFocus'),
+      onState: (cb) => { ipcRenderer.on('office:dock', (_e, s) => { try { cb(s); } catch (_) {} }); } } },
   downloads: { list: () => call('dl:list'), open: (id) => call('dl:open', id), show: (id) => call('dl:show', id), cancel: (id) => call('dl:cancel', id), pause: (id) => call('dl:pause', id), resume: (id) => call('dl:resume', id),
     remove: (id) => call('dl:remove', id), clear: () => call('dl:clear'), folder: () => call('dl:folder'), read: (id) => call('dl:read', id) },
   setMini: (on) => call('app:mini', on), getMini: () => call('app:miniState'),

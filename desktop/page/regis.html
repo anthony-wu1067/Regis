@@ -2040,6 +2040,9 @@ html.lite .bw-lay i{filter:none!important;translate:none!important}
   html.mob .panel{border-radius:18px}
   html.mob .ph{padding:16px 16px 6px;gap:6px 10px}
   html.mob .ph .pa{margin-left:auto;display:flex;gap:6px;flex-wrap:nowrap}
+  html.mob .ph:not(:has(.pa>:nth-child(3))){flex-wrap:nowrap}
+  html.mob .ph:not(:has(.pa>:nth-child(3)))>h2{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  html.mob .ph:not(:has(.pa>:nth-child(3)))>.sub{min-width:0;flex:0 20 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   html.mob .ph .pa .btn{min-height:34px;height:34px;padding:0 12px;font-size:13px}
 }
 
@@ -2427,7 +2430,7 @@ html.mob[data-view="office"] .top{padding-top:max(8px,var(--sat))}
   html.mob[data-view="office"] .top,html.mob[data-view="browser"] .top{min-height:0;height:max(8px,env(safe-area-inset-top,0px));padding:0;gap:0;overflow:hidden}
 html.mob[data-view="office"] .top>*,html.mob[data-view="browser"] .top>*{display:none!important}
 html[data-view="office"] #office{display:block}
-html[data-view="office"] #app>:not(.top):not(#office):not(#banner):not(#upd-bar):not(#shell-bar){display:none!important}
+html[data-view="office"] #app>:not(.top):not(#office):not(#ofd):not(#banner):not(#upd-bar):not(#shell-bar){display:none!important}
 html:not(.mob)[data-view="office"] #office{padding-top:64px}
 .of-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:16px;align-items:start}
 @media (max-width:900px){.of-grid{grid-template-columns:1fr}}
@@ -2466,7 +2469,64 @@ html:not(.mob) #vsw{gap:2px}
 .bw-snap{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:3;pointer-events:none}
 .bw-snap[hidden]{display:none}
 .bw-tab{cursor:default}
-.bw-tab.drag{opacity:.45}
+#bw-tabs .bw-tab,#bw-tabs .bw-gh{transition:transform .2s cubic-bezier(.2,.8,.2,1),background .25s var(--ease),color .2s}
+#bw-tabs.tdrag{cursor:grabbing}
+#bw-tabs .bw-tab.lift{z-index:4;transition:none!important;cursor:grabbing;box-shadow:0 8px 20px -8px rgba(0,0,0,.7),inset 0 2px 0 var(--gc,transparent)}
+#bw-tabs .bw-tab.lift:not(.on){background:color-mix(in srgb,var(--fg) 16%,var(--bg))}
+#bw-tabs .bw-gh.dg{transform:scale(1.06)}
+@keyframes tabIn{from{opacity:0;transform:translateY(5px) scale(.9)}}
+#bw-tabs .tin{animation:tabIn .2s cubic-bezier(.2,.8,.2,1)}
+/* browser toolbar: Appearance as an icon like its neighbours (less clutter; the tooltip names it) */
+.bw-bar .bw-look span{display:none}
+.bw-bar .bw-look{width:34px;padding:0;justify-content:center}
+/* 1.8.4 Office workspace: the desktop apps docked inside Regis */
+.ofd{display:none}
+html.ofd-on[data-view="office"] #office{display:none!important}
+html.ofd-on[data-view="office"] #ofd{display:flex;position:fixed;left:0;right:0;bottom:0;top:44px;z-index:6;background:var(--bg)}
+.ofd-side .of-ic{width:26px;height:26px;border-radius:7px;font-size:13px;pointer-events:none}
+.ofd-side .bw-ic[aria-current=page]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--inset));color:var(--fg)}
+.ofd-side .bw-ic[aria-current=page] small{color:var(--fg)}
+.ofd-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.ofd-bar{flex:none;display:flex;align-items:center;gap:6px;height:46px;padding:0 12px;border-bottom:1px solid var(--line);overflow:hidden}
+.ofd-bar .grow{flex:1}
+.ofd-ttl{font:600 13px var(--f-body);color:var(--fg)}
+.ofd-doc{display:flex;align-items:center;gap:2px;height:32px;min-width:0;max-width:240px;flex:0 1 220px;padding:0 4px 0 8px;border-radius:9px;background:color-mix(in srgb,var(--fg) 7%,transparent);color:var(--fg2)}
+.ofd-doc.on{background:color-mix(in srgb,var(--fg) 18%,var(--bg));color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.ofd-dn{flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:100%;border:0;background:none;color:inherit;font:500 12.5px var(--f-body);cursor:pointer;padding:0;text-align:left}
+.ofd-dn span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ofd-dn .of-ic{width:20px;height:20px;border-radius:5px;font-size:10.5px}
+.ofd-doc .x{flex:none;width:22px;height:22px;border-radius:6px;border:0;background:transparent;color:var(--fg3);cursor:pointer;font-size:15px;line-height:1;padding:0}
+.ofd-doc .x:hover{background:var(--line);color:var(--fg)}
+.ofd-bar .bw-new{margin:0 0 0 2px}
+.ofd-stage{position:relative;flex:1;min-height:0;overflow:auto;background:var(--bg)}
+.ofd-stage.live{overflow:hidden}
+.ofd-ph{min-height:100%}
+.ofd-hold{height:100%;min-height:260px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--fg2)}
+.ofd-hold .of-ic{width:44px;height:44px;border-radius:12px;font-size:20px}
+.ofd-hold small{color:var(--fg3)}
+.ofd-empty{max-width:860px;margin:0 auto;padding:32px 24px 40px;display:flex;flex-direction:column;gap:22px}
+.ofd-hero{display:flex;align-items:center;gap:16px}
+.ofd-hero .of-ic{width:56px;height:56px;border-radius:14px;font-size:26px}
+.ofd-hero h3{margin:0;font:600 22px var(--f-display);color:var(--fg)}
+.ofd-hero p{margin:4px 0 0;color:var(--fg2)}
+.ofd-acts{display:flex;flex-wrap:wrap;gap:10px}
+.ofd-new3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ofd-new3 .of-app[disabled]{opacity:.5;cursor:default}
+.ofd-empty h4{margin:0 0 8px;font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--fg3)}
+.ofd-rec,.ofd-out{display:flex;flex-direction:column;gap:2px}
+.ofd-out .of-x{justify-content:center}
+.ofd-tabs{margin-bottom:-8px}
+.ofd-keys{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:10px 0 4px}
+.ofd-keys h4{margin:0 0 8px;font:600 12px var(--f-body);color:var(--fg)}
+.ofd-kr{display:flex;align-items:center;gap:10px;padding:4px 0;font-size:13px;color:var(--fg2)}
+.ofd-kr kbd{flex:none;min-width:118px;font:500 11.5px var(--f-mono);color:var(--fg);background:var(--inset);border:1px solid var(--line2);border-radius:6px;padding:3px 7px}
+@media (max-width:700px){.ofd-keys,.ofd-new3{grid-template-columns:1fr}}
+/* many tabs: shrink like Chrome, down to the site icon (the open tab keeps its close button) */
+#bw-tabs .bw-tab{min-width:42px}
+#bw-tabs.nar .bw-tab{padding:0 6px;justify-content:center;gap:4px}
+#bw-tabs.nar .bw-tab span{display:none}
+#bw-tabs.nar .bw-tab:not(.on) .x{display:none}
+#bw-tabs.nar .bw-tab .bw-fav{margin:0}
 .bw-tab.dl{box-shadow:inset 2px 0 0 var(--accent)}
 .bw-tab.dr{box-shadow:inset -2px 0 0 var(--accent)}
 .bw-gh.dg{outline:2px solid var(--accent);outline-offset:1px}
@@ -2652,7 +2712,7 @@ html[data-look] .chip.acc{color:var(--accent);background:var(--accent-soft);bord
         <div class="hm-card" id="hm-mail"></div>
       </div>
     </div>
-    <div class="hm-foot"><button class="btn sm" data-act="tv-on">TV mode</button><button class="btn sm ghost" data-act="tv-help">Show on a TV</button><span class="hm-hint">Home · press <kbd>H</kbd> for Home, <kbd>W</kbd> for Workspace</span></div>
+    <div class="hm-foot"><button class="btn sm" data-act="tv-on">TV mode</button><button class="btn sm ghost" data-act="tv-help">Show on a TV</button><span class="hm-hint">Switch pages with <kbd>Alt</kbd>+<kbd>H</kbd> Home · <kbd>W</kbd> Workspace · <kbd>M</kbd> Music · <kbd>B</kbd> Browser · <kbd>O</kbd> Office</span></div>
   </section>
 <section class="mview oview" id="office" aria-label="Office">
     <header class="mv-h"><h2>Office</h2><p>Word, Excel and PowerPoint, alongside Regis.</p></header>
@@ -2666,6 +2726,21 @@ html[data-look] .chip.acc{color:var(--accent);background:var(--accent-soft);bord
       <div class="panel of-card of-files"><header class="ph"><h2>On this computer</h2><span class="sub" id="of-sub"></span><div class="pa"><button class="btn sm ghost" data-act="of-scan">Refresh</button></div></header><div class="pb">
         <div class="tabs of-f" role="tablist" id="of-f"><button class="tab" role="tab" data-act="of-scan" data-k="all" aria-selected="true">All</button><button class="tab" role="tab" data-act="of-scan" data-k="w" aria-selected="false">Word</button><button class="tab" role="tab" data-act="of-scan" data-k="x" aria-selected="false">Excel</button><button class="tab" role="tab" data-act="of-scan" data-k="p" aria-selected="false">PowerPoint</button></div>
         <div id="of-list" class="of-list"></div></div></div>
+    </div>
+  </section>
+  <section class="ofd" id="ofd" aria-label="Office apps" hidden>
+    <aside class="bw-side ofd-side" id="ofd-side" aria-label="Office apps">
+      <button class="bw-ic" data-act="ofd-app" data-k="home" title="Your Office files" aria-label="Files"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5a2 2 0 0 1 2-2H10l2 2.5h6.5a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg><small>Files</small></button>
+      <span class="bw-sep"></span>
+      <button class="bw-ic ofd-a" data-act="ofd-app" data-k="word" title="Word" aria-label="Word"><i class="of-ic w">W</i><small>Word</small><em></em></button>
+      <button class="bw-ic ofd-a" data-act="ofd-app" data-k="excel" title="Excel" aria-label="Excel"><i class="of-ic x">X</i><small>Excel</small><em></em></button>
+      <button class="bw-ic ofd-a" data-act="ofd-app" data-k="powerpoint" title="PowerPoint" aria-label="PowerPoint"><i class="of-ic p">P</i><small>PowerPoint</small><em></em></button>
+      <span class="grow"></span>
+      <button class="bw-ic" data-act="ofd-keys" title="Keyboard shortcuts" aria-label="Keyboard shortcuts"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6.5" width="18" height="11" rx="2"/><path d="M7 10h.01M10.5 10h.01M14 10h.01M17.5 10h.01M8 14h8"/></svg><small>Keys</small></button>
+    </aside>
+    <div class="ofd-main">
+      <div class="ofd-bar" id="ofd-bar" role="tablist" aria-label="Open documents"></div>
+      <div class="ofd-stage" id="ofd-stage"><div class="ofd-ph" id="ofd-ph"></div></div>
     </div>
   </section>
 <section class="mview" id="music" aria-label="Music">
@@ -3409,48 +3484,29 @@ function onScroll(){if(scrollTick)return;scrollTick=true;requestAnimationFrame(f
 function initScroll(){window.addEventListener("scroll",onScroll,{passive:true});onScroll();
 }
 
-/* ---------- organic sci-fi layer: drifting constellation ---------- */
-function initFx(){
-  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var host=$(".bg");if(!host)return;
-  var cv=document.createElement("canvas");cv.id="fx";host.appendChild(cv);var cx=cv.getContext&&cv.getContext("2d");
-  var W=0,H=0,dpr=1,pts=[],col=[185,154,255],mx=-9999,my=-9999,tick=0,on=true;
-  function readCol(){var c=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),m;
-    if(m=c.match(/^#([0-9a-f]{6})$/i))col=[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)];
-    else if(m=c.match(/(\d+)\D+(\d+)\D+(\d+)/))col=[+m[1],+m[2],+m[3]]}
-  function size(){if(!cx)return;dpr=1;W=window.innerWidth;H=window.innerHeight;cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
-    var n=Math.max(18,Math.min(PERF.bal?24:54,Math.round(W*H/26000)));while(pts.length<n)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,r:.8+Math.random()*1.6,p:Math.random()*6.28});pts.length=n}
-  var lt=0;
-  function frame(ts){
-    if(!cx)return;if(FX.bg!=="aurora"){on=false;cx.clearRect(0,0,W,H);return}
-    if(S.view==="browser"){on=false;return}
-    if(ts&&lt&&ts-lt<30&&!PERF.lite&&!PERF.bal){requestAnimationFrame(frame);return}lt=ts||0;     // 30 fps cap
-    cx.clearRect(0,0,W,H);tick++;if(tick%90===1)readCol();
-    var rgb=col.join(",");
-    /* batched: lines and dots are grouped into 4 brightness levels, so a frame is ~8 draw calls instead of dozens */
-    var LB=[[],[],[],[]],DB=[[],[],[],[]],i,j,k;
+/* ---------- animated backgrounds (constellation "aurora", Milky Way "cosmos") ----------
+   1.8.4: drawn on a worker thread with OffscreenCanvas, so they never cost the page a frame
+   (before, their 60 Hz loops kept the main thread recalculating styles all the time).
+   fxCore runs in the worker, or on the page itself where OffscreenCanvas is missing. */
+function fxCore(G,inline){
+  var K={bg:"aurora",mode:"lite",run:false,s:1,reduce:false,col:[185,154,255],skin:"violet",W:0,H:0},cv=null,st=null,cx=null,sx=null,busy=false,lt=0,timer=0;
+  var PAL={violet:{w:[176,80,124],c:[62,72,196],m:[234,208,216],b:[6,5,14]},ember:{w:[222,108,54],c:[128,72,60],m:[248,210,172],b:[10,6,5]},sage:{w:[70,140,210],c:[24,64,150],m:[200,232,255],b:[2,6,14]},rhodes:{w:[214,174,78],c:[48,94,172],m:[238,224,192],b:[5,7,13]},linen:{w:[240,176,146],c:[150,172,232],m:[255,238,222],b:[255,255,255],light:true}};
+  var raf=G.requestAnimationFrame?function(f){G.requestAnimationFrame(f)}:function(f){setTimeout(function(){f(performance.now())},16)};
+  function mk(w,h){if(typeof OffscreenCanvas!=="undefined")return new OffscreenCanvas(w,h);var c=document.createElement("canvas");c.width=w;c.height=h;return c}
+  /* aurora: drifting constellation */
+  var pts=[],fx=null,fc=null;
+  function auSize(){if(!fc)return;fx.width=K.W;fx.height=K.H;var n=Math.max(18,Math.min(K.mode==="bal"?24:54,Math.round(K.W*K.H/26000)));
+    while(pts.length<n)pts.push({x:Math.random()*K.W,y:Math.random()*K.H,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,r:.8+Math.random()*1.6,p:Math.random()*6.28});pts.length=n}
+  function auDraw(move){var W=K.W,H=K.H,s=K.s*(move||0),rgb=K.col.join(","),LB=[[],[],[],[]],DB=[[],[],[],[]],i,j,k;fc.clearRect(0,0,W,H);
     for(i=0;i<pts.length;i++){var a=pts[i];
-      if(!reduce){a.x+=a.vx*FX.s;a.y+=a.vy*FX.s;a.p+=.012*FX.s;if(a.x<-20)a.x=W+20;else if(a.x>W+20)a.x=-20;if(a.y<-20)a.y=H+20;else if(a.y>H+20)a.y=-20}
+      if(s){a.x+=a.vx*s;a.y+=a.vy*s;a.p+=.012*s;if(a.x<-20)a.x=W+20;else if(a.x>W+20)a.x=-20;if(a.y<-20)a.y=H+20;else if(a.y>H+20)a.y=-20}
       for(j=i+1;j<pts.length;j++){var b=pts[j],ex=a.x-b.x,ey=a.y-b.y,dd=ex*ex+ey*ey;if(dd<20000)LB[Math.min(3,((1-dd/20000)*4)|0)].push(a.x,a.y,b.x,b.y)}
       DB[Math.min(3,((.5+.5*Math.sin(a.p))*4)|0)].push(a)}
-    cx.lineWidth=.7;
-    for(k=0;k<4;k++){var L=LB[k];if(L.length){cx.strokeStyle="rgba("+rgb+","+(.2*(k+.5)/4).toFixed(3)+")";cx.beginPath();for(i=0;i<L.length;i+=4){cx.moveTo(L[i],L[i+1]);cx.lineTo(L[i+2],L[i+3])}cx.stroke()}
-      var D=DB[k];if(D.length){cx.fillStyle="rgba("+rgb+","+(.05+.3*(k+.5)/2).toFixed(3)+")";cx.beginPath();for(i=0;i<D.length;i++){cx.moveTo(D[i].x+D[i].r,D[i].y);cx.arc(D[i].x,D[i].y,D[i].r,0,6.283)}cx.fill()}}
-    if(!reduce&&!document.hidden&&!PERF.lite&&!PERF.idle){if(PERF.bal)setTimeout(function(){requestAnimationFrame(frame)},66);else requestAnimationFrame(frame)}else on=false}
-  PERF.wake.push(function(){if(FX.bg==="aurora"&&!on){on=true;requestAnimationFrame(frame)}});
-  size();readCol();frame();
-  window.addEventListener("resize",function(){size();if(reduce||PERF.lite)frame()});
-    FX.resize=function(){size();if(PERF.lite||reduce)frame()};FX.kick=function(){if(!on&&FX.bg==="aurora"&&!reduce){on=true;requestAnimationFrame(frame)}else if(reduce&&FX.bg==="aurora")frame()}}
-
-/* ---------- cosmic background: procedural Milky Way, dust lanes, twinkling stars ---------- */
-function initCosmos(){
-  var host=$(".bg");if(!host||!document.createElement("canvas").getContext)return;
-  var cv=document.createElement("canvas"),st=document.createElement("canvas");cv.id="cosmos";st.id="stars";host.insertBefore(st,host.firstChild);host.insertBefore(cv,host.firstChild);
-  var cx=cv.getContext("2d"),sx=st.getContext("2d");if(!cx||!sx)return;
-  var met=document.createElement("div");met.className="metal";host.insertBefore(met,host.firstChild);
-  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var W=0,H=0,U=1,dust=null,bright=[],built="",running=false,t=0,last=0,shoot=null,nextShoot=6;
-  var PAL={violet:{w:[176,80,124],c:[62,72,196],m:[234,208,216],b:[6,5,14]},ember:{w:[222,108,54],c:[128,72,60],m:[248,210,172],b:[10,6,5]},sage:{w:[70,140,210],c:[24,64,150],m:[200,232,255],b:[2,6,14]},rhodes:{w:[214,174,78],c:[48,94,172],m:[238,224,192],b:[5,7,13]},linen:{w:[240,176,146],c:[150,172,232],m:[255,238,222],b:[255,255,255],light:true}};
+    fc.lineWidth=.7;
+    for(k=0;k<4;k++){var L=LB[k];if(L.length){fc.strokeStyle="rgba("+rgb+","+(.2*(k+.5)/4).toFixed(3)+")";fc.beginPath();for(i=0;i<L.length;i+=4){fc.moveTo(L[i],L[i+1]);fc.lineTo(L[i+2],L[i+3])}fc.stroke()}
+      var D=DB[k];if(D.length){fc.fillStyle="rgba("+rgb+","+(.05+.3*(k+.5)/2).toFixed(3)+")";fc.beginPath();for(i=0;i<D.length;i++){fc.moveTo(D[i].x+D[i].r,D[i].y);fc.arc(D[i].x,D[i].y,D[i].r,0,6.283)}fc.fill()}}}
+  /* cosmos: procedural Milky Way, star dust, twinkles, a shooting star now and then */
+  var dust=null,bright=[],built="",t=0,shoot=null,nextShoot=6;
   function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var q=Math.imul(a^a>>>15,1|a);q=q+Math.imul(q^q>>>7,61|q)^q;return((q^q>>>14)>>>0)/4294967296}}
   var P=new Uint8Array(512);(function(){var r=rng(11),a=[],i,j,k;for(i=0;i<256;i++)a[i]=i;for(i=255;i>0;i--){j=Math.floor(r()*(i+1));k=a[i];a[i]=a[j];a[j]=k}for(i=0;i<512;i++)P[i]=a[i&255]})();
   function sm(q){return q*q*(3-2*q)}
@@ -3459,9 +3515,8 @@ function initCosmos(){
   function fbm(x,y,o){var s=0,a=.5,f=1;for(var i=0;i<o;i++){s+=a*vn(x*f,y*f);f*=2.03;a*=.5}return s}
   var SIN=Math.sin(.42),COS=Math.cos(.42);
   function band(dx,dy){var v=-dx*SIN+dy*COS-.03;return Math.exp(-v*v/.015)}
-  function pal(){var k=document.documentElement.getAttribute("data-skin")||"violet";return PAL[k]||PAL.violet}
-  function build(){
-    W=window.innerWidth;H=window.innerHeight;U=Math.max(W,H);var p=pal(),key=[document.documentElement.getAttribute("data-skin"),W,H].join("|");if(key===built)return;built=key;
+  function pal(){return PAL[K.skin]||PAL.violet}
+  function coBuild(){if(!cx)return;var W=K.W,H=K.H,U=Math.max(W,H),p=pal(),key=[K.skin,W,H].join("|");if(key===built)return;built=key;
     var nw=Math.min(760,Math.ceil(W*1.15/2)),nh=Math.min(760,Math.ceil(H*1.15/2));cv.width=nw;cv.height=nh;
     var img=cx.createImageData(nw,nh),d=img.data,i=0,x,y;
     for(y=0;y<nh;y++){var ny=(y/nh*1.15-.075)-.5;for(x=0;x<nw;x++){var nx=(x/nw*1.15-.075)-.5,dx=nx*W/U,dy=ny*H/U;
@@ -3473,30 +3528,60 @@ function initCosmos(){
       else{r=p.b[0]+p.w[0]*wv*.5+p.c[0]*cvv*.55+p.m[0]*g*1.4;gg=p.b[1]+p.w[1]*wv*.5+p.c[1]*cvv*.55+p.m[1]*g*1.4;b=p.b[2]+p.w[2]*wv*.5+p.c[2]*cvv*.55+p.m[2]*g*1.4}
       d[i++]=r>255?255:r;d[i++]=gg>255?255:gg;d[i++]=b>255?255:b;d[i++]=al}}
     cx.putImageData(img,0,0);
-    /* star dust */
-    st.width=W;st.height=H;dust=document.createElement("canvas");dust.width=W;dust.height=H;var dc=dust.getContext("2d"),R=rng(7),n=Math.min(14000,Math.floor(W*H/150)),k;
+    st.width=W;st.height=H;dust=mk(W,H);var dc=dust.getContext("2d"),R=rng(7),n=Math.min(14000,Math.floor(W*H/150)),k;
     for(k=0;k<n;k++){var X=R()*W,Y=R()*H,ddx=(X/W-.5)*W/U,ddy=(Y/H-.5)*H/U,acc=(.2+.95*band(ddx,ddy))*(.5+1.0*vn(ddx*45+2,ddy*45+5));if(R()>acc)continue;
       var q=R(),sz=.35+Math.pow(R(),3)*.9,al2=.22+R()*.6,c=q<.7?[236,241,255]:q<.85?[255,226,192]:[192,212,255];
       dc.fillStyle=p.light?"rgba(60,70,110,"+(al2*.45).toFixed(2)+")":"rgba("+c[0]+","+c[1]+","+c[2]+","+al2.toFixed(2)+")";
       if(sz<.7)dc.fillRect(X,Y,1,1);else{dc.beginPath();dc.arc(X,Y,sz,0,6.283);dc.fill()}}
     bright=[];var nb=Math.floor(W*H/9000);for(k=0;k<nb;k++){var bx=R()*W,by=R()*H,bd=band((bx/W-.5)*W/U,(by/H-.5)*H/U);if(R()>.3+bd)continue;
-      bright.push({x:bx,y:by,r:.9+Math.pow(R(),2)*1.5,ph:R()*6.28,sp:.5+R()*1.6,c:R()<.7?[240,244,255]:R()<.5?[255,226,192]:[190,212,255]})}
-  }
-  function frame(now){
-    if(FX.bg!=="cosmos"||document.hidden){running=false;return}
-    var dt=Math.min(.1,(now-last)/1000||0);last=now;var s=reduce?0:FX.s;t+=dt*s;
-    var p=pal(),ox=((t*5)+(window.scrollY||0)*.02*FX.s)%W;
+      bright.push({x:bx,y:by,r:.9+Math.pow(R(),2)*1.5,ph:R()*6.28,sp:.5+R()*1.6,c:R()<.7?[240,244,255]:R()<.5?[255,226,192]:[190,212,255]})}}
+  function coDraw(dt){if(!sx||!dust)return;var W=K.W,H=K.H,s=K.reduce?0:K.s;t+=dt*s;var p=pal(),ox=(t*5)%W;
     sx.clearRect(0,0,W,H);sx.drawImage(dust,-ox,0);sx.drawImage(dust,W-ox,0);
     for(var i=0;i<bright.length;i++){var b=bright[i],x=(b.x-ox+W)%W,tw=.55+.45*Math.sin(t*b.sp*1.4+b.ph),col=p.light?[70,80,120]:b.c;
       if(b.r>1.7){sx.strokeStyle="rgba("+col.join(",")+","+(.35*tw).toFixed(3)+")";sx.lineWidth=.7;sx.beginPath();sx.moveTo(x-b.r*3.4,b.y);sx.lineTo(x+b.r*3.4,b.y);sx.moveTo(x,b.y-b.r*3.4);sx.lineTo(x,b.y+b.r*3.4);sx.stroke()}
       sx.fillStyle="rgba("+col.join(",")+","+(.5+.5*tw).toFixed(3)+")";sx.beginPath();sx.arc(x,b.y,b.r*(.8+.25*tw),0,6.283);sx.fill()}
-    if(s>0){nextShoot-=dt*s;if(!shoot&&nextShoot<=0&&!p.light){shoot={x:Math.random()*W*.8+W*.1,y:Math.random()*H*.35,vx:420+Math.random()*260,vy:150+Math.random()*120,life:0};nextShoot=14+Math.random()*16}
-      if(shoot){shoot.life+=dt*s;shoot.x+=shoot.vx*dt*s;shoot.y+=shoot.vy*dt*s;var a=Math.max(0,1-shoot.life/1.1),g=sx.createLinearGradient(shoot.x,shoot.y,shoot.x-shoot.vx*.16,shoot.y-shoot.vy*.16);g.addColorStop(0,"rgba(255,255,255,"+(.85*a).toFixed(3)+")");g.addColorStop(1,"rgba(255,255,255,0)");sx.strokeStyle=g;sx.lineWidth=1.4;sx.beginPath();sx.moveTo(shoot.x,shoot.y);sx.lineTo(shoot.x-shoot.vx*.16,shoot.y-shoot.vy*.16);sx.stroke();if(a<=0)shoot=null}}
-    if(!reduce&&!PERF.lite&&!PERF.idle&&!document.hidden){if(PERF.bal)setTimeout(function(){requestAnimationFrame(frame)},75);else requestAnimationFrame(frame)}else running=false}
-  PERF.wake.push(function(){if(FX.bg==="cosmos")FX.cosmos()});
-  FX.cosmos=function(rebuild){if(FX.bg!=="cosmos")return;if(rebuild)built="";build();if(reduce){last=performance.now();frame(last+1);return}if(!running){running=true;last=performance.now();requestAnimationFrame(frame)}};
-  window.addEventListener("resize",function(){if(FX.bg==="cosmos"){clearTimeout(initCosmos.rt);initCosmos.rt=setTimeout(function(){FX.cosmos(true)},250)}});
-  }
+    if(s>0&&dt>0){nextShoot-=dt*s;if(!shoot&&nextShoot<=0&&!p.light){shoot={x:Math.random()*W*.8+W*.1,y:Math.random()*H*.35,vx:420+Math.random()*260,vy:150+Math.random()*120,life:0};nextShoot=14+Math.random()*16}
+      if(shoot){shoot.life+=dt*s;shoot.x+=shoot.vx*dt*s;shoot.y+=shoot.vy*dt*s;var a=Math.max(0,1-shoot.life/1.1),g=sx.createLinearGradient(shoot.x,shoot.y,shoot.x-shoot.vx*.16,shoot.y-shoot.vy*.16);g.addColorStop(0,"rgba(255,255,255,"+(.85*a).toFixed(3)+")");g.addColorStop(1,"rgba(255,255,255,0)");sx.strokeStyle=g;sx.lineWidth=1.4;sx.beginPath();sx.moveTo(shoot.x,shoot.y);sx.lineTo(shoot.x-shoot.vx*.16,shoot.y-shoot.vy*.16);sx.stroke();if(a<=0)shoot=null}}}
+  /* one loop for both; paced by a timer so nothing runs between frames (30 fps, 13-15 fps in Balanced) */
+  function moving(){return K.run&&!K.reduce&&K.mode!=="lite"&&(K.bg==="aurora"?!!fc:K.bg==="cosmos"&&!!sx)}
+  function step(ts){timer=0;if(!moving()){busy=false;return}var dt=lt?Math.min(.1,(ts-lt)/1000):0;lt=ts;
+    if(K.bg==="aurora")auDraw(1);else coDraw(dt);
+    timer=setTimeout(function(){raf(step)},K.mode==="bal"?(K.bg==="cosmos"?72:62):28)}
+  function still(){if(K.bg==="aurora"&&fc)auDraw(0);else if(K.bg==="cosmos"){coBuild();coDraw(0)}}
+  function apply(m){var was=[K.bg,K.skin,K.W,K.H,K.mode].join("|");for(var k in m)if(k!=="t")K[k]=m[k];
+    var now=[K.bg,K.skin,K.W,K.H,K.mode].join("|");if(m.rebuild)built="";
+    if(was!==now||m.rebuild){if(fc&&(K.W!==fx.width||K.H!==fx.height||m.mode))auSize();if(K.bg==="cosmos")coBuild()}
+    if(moving()){if(!busy){busy=true;lt=0;raf(step)}}else{busy=false;if(timer){clearTimeout(timer);timer=0}if(was!==now||m.rebuild||m.col)still()}}
+  function on(m){if(!m)return;if(m.t==="init"){fx=m.fx;fc=fx&&fx.getContext("2d");cv=m.cosmos;st=m.stars;cx=cv&&cv.getContext("2d");sx=st&&st.getContext("2d");apply(m.k||{});if(K.bg==="aurora")auSize();still();return}apply(m)}
+  if(!inline)G.onmessage=function(e){try{on(e.data)}catch(_){}};
+  return on}
+
+function initFx(){
+  var host=$(".bg");if(!host||!document.createElement("canvas").getContext)return;
+  var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fx=document.createElement("canvas"),cv=document.createElement("canvas"),st=document.createElement("canvas"),met=document.createElement("div");
+  fx.id="fx";cv.id="cosmos";st.id="stars";met.className="metal";host.appendChild(fx);host.insertBefore(st,host.firstChild);host.insertBefore(cv,host.firstChild);host.insertBefore(met,host.firstChild);
+  var send=null,last="";
+  if(fx.transferControlToOffscreen&&window.Worker&&typeof OffscreenCanvas!=="undefined"){
+    try{var url=URL.createObjectURL(new Blob(["("+fxCore.toString()+")(self,false)"],{type:"text/javascript"})),w=new Worker(url);
+      var o={fx:fx.transferControlToOffscreen(),cosmos:cv.transferControlToOffscreen(),stars:st.transferControlToOffscreen()};
+      w.onerror=function(){};send=function(m,tr){w.postMessage(m,tr||[])};send({t:"init",fx:o.fx,cosmos:o.cosmos,stars:o.stars,k:cfg()},[o.fx,o.cosmos,o.stars]);FX.worker=true}catch(_){send=null}}
+  if(!send){var h=fxCore(window,true);send=function(m){h(m)};send({t:"init",fx:fx,cosmos:cv,stars:st,k:cfg()})}
+  function col(){var c=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),m;
+    if(m=c.match(/^#([0-9a-f]{6})$/i))return[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)];
+    if(m=c.match(/(\d+)\D+(\d+)\D+(\d+)/))return[+m[1],+m[2],+m[3]];return[185,154,255]}
+  function cfg(){var R=document.documentElement;return{bg:FX.bg,mode:PERF.mode,s:FX.s,reduce:!!reduce,skin:R.getAttribute("data-skin")||"violet",W:window.innerWidth,H:window.innerHeight,
+    run:!document.hidden&&!PERF.idle&&!R.classList.contains("away")&&!(FX.bg==="aurora"&&S.view==="browser")}}
+  function sync(extra){var k=cfg();if(extra)for(var x in extra)k[x]=extra[x];var key=JSON.stringify(k);if(key===last&&!extra)return;last=key;k.t="cfg";send(k)}
+  FX.kick=function(){sync()};
+  FX.cosmos=function(rebuild){sync(rebuild?{rebuild:true,col:col()}:null)};
+  FX.resize=function(){sync()};
+  PERF.wake.push(function(){sync()});
+  document.addEventListener("visibilitychange",function(){sync()});
+  var rt=0;window.addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(function(){sync()},200)});
+  new MutationObserver(function(ms){var c=ms.some(function(m){return m.attributeName!=="class"&&m.attributeName!=="data-view"});sync(c?{col:col()}:null)}).observe(document.documentElement,{attributes:true,attributeFilter:["class","data-skin","data-ui","data-view","data-bg"]});
+  sync({col:col()})}
+function initCosmos(){}
 
 /* ---------- school (Canvas): desktop app only ---------- */
 S.school={st:"idle",items:[],at:0,msg:"",showDone:false};
@@ -4188,7 +4273,7 @@ var NAV={pages:[
   hide:lsj("regis-navhide",[])};
 var VIEWS=NAV.pages.map(function(p){return p.v}),VORD=VIEWS.slice();
 function viewSaved(){var v=null;try{v=localStorage.getItem("regis-view")}catch(_){}return VIEWS.indexOf(v)>=0?v:"home"}
-function applyView(v,save){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;S.view=v;document.documentElement.setAttribute("data-view",v);try{navRender()}catch(_){}if(v==="office")try{ofEnter()}catch(_){}$$("#tabbar [data-v]").forEach(function(b){b.setAttribute("aria-current",String(b.dataset.v===v))});
+function applyView(v,save){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;S.view=v;document.documentElement.setAttribute("data-view",v);try{navRender()}catch(_){}if(v==="office")try{ofEnter()}catch(_){}else if(typeof ofdSync==="function")try{ofdSync()}catch(_){}$$("#tabbar [data-v]").forEach(function(b){b.setAttribute("aria-current",String(b.dataset.v===v))});
   if(v==="music")requestAnimationFrame(mvLayout);
   if(save){try{localStorage.setItem("regis-view",v)}catch(_){}}
   $$('[data-act="view"]').forEach(function(b){var on=b.dataset.v===v;if(b.getAttribute("role")==="tab")b.setAttribute("aria-selected",String(on));else if(on)b.setAttribute("aria-current","true");else b.removeAttribute("aria-current")});
@@ -4217,11 +4302,15 @@ function pxRun(mode,fwd,done){var W=innerWidth,H=innerHeight,cell=Math.max(40,Ma
   /* first frame already shows the starting state, so nothing flashes */
   if(mode==="in"){ctx.fillStyle=bg;ctx.fillRect(0,0,cols,rows)}
   PX.raf=requestAnimationFrame(frame)}
-function setView(v,save,cb){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;if(PX.busy&&PX.fin){var f=PX.fin;f()}
+function setView(v,save,cb){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;
+  /* 1.8.4: hide the web page first, then switch; otherwise a white website could stay on top of the new page for a frame or two */
+  if(!setView.hid&&prev!==v&&((prev==="browser"&&typeof bwNative==="function"&&bwNative())||(prev==="office"&&OFD.on))){var go=function(){if(go.d)return;go.d=1;setView.hid=1;try{setView(v,save,cb)}finally{setView.hid=0}};
+    var hide=prev==="browser"?(BW.leaving=1,APP.browser.show(false,false)):(OFD.leaving=1,ofdSync());Promise.resolve(hide).then(go,go);setTimeout(go,250);return}
+  BW.leaving=0;OFD.leaving=0;
+  if(PX.busy&&PX.fin){var f=PX.fin;f()}
   if(!prev||prev===v||!pxOK()){applyView(v,save);if(cb)cb();return}
   var fwd=VORD.indexOf(v)>VORD.indexOf(prev);
   if(fwd){applyView(v,save);pxRun("in",true,function(){if(S.view==="browser")try{bwSync()}catch(_){}});if(cb)cb();return}
-  if(prev==="browser"&&bwNative())APP.browser.show(false).catch(function(){});
   pxRun("out",false,function(){applyView(v,save);if(cb)cb();pxRun("in",false,function(){})})}
 
 /* ---------- Music + Chat pages ---------- */
@@ -4316,7 +4405,7 @@ function spErr(e){if(e&&e.hold){if(SP.holdToast===SP.holdUntil)return;SP.holdToa
 function spOut(){SP.hist=[];SP.hi=-1;SP.lc={};SP.rpId=null;SP.tok=null;SP.me=null;SP.st=null;SP.pl=null;SP.opened=0;lsw("regis-sp-tok",null);clearInterval(SP.tickT);SP.tickT=0;clearInterval(SP.lyT);SP.lyT=0;spShow()}
 function spShow(){var on=spOn();try{spHoldUi()}catch(_){}var a=$("#sp-app"),b=$("#sp-setup");if(!a)return;a.hidden=!on;b.hidden=on;var np=$("#sp-np");if(np)np.hidden=!(on&&(S.view==="music"||opGet("spbar"))&&S.view!=="browser");
   document.documentElement.classList.toggle("sp-bar-on",!!(on&&np&&!np.hidden));document.documentElement.classList.toggle("sp-on",on);document.documentElement.classList.toggle("sp-rp-on",!!SP.rp);var rb=$("#sp-rpb");if(rb)rb.setAttribute("aria-pressed",String(!!SP.rp));
-  var u=$("#sp-weburi");if(u)u.textContent=spRedirect();var c=$("#sp-cid");if(c&&!c.value)c.value=SP.cid||"";var w=$("#sp-warn");if(w)w.textContent=(!spDesk()&&!spWebOK())?"Sign-in needs the Regis desktop app or your own web address. It can’t run inside Claude’s artifact view.":"";
+  var u=$("#sp-weburi");if(u){u.textContent=spRedirect();if(location.protocol==="file:")u.parentNode.hidden=true}var c=$("#sp-cid");if(c&&!c.value)c.value=SP.cid||"";var w=$("#sp-warn");if(w)w.textContent=(!spDesk()&&!spWebOK())?"Sign-in needs the Regis desktop app or your own web address. It can’t run inside Claude’s artifact view.":"";
   $("#sp-sub").textContent=on&&SP.me?"Signed in as "+(SP.me.display_name||SP.me.id)+(SP.me.product&&SP.me.product!=="premium"?" · "+SP.me.product+" plan (playback needs Premium)":""):"Spotify inside Regis.";
   if(on&&spPlayerOK())spSdk();
   if(on){if(!SP.opened){SP.opened=1;spLoadMe().then(function(){spOpen(SP.view)})}else spLoadMe();spNavRender();if(!SP.tickT)SP.tickT=setInterval(spTick,1000);if(!SP.lyT)SP.lyT=setInterval(function(){spLyrSync();if(!SP.lyNT||SP.lyNTk!==SP.curId){SP.lyNTk=SP.curId;spLyNext()}},300);spPoll()}else{muRender()}}
@@ -4714,9 +4803,9 @@ function bwOverlay(){var m=$("#modal"),l=$("#look"),a=$("#alert-pop"),mp=$("#mor
 var bwBR=0,bwBK="";
 function bwBounds(){if(bwBR)return;bwBR=requestAnimationFrame(function(){bwBR=0;if(!bwNative()||S.view!=="browser")return;var st=$("#bw-stage");if(!st)return;var r=st.getBoundingClientRect(),k=[r.left,r.top,r.width,r.height].map(Math.round).join();if(k===bwBK)return;bwBK=k;APP.browser.bounds({x:r.left,y:r.top,width:r.width,height:r.height}).catch(function(){})})}
 function bwLayout(){var tp=document.querySelector(".top");if(tp){var b=Math.ceil(tp.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty("--bwtop",b+"px");var rt=document.getElementById("vsw");if(!rt||!rt.offsetWidth)rt=tp.querySelector(".right");if(rt){var l=Math.floor(rt.getBoundingClientRect().left);if(l>0)document.documentElement.style.setProperty("--bwr",Math.max(120,innerWidth-l+12)+"px")}}try{bwBmFit()}catch(_){}bwBounds()}
-function bwSync(){if(!bwNative())return;bwBK="";var on=S.view==="browser"&&!bwOverlay(),want=S.view==="browser";APP.browser.show(on,want).then(function(r){var sn=$("#bw-snap");if(sn){if(!on&&want&&r&&r.snap){sn.src=r.snap;sn.hidden=false}else if(on||!want){clearTimeout(BW.snT);BW.snT=setTimeout(function(){sn.hidden=true;sn.removeAttribute("src")},on?160:0)}}bwBounds()}).catch(function(){})}
+function bwSync(){try{ofdSync()}catch(_){}if(!bwNative())return;bwBK="";var on=S.view==="browser"&&!bwOverlay()&&!BW.leaving,want=S.view==="browser"&&!BW.leaving;APP.browser.show(on,want).then(function(r){var sn=$("#bw-snap");if(sn){if(!on&&want&&r&&r.snap){sn.src=r.snap;sn.hidden=false}else if(on||!want){clearTimeout(BW.snT);BW.snT=setTimeout(function(){sn.hidden=true;sn.removeAttribute("src")},on?160:0)}}bwBounds()}).catch(function(){})}
 function bwRender(st){if(st)BW.st=st;var s2=BW.st,act=bwActive(),nat=bwNative();
-  setH($("#bw-tabs"),nat?tgTabsHtml(s2.tabs,s2.active)+'<button class="bw-new" data-act="bw-new" aria-label="New tab" title="New tab">+</button>':"");
+  bwTabsSet(nat?tgTabsHtml(s2.tabs,s2.active)+'<button class="bw-new" data-act="bw-new" aria-label="New tab" title="New tab (Ctrl+T)">+</button>':"");
   document.documentElement.classList.toggle("bw-nonat",!nat);
   var ad=$("#bw-addr");if(ad&&document.activeElement!==ad)ad.value=act&&!act.blank?act.url:"";
   var bb=$("#bw-back"),bf=$("#bw-fwd");if(bb)bb.disabled=!(act&&act.canBack);if(bf)bf.disabled=!(act&&act.canFwd);
@@ -4814,17 +4903,72 @@ document.addEventListener("click",function(e){var p=$("#bw-bmpop");if(!p||p.hidd
 document.addEventListener("keydown",function(e){if(e.key==="Escape"){var p=$("#bw-bmpop");if(p&&!p.hidden){e.stopPropagation();bwBmClose()}}},true);
 
 /* ================= 1.8.2 browser ================= */
-/* --- drag tabs to reorder; drop on a group name (or a tab in a group) to join it, anywhere else to leave it --- */
-(function(){var drag=null,mark=null;function clr(){if(mark){mark.classList.remove("dl","dr","dg");mark=null}}
-  document.addEventListener("dragstart",function(e){var t=e.target&&e.target.closest&&e.target.closest("#bw-tabs .bw-tab");if(!t)return;drag=+t.dataset.id;try{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain",String(drag))}catch(_){}t.classList.add("drag")});
-  document.addEventListener("dragend",function(){clr();$$("#bw-tabs .drag").forEach(function(x){x.classList.remove("drag")});drag=null});
-  document.addEventListener("dragover",function(e){if(drag==null)return;var t=e.target&&e.target.closest&&e.target.closest("#bw-tabs .bw-tab,#bw-tabs .bw-gh");if(!t)return;e.preventDefault();try{e.dataTransfer.dropEffect="move"}catch(_){}
-    if(mark&&mark!==t)clr();mark=t;if(t.classList.contains("bw-gh")){t.classList.add("dg")}else{var r=t.getBoundingClientRect(),right=e.clientX>r.left+r.width/2;t.classList.toggle("dr",right);t.classList.toggle("dl",!right)}});
-  document.addEventListener("drop",function(e){if(drag==null)return;var t=e.target&&e.target.closest&&e.target.closest("#bw-tabs .bw-tab,#bw-tabs .bw-gh");if(!t)return;e.preventDefault();var id=drag;drag=null;var right=t.classList.contains("dr");clr();
-    if(t.dataset.gh){TG.m[id]=t.dataset.gh;var g=TG.g.find(function(x){return x.id===t.dataset.gh});if(g)g.k=0;tgSave();bwRender();return}
-    var tid=+t.dataset.id;if(tid===id)return;if(t.dataset.g)TG.m[id]=t.dataset.g;else delete TG.m[id];tgSave();
-    var ids=BW.st.tabs.map(function(x){return x.id}).filter(function(x){return x!==id}),to=ids.indexOf(tid)+(right?1:0);
-    if(bwNative()&&APP.browser.move)APP.browser.move(id,to).catch(function(){});else bwRender()});
+/* --- 1.8.4 tabs that move like Chrome's: press to select, drag and the tab follows the pointer while the others slide out of the way;
+       drop between tabs of a group (or on a group's name) to join it, outside to leave; tabs slide into place when one opens or closes --- */
+var TD=null;
+function bwTabsFit(){var el=$("#bw-tabs");if(!el)return;var t=el.querySelector(".bw-tab:not(.lift)");if(!t){el.classList.remove("nar");return}
+  var w=t.getBoundingClientRect().width,on=el.classList.contains("nar");if(!on&&w&&w<92)el.classList.add("nar");else if(on&&w>118)el.classList.remove("nar")}
+window.addEventListener("resize",function(){clearTimeout(bwTabsFit.t);bwTabsFit.t=setTimeout(bwTabsFit,120)});
+function bwTabsSet(html){var el=$("#bw-tabs");if(!el)return;if(TD&&TD.on){TD.pend=html;return}
+  if(el.dataset.sig===html)return;
+  var key=function(x){return x.dataset.id?(x.classList.contains("bw-gh")?"g":"t")+x.dataset.id:""},old={},ids0=el.dataset.ids||"",first=!ids0;
+  var items=el.querySelectorAll(".bw-tab,.bw-gh");
+  if(!first&&!document.hidden)for(var i=0;i<items.length;i++){var k=key(items[i]);if(k)old[k]=items[i].getBoundingClientRect().left}
+  setH(el,html);bwTabsFit();
+  var now=el.querySelectorAll(".bw-tab,.bw-gh"),ids=[];for(i=0;i<now.length;i++)ids.push(key(now[i]));el.dataset.ids=ids.join(",");
+  if(first||ids.join(",")===ids0||document.hidden||document.documentElement.classList.contains("lite"))return;
+  var moved=[];for(i=0;i<now.length;i++){var e=now[i],o=old[key(e)];
+    if(o==null){e.classList.add("tin");continue}
+    var dx=o-e.getBoundingClientRect().left;if(Math.abs(dx)>1){e.style.transition="none";e.style.transform="translateX("+dx+"px)";moved.push(e)}}
+  if(moved.length)requestAnimationFrame(function(){requestAnimationFrame(function(){moved.forEach(function(e){e.style.transition="";e.style.transform=""})})})}
+(function(){
+  function clean(){var el=$("#bw-tabs");if(el){el.classList.remove("tdrag");el.querySelectorAll(".bw-tab,.bw-gh").forEach(function(x){x.style.transform="";x.classList.remove("lift","dg","tg")})}}
+  function start(){var el=$("#bw-tabs");if(!el)return false;var cur=el.querySelector('.bw-tab[data-id="'+TD.id+'"]');if(cur)TD.el=cur;var all=[].slice.call(el.querySelectorAll(".bw-tab,.bw-gh"));
+    TD.items=all.map(function(x){var r=x.getBoundingClientRect();return{el:x,l:r.left,r:r.right,c:(r.left+r.right)/2,gh:x.classList.contains("bw-gh")?x.dataset.gh:"",g:x.dataset.g||"",id:x.dataset.id}});
+    TD.i=all.indexOf(TD.el);if(TD.i<0)return false;var me=TD.items[TD.i],nx=TD.items[TD.i+1]||TD.items[TD.i-1];
+    var gap=TD.items[TD.i+1]?TD.items[TD.i+1].l-me.r:TD.items[TD.i-1]?me.l-TD.items[TD.i-1].r:0;TD.w=me.r-me.l+Math.max(0,gap);TD.me=me;TD.gap=Math.max(0,gap);TD.min=TD.items[0].l-me.l;var sr=el.getBoundingClientRect();TD.max=Math.max(TD.items[TD.items.length-1].r-me.r,Math.min(sr.right-4,TD.items[TD.items.length-1].r+(me.r-me.l)*.6)-me.r);
+    el.classList.add("tdrag");TD.el.classList.add("lift");TD.on=true;TD.g0=me.g;try{TD.el.setPointerCapture(TD.pid)}catch(_){}return true}
+  /* like Chrome: a neighbour moves aside once the dragged tab's edge passes its middle */
+  function slot(){var l=TD.me.l+TD.dx,r=TD.me.r+TD.dx,n=TD.i,i;for(i=0;i<TD.items.length;i++){if(i===TD.i)continue;var it=TD.items[i];if(i<TD.i&&l<it.c)n=Math.min(n,i);if(i>TD.i&&r>it.c)n=Math.max(n,i)}return n}
+  /* which group the tab would land in */
+  function grp(n){var seq=TD.items.filter(function(_,i){return i!==TD.i}),at=n,L=seq[at-1],R=seq[at],c=TD.me.c+TD.dx;
+    for(var i=0;i<TD.items.length;i++){var h=TD.items[i];if(h.gh&&i!==TD.i&&c>h.l+6&&c<h.r-6)return{g:h.gh,hd:h}}
+    if(L&&L.gh){var gl=TG.g.find(function(x){return x.id===L.gh});if(gl&&!gl.k)return{g:L.gh}}
+    if(L&&L.g&&R&&R.g===L.g)return{g:L.g};
+    if(L&&L.g&&L.g===TD.g0&&!(R&&R.g===L.g)){if(TD.me.l+TD.dx<L.r+TD.gap+Math.min(24,(TD.me.r-TD.me.l)*.4))return{g:L.g}}
+    if(R&&R.g&&R.g===TD.g0&&!L)return{g:R.g};
+    return{g:""}}
+  function frame(){if(!TD)return;TD.raf=0;if(!TD.on)return;var dx=TD.cancel?0:Math.max(TD.min,Math.min(TD.max,TD.dx0));TD.dx=dx;TD.el.style.transform="translateX("+dx+"px)";
+    var n=TD.cancel?TD.i:slot(),i;for(i=0;i<TD.items.length;i++){if(i===TD.i)continue;var sh=0;if(i>=n&&i<TD.i)sh=TD.w;else if(i<=n&&i>TD.i)sh=-TD.w;var tx=sh?"translateX("+sh+"px)":"";if(TD.items[i].el.style.transform!==tx)TD.items[i].el.style.transform=tx}
+    TD.n=n;var G=TD.cancel?{g:TD.g0}:grp(n);TD.G=G;TD.items.forEach(function(it){if(it.gh)it.el.classList.toggle("dg",!!(G.hd&&G.hd===it))});
+    var gc=G.g?((TG.g.find(function(x){return x.id===G.g})||{}).c||""):"";TD.el.classList.toggle("tg",!!G.g);TD.el.style.setProperty("--gc",gc||"transparent")}
+  function finish(){var el=$("#bw-tabs"),d=TD,n=d.cancel||d.n==null?d.i:d.n,id=+d.id;
+    /* settle into the slot, then commit */
+    var tgt=0;if(n>d.i)tgt=d.items[n].r-d.me.r;else if(n<d.i)tgt=d.items[n].l-d.me.l;
+    d.el.style.transition="transform .16s cubic-bezier(.2,.8,.2,1)";d.el.style.transform="translateX("+tgt+"px)";
+    setTimeout(function(){var G=d.cancel?{g:d.g0}:(d.G||{g:d.g0});if(G.g){TG.m[id]=G.g;var g=TG.g.find(function(x){return x.id===G.g});if(g&&G.hd)g.k=0}else delete TG.m[id];tgSave();
+      /* the new order, with hidden (collapsed) group members kept in place */
+      var seq=d.items.filter(function(_,i){return i!==d.i});seq.splice(n,0,d.me);var order=[];
+      seq.forEach(function(it){if(it.gh){var g=TG.g.find(function(x){return x.id===it.gh});if(g&&g.k)BW.st.tabs.forEach(function(t){if(TG.m[t.id]===it.gh&&t.id!==id)order.push(t.id)})}else order.push(+it.id)});
+      if(G.hd){var gi=order.indexOf(id);order.splice(gi,1);var last=-1;order.forEach(function(x,i){if(TG.m[x]===G.g)last=i});order.splice(last+1,0,id)}
+      var to=order.indexOf(id),byId={};BW.st.tabs.forEach(function(t){byId[t.id]=t});var nt=order.map(function(x){return byId[x]}).filter(Boolean);
+      BW.st.tabs.forEach(function(t){if(nt.indexOf(t)<0)nt.push(t)});BW.st.tabs=nt;
+      var pend=TD&&TD.pend;TD=null;clean();if(el){el.dataset.sig="";el.dataset.ids=""}
+      bwRender();if(bwNative()&&APP.browser.move)APP.browser.move(id,to).catch(function(){})},170)}
+  document.addEventListener("pointerdown",function(e){if(e.button!==0&&e.button!==1)return;var t=e.target.closest&&e.target.closest("#bw-tabs .bw-tab");if(!t||TD)return;
+    if(e.button===1){e.preventDefault();if(bwNative())APP.browser.close(+t.dataset.id).catch(function(){});return}
+    if(e.target.closest("button"))return;
+    TD={id:t.dataset.id,el:t,x0:e.clientX,y0:e.clientY,pid:e.pointerId,on:false,dx0:0,g0:t.dataset.g||""};
+    if(!t.classList.contains("on")&&bwNative()){APP.browser.activate(+t.dataset.id).catch(function(){});TD.act=1}},true);
+  document.addEventListener("pointermove",function(e){if(!TD||e.pointerId!==TD.pid)return;
+    if(!TD.on){if(Math.abs(e.clientX-TD.x0)<5)return;if(!start()){TD=null;return}}
+    TD.dx0=e.clientX-TD.x0;if(!TD.raf)TD.raf=requestAnimationFrame(frame)},true);
+  function up(e){if(!TD||(e&&e.pointerId!==TD.pid))return;if(TD.raf){cancelAnimationFrame(TD.raf);frame()}
+    if(TD.on){TD.cl=1;TD.on=false;finish()}else{var p=TD.pend;TD=null;if(p!=null)bwTabsSet(p)}}
+  document.addEventListener("pointerup",up,true);document.addEventListener("pointercancel",up,true);
+  /* the press already selected the tab (or finished a drag): don't run the click again */
+  document.addEventListener("click",function(e){if(!e.detail)return;var t=e.target.closest&&e.target.closest("#bw-tabs .bw-tab");if(!t||e.target.closest("button"))return;e.stopPropagation();e.preventDefault()},true);
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&TD&&TD.on){e.stopPropagation();TD.cancel=1;frame()}},true);
 })();
 /* --- right-click a tab --- */
 function bwPopAt(x,y,h,key){var p=$("#bw-bmpop");if(!p)return;bwBmClose();p.innerHTML=h;p.hidden=false;BW.popFor=key||"menu";p.style.left=Math.round(Math.max(8,Math.min(innerWidth-p.offsetWidth-8,x)))+"px";p.style.top=Math.round(Math.max(8,Math.min(innerHeight-p.offsetHeight-8,y)))+"px";var f=p.querySelector("button");if(f)try{f.focus({preventScroll:true})}catch(_){}}
@@ -4921,7 +5065,7 @@ var TGC=["#7aa2ff","#ff7a90","#ffd166","#5be3a0","#c58bff","#4fd6e0"];
 function tgSave(){try{localStorage.setItem("regis-tg",JSON.stringify(TG))}catch(_){}}
 function tgTabsHtml(tabs,active){var live={};tabs.forEach(function(t){live[t.id]=1});Object.keys(TG.m).forEach(function(k){if(!live[k])delete TG.m[k]});
   var gs=TG.g.filter(function(g){return tabs.some(function(t){return TG.m[t.id]===g.id})}),out=[],done={};
-  function tab(t){return '<div class="bw-tab'+(t.id===active?" on":"")+(t.loading?" ld":"")+(t.asleep?" zz":"")+'" role="tab" draggable="true" aria-selected="'+(t.id===active)+'" data-act="bw-tab" data-id="'+t.id+'"'+(TG.m[t.id]?' data-g="'+esc(TG.m[t.id])+'" style="--gc:'+esc((TG.g.find(function(g){return g.id===TG.m[t.id]})||{}).c||"")+'"':"")+' title="'+esc((t.title||t.url||"New tab")+(t.asleep?" · sleeping to save memory":""))+'"><i class="bw-ld"></i>'+(t.icon&&/^data:image\//.test(t.icon)?'<img class="bw-fav" src="'+esc(t.icon)+'" alt="">':'')+'<span>'+esc(t.blank?"New tab":(t.title||t.url))+'</span>'+((t.audible||t.muted)?'<button class="a" data-act="bw-mute" data-id="'+t.id+'" aria-label="'+(t.muted?"Unmute":"Mute")+' tab" title="'+(t.muted?"Unmute":"Mute")+'">'+(t.muted?'<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4zM16 9.5l5 5M21 9.5l-5 5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4zM16 9a4.5 4.5 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>')+'</button>':'')+'<button class="x" data-act="bw-close" data-id="'+t.id+'" aria-label="Close tab">×</button></div>'}
+  function tab(t){return '<div class="bw-tab'+(t.id===active?" on":"")+(t.loading?" ld":"")+(t.asleep?" zz":"")+'" role="tab" aria-selected="'+(t.id===active)+'" data-act="bw-tab" data-id="'+t.id+'"'+(TG.m[t.id]?' data-g="'+esc(TG.m[t.id])+'" style="--gc:'+esc((TG.g.find(function(g){return g.id===TG.m[t.id]})||{}).c||"")+'"':"")+' title="'+esc((t.title||t.url||"New tab")+(t.asleep?" · sleeping to save memory":""))+'"><i class="bw-ld"></i>'+(t.icon&&/^data:image\//.test(t.icon)?'<img class="bw-fav" src="'+esc(t.icon)+'" alt="">':'')+'<span>'+esc(t.blank?"New tab":(t.title||t.url))+'</span>'+((t.audible||t.muted)?'<button class="a" data-act="bw-mute" data-id="'+t.id+'" aria-label="'+(t.muted?"Unmute":"Mute")+' tab" title="'+(t.muted?"Unmute":"Mute")+'">'+(t.muted?'<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4zM16 9.5l5 5M21 9.5l-5 5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4zM16 9a4.5 4.5 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>')+'</button>':'')+'<button class="x" data-act="bw-close" data-id="'+t.id+'" aria-label="Close tab">×</button></div>'}
   tabs.forEach(function(t){var gid=TG.m[t.id];
     if(!gid||!gs.some(function(g){return g.id===gid})){out.push(tab(t));return}
     if(done[gid])return;done[gid]=1;var g=gs.find(function(x){return x.id===gid}),mem=tabs.filter(function(x){return TG.m[x.id]===gid});
@@ -5111,7 +5255,7 @@ function tiltInit(){if(!window.matchMedia||!matchMedia("(hover:hover) and (point
   document.addEventListener("pointermove",function(e){var R=document.documentElement;if(!R.classList.contains("d3")||R.classList.contains("x-tilt")||R.classList.contains("x-track")||R.classList.contains("lite")||R.classList.contains("mob")||S.view==="browser")return;
     var t=e.target.closest?e.target.closest(S.view==="work"?".panel":".hm-card,.sat,.bw-t"):null;if(t!==cur){rel();cur=t;if(cur)cur.classList.add("tl-on")}px=e.clientX;py=e.clientY;if(cur&&!raf)raf=requestAnimationFrame(go)},{passive:true});
   document.addEventListener("pointerleave",rel,true);window.addEventListener("blur",rel)}
-function browserLeave(){if(bwNative())APP.browser.show(false).catch(function(){})}
+function browserLeave(){if(bwNative())APP.browser.show(false,false).catch(function(){})}
 function bwGo(text,fresh){var u=bwResolve(text);if(!u)return;
   if(!bwNative()){window.open(u,"_blank","noopener");return}
   var act=bwActive();if(!act||(!act.blank&&fresh))APP.browser.open(u).catch(function(){});else APP.browser.go(act.id,u).catch(function(e){toast((e&&e.message)||"Couldn’t open that.","bad")})}
@@ -5238,7 +5382,8 @@ function bwSkyStart(){if(!skyOK())return;var cv=$("#bw-sky");if(!cv)return;if(SK
   function mk(init){var m=6+Math.random()*9;return {x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,age:init?Math.random()*m:0,max:m,r:.9+Math.random()*1.5}}
   function target(){var n=+opGet("bwsd")||46;while(st.length<n)st.push(mk(true));if(st.length>n)st.length=n}
   function frame(t){raf=0;if(!run)return;if(document.hidden||S.view!=="browser"||($("#bw-start")||{}).hidden||PERF.lite||PERF.idle||document.documentElement.classList.contains("o-still")||!opGet("bwstar")){run=false;ctx.clearRect(0,0,W,H);return}
-    raf=requestAnimationFrame(frame);if(t-last<33)return;var dt=Math.min(.1,(t-last)/1000);last=t;var sp=(+opGet("bwss")||100)/100;
+    /* 1.8.4: paced by a timer (about 30 fps), so the page only wakes up for frames it draws */
+    var dt=last?Math.min(.1,(t-last)/1000):0;last=t;raf=-1;setTimeout(function(){if(run)raf=requestAnimationFrame(frame)},30);var sp=(+opGet("bwss")||100)/100;
     if(t-colAt>4000){col=skyCol();colAt=t}target();ctx.clearRect(0,0,W,H);var L=Math.min(170,Math.max(90,W/7)),i,j;
     for(i=0;i<st.length;i++){var a=st[i];a.age+=dt*sp;a.x+=a.vx*sp*60*dt;a.y+=a.vy*sp*60*dt;if(a.age>=a.max||a.x<-20||a.x>W+20||a.y<-20||a.y>H+20)st[i]=a=mk(false);a.al=Math.sin(Math.PI*Math.min(1,a.age/a.max))}
     ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=.8;
@@ -5621,6 +5766,7 @@ document.addEventListener("click",async function(ev){
     case "nav-more":navMore(b);break;
     case "vo-vis":{var vv=b.dataset.v,hi=NAV.hide.indexOf(vv);if(hi>=0)NAV.hide.splice(hi,1);else if(VORD.length-NAV.hide.length>2)NAV.hide.push(vv);lsw("regis-navhide",NAV.hide);voApply();break}
     case "of-new":case "of-web":case "of-open":case "of-show":case "of-scan":case "of-folder":await ofAct(act,b);break;
+    case "ofd-app":case "ofd-filter":case "ofd-doc":case "ofd-keys":case "ofd-new":case "ofd-start":case "ofd-pick":case "ofd-open":case "ofd-close":case "ofd-adopt":case "ofd-pop":await ofdAct(act,b);break;
     case "bw-mute":if(bwNative()&&APP.browser.mute)APP.browser.mute(+b.dataset.id);break;
     case "bwt-new":case "bwt-reload":case "bwt-dup":case "bwt-mute":case "bwt-bm":case "bwt-copy":case "bwt-grp":case "bwt-to":case "bwt-newg":case "bwt-ungrp":case "bwt-sleep":case "bwt-close":case "bwt-others":case "bwt-right":case "bwt-reopen":await bwTabAct(act,b);break;
     case "bfind-prev":bwFindGo(true);break;
@@ -5835,7 +5981,7 @@ function pick(o,a,b){return o&&o[a]!==undefined&&o[a]!==null?o[a]:(o?o[b]:undefi
 
 
 /* ---------- other inboxes, labels and search in the mail list ---------- */
-var MV_VIEWS=[["priority","Needs you (unread, ranked)","","Priority"],["inbox","Inbox","in:inbox","Inbox"],["primary","Primary","in:inbox category:primary","Primary"],["promotions","Promotions","in:inbox category:promotions","Promotions"],["social","Social","in:inbox category:social","Social"],["updates","Updates","in:inbox category:updates","Updates"],["forums","Forums","in:inbox category:forums","Forums"],["unread","All unread","in:inbox is:unread","All unread"],["starred","Starred","is:starred","Starred"],["important","Important","is:important","Important"],["sent","Sent","in:sent","Sent"]];
+var MV_VIEWS=[["priority","Needs you","","Priority"],["inbox","Inbox","in:inbox","Inbox"],["primary","Primary","in:inbox category:primary","Primary"],["promotions","Promotions","in:inbox category:promotions","Promotions"],["social","Social","in:inbox category:social","Social"],["updates","Updates","in:inbox category:updates","Updates"],["forums","Forums","in:inbox category:forums","Forums"],["unread","All unread","in:inbox is:unread","All unread"],["starred","Starred","is:starred","Starred"],["important","Important","is:important","Important"],["sent","Sent","in:sent","Sent"]];
 var INBOXY=["inbox","primary","promotions","social","updates","forums","unread"];
 function labelTerm(n){return "label:"+String(n).trim().replace(/[\s/]+/g,"-")}
 function mvQuery(v){if(v.key==="search")return v.q;if(v.key.indexOf("label:")===0)return labelTerm(v.key.slice(6));
@@ -5879,7 +6025,7 @@ function renderMailView(){var v=S.mv,h=[];
   var ml=$("#mail-list"),html=h.join("");if(ml.dataset.sig!==html){var st=ml.scrollTop;ml.innerHTML=html;ml.dataset.sig=html;ml.scrollTop=st}}
 
 /* ---------- mini mode (desktop app) ---------- */
-function setMiniUI(on){on=!!on;S.mini=on;document.documentElement.classList.toggle("mini",on);renderMini();if(!on)try{window.dispatchEvent(new Event("resize"))}catch(_){}}
+function setMiniUI(on){on=!!on;S.mini=on;try{if(typeof ofdSync==="function")ofdSync()}catch(_){}document.documentElement.classList.toggle("mini",on);renderMini();if(!on)try{window.dispatchEvent(new Event("resize"))}catch(_){}}
 function sigHTML(el,h){if(el.dataset.sig!==h){el.dataset.sig=h;el.innerHTML=h}}
 function renderMini(){var m=$("#mini");if(!m||!S.mini)return;var now=new Date(),td=today();
   $("#mn-clock").textContent=now.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});$("#mn-date").textContent=now.toLocaleDateString([],{weekday:"short",month:"short",day:"numeric"});
@@ -6810,9 +6956,9 @@ document.addEventListener("keydown",function(e){if(e.code!=="Space"&&e.key!==" "
 var OF={k:"all",list:null,busy:false};
 var OFW={home:"https://www.office.com/",onedrive:"https://onedrive.live.com/",recent:"https://www.office.com/mycontent",word:"https://word.new/",excel:"https://excel.new/",powerpoint:"https://powerpoint.new/"};
 function ofKind(n){n=String(n||"").toLowerCase();return /\.(docx?|docm|rtf|odt)$/.test(n)?"w":/\.(xlsx?|xlsm|csv|ods)$/.test(n)?"x":/\.(pptx?|pptm|odp)$/.test(n)?"p":""}
-function ofEnter(){if(!OF.list&&!OF.busy)ofScan();else ofRender()}
+function ofEnter(){if(typeof ofdOk==="function"&&ofdOk()){document.documentElement.classList.add("ofd-on");ofdEnter();return}if(!OF.list&&!OF.busy)ofScan();else ofRender()}
 function ofScan(){var sub=$("#of-sub");if(!APP||!APP.office){ofRender();return}OF.busy=true;if(sub)sub.textContent="Looking…";APP.office.recent().then(function(l){OF.list=l||[];OF.busy=false;ofRender()}).catch(function(e){OF.busy=false;OF.list=[];ofRender();toast((e&&e.message)||"Couldn’t look through your files.","bad")})}
-function ofRender(){var el=$("#of-list"),sub=$("#of-sub");if(!el)return;$$("#of-f .tab").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.k===OF.k))});
+function ofRender(){if(typeof ofdRender==="function"&&OFD.wired)ofdRender();var el=$("#of-list"),sub=$("#of-sub");if(!el)return;$$("#of-f .tab").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.k===OF.k))});
   if(!APP||!APP.office){el.innerHTML='<p class="note">The Regis desktop app finds Word, Excel and PowerPoint files on your computer. Here, use the buttons on the left to work on the web.</p>';if(sub)sub.textContent="";return}
   if(!OF.list){el.innerHTML='<p class="note">Looking for your files…</p>';return}
   var L=OF.list.filter(function(f){return OF.k==="all"||ofKind(f.name)===OF.k});if(sub)sub.textContent=OF.list.length+" files";
@@ -6822,6 +6968,71 @@ async function ofAct(a,b){var k=b.dataset.k;
   if(a==="of-web"){appGo(OFW[k]||OFW.home);return}
   if(a==="of-scan"){if(k&&k!==OF.k&&OF.list){OF.k=k;ofRender();return}if(k)OF.k=k;ofScan();return}
   if(!APP||!APP.office)return;try{if(a==="of-open"){await APP.office.open(b.dataset.p);toast("Opening in Office…","good")}else if(a==="of-show")await APP.office.show(b.dataset.p)}catch(e){toast((e&&e.message)||"Couldn’t open that file.","bad")}}
+/* 1.8.4 Office workspace (desktop app on Windows): the real Word, Excel and PowerPoint docked inside Regis.
+   A sidebar switches between Files and the three apps; the bar shows that app's open documents like tabs.
+   The document is the actual desktop app, so the ribbon, dialogs and every keyboard shortcut are the real ones. */
+var OFD={on:false,k:"home",st:null,sel:{},key:"",wired:false,lastAct:0,busy:""};
+var OFN={word:"Word",excel:"Excel",powerpoint:"PowerPoint"},OFL={word:"w",excel:"x",powerpoint:"p"},OFNEW={word:"Blank document",excel:"Blank workbook",powerpoint:"Blank presentation"};
+var OFKEYS={
+  all:[["Ctrl+S","Save"],["F12","Save as"],["Ctrl+O","Open"],["Ctrl+N","New"],["Ctrl+P","Print"],["Ctrl+Z / Ctrl+Y","Undo / redo"],["Ctrl+C / X / V","Copy / cut / paste"],["Ctrl+F","Find"],["Ctrl+H","Replace"],["Ctrl+B / I / U","Bold / italic / underline"],["Alt","Ribbon key tips"],["F1","Help"]],
+  word:[["Ctrl+E / L / R / J","Centre / left / right / justify"],["Ctrl+] / Ctrl+[","Bigger / smaller text"],["Ctrl+Enter","Page break"],["Ctrl+K","Insert link"],["F7","Spelling and grammar"],["Ctrl+Shift+C / V","Copy / paste formatting"]],
+  excel:[["F2","Edit the cell"],["Ctrl+Arrow","Jump to the data edge"],["Ctrl+Shift+L","Filter"],["Alt+=","AutoSum"],["Ctrl+;","Today's date"],["Ctrl+1","Format cells"],["Ctrl+T","Make a table"],["F4","Fix a reference ($A$1)"],["Ctrl+Page Up/Down","Switch sheets"]],
+  powerpoint:[["F5","Start the slide show"],["Shift+F5","Show from this slide"],["Ctrl+M","New slide"],["Ctrl+D","Duplicate"],["Ctrl+G","Group"],["Esc","End the show"]]};
+function ofdOk(){return !!(APP&&APP.office&&APP.office.dock&&!document.documentElement.classList.contains("mob"))}
+function ofdDocs(k){var st=OFD.st;return st?st.docs.filter(function(d){return d.k===k}):[]}
+function ofdActive(){if(OFD.k==="home")return null;var L=ofdDocs(OFD.k).filter(function(d){return d.docked}),h=OFD.sel[OFD.k];return L.find(function(d){return d.h===h})||L[0]||null}
+function ofdIc(k){return '<i class="of-ic '+OFL[k]+'">'+OFL[k].toUpperCase()+'</i>'}
+function ofdEnter(){if(!ofdOk())return;var el=$("#ofd");if(!el)return;
+  if(!OFD.wired){OFD.wired=true;
+    APP.office.dock.onState(function(s){var prev=OFD.st&&OFD.st.active;OFD.st=s;
+      /* a document Regis just opened came in: show it */
+      if(s.active&&s.active!==prev){var d=s.docs.find(function(x){return x.h===s.active&&x.docked});if(d&&S.view==="office"){OFD.k=d.k;OFD.sel[d.k]=d.h}}
+      ofdRender();ofdSync()});
+    if(window.ResizeObserver){new ResizeObserver(function(){ofdBounds()}).observe($("#ofd-stage"))}
+    if(window.MutationObserver){var ov=new MutationObserver(function(){ofdSync()});["#modal","#look","#alert-pop","#more-pop","#bw-bmpop"].forEach(function(q){var e=$(q);if(e)ov.observe(e,{attributes:true,attributeFilter:["hidden"]})})}
+    document.addEventListener("visibilitychange",ofdSync);
+    APP.office.dock.apps().then(function(a){OFD.apps=a||{};ofdRender()}).catch(function(){})}
+  el.hidden=false;if(!OF.list&&!OF.busy)ofScan();
+  APP.office.dock.state().then(function(s){OFD.st=s;ofdRender();ofdBounds();ofdSync()}).catch(function(){ofdRender()})}
+function ofdBounds(){var st=$("#ofd-stage");if(!st||!ofdOk()||S.view!=="office")return;var r=st.getBoundingClientRect();APP.office.dock.bounds({x:r.left,y:r.top,width:r.width,height:r.height}).catch(function(){})}
+/* show the active document over the stage, or hide every docked window (other page, a Regis menu is open, window hidden) */
+function ofdSync(focus){if(!ofdOk()||!OFD.wired)return;var d=ofdActive(),on=S.view==="office"&&!!d&&!bwOverlay()&&!document.hidden&&!S.mini&&!OFD.leaving,key=on+"|"+(d?d.h:0);
+  if(key===OFD.key&&!focus)return;OFD.key=key;OFD.on=on;var ph=$("#ofd-stage");if(ph)ph.classList.toggle("live",on);
+  if(on)ofdBounds();return APP.office.dock.show(on,d?d.h:0,!!focus).catch(function(){})}
+function ofdRender(){var side=$("#ofd-side"),bar=$("#ofd-bar"),ph=$("#ofd-ph");if(!side||!bar||!ph)return;var st=OFD.st||{docs:[],apps:{}},apps=OFD.apps||st.apps||{};
+  side.querySelectorAll("[data-act=ofd-app]").forEach(function(b){var k=b.dataset.k,on=k===OFD.k;b.setAttribute("aria-current",on?"page":"false");var n=k==="home"?0:ofdDocs(k).filter(function(d){return d.docked}).length,em=b.querySelector("em");if(em)em.textContent=n?String(n):""});
+  if(OFD.k==="home"){bar.innerHTML='<span class="ofd-ttl">Files on this PC</span><span class="grow"></span><button class="btn sm ghost" data-act="of-scan">Refresh</button>';ph.innerHTML=ofdHome(apps);return}
+  var k=OFD.k,L=ofdDocs(k),docked=L.filter(function(d){return d.docked}),out=L.filter(function(d){return !d.docked}),a=ofdActive();
+  bar.innerHTML=docked.map(function(d){var on=a&&a.h===d.h;return '<div class="ofd-doc'+(on?" on":"")+'" role="tab" aria-selected="'+on+'"><button class="ofd-dn" data-act="ofd-doc" data-h="'+d.h+'" title="'+esc(d.t)+'">'+ofdIc(k)+'<span>'+esc(d.t)+'</span></button><button class="x" data-act="ofd-close" data-h="'+d.h+'" aria-label="Close '+esc(d.t)+'" title="Close (Office asks to save first)">×</button></div>'}).join("")+
+    '<button class="bw-new" data-act="ofd-new" data-k="'+k+'" aria-label="'+OFNEW[k]+'" title="'+OFNEW[k]+'">+</button><span class="grow"></span>'+
+    '<button class="btn sm ghost" data-act="ofd-pick" data-k="'+k+'">Open…</button>'+(a?'<button class="btn sm ghost" data-act="ofd-pop" data-h="'+a.h+'" title="Move this window out of Regis">Pop out</button>':'');
+  var wait=st.waiting===k,miss=apps&&apps[k]===null;
+  ph.innerHTML=a?'<div class="ofd-hold">'+ofdIc(k)+'<b>'+esc(a.t)+'</b><small>'+(bwOverlay()?"Hidden while a Regis menu is open.":"Showing in "+OFN[k]+".")+'</small></div>':
+    '<div class="ofd-empty"><div class="ofd-hero">'+ofdIc(k)+'<div><h3>'+OFN[k]+'</h3><p>'+(miss?OFN[k]+" isn’t installed on this PC.":wait?"Opening "+OFN[k]+"…":"The desktop app, right here in Regis. Every shortcut works as usual.")+'</p></div></div>'+
+    (miss?'':'<div class="ofd-acts"><button class="btn pri" data-act="ofd-new" data-k="'+k+'"'+(wait?" disabled":"")+'>'+OFNEW[k]+'</button><button class="btn" data-act="ofd-pick" data-k="'+k+'">Open a file…</button><button class="btn ghost" data-act="ofd-start" data-k="'+k+'" title="Templates and your recent files, in '+OFN[k]+'">Templates</button></div>')+
+    (out.length?'<div class="ofd-out"><h4>Open outside Regis</h4>'+out.map(function(d){return '<div class="of-r">'+ofdIc(k)+'<span class="of-x"><b>'+esc(d.t)+'</b></span><button class="btn sm" data-act="ofd-adopt" data-h="'+d.h+'">Bring into Regis</button></div>'}).join("")+'</div>':'')+
+    ofdRecent(OFL[k],8)+'</div>'}
+function ofdRecent(kk,n){if(!OF.list)return '<p class="note">Looking for your files…</p>';var L=OF.list.filter(function(f){return !kk||ofKind(f.name)===kk}).slice(0,n);if(!L.length)return '<p class="note">No '+(kk?{w:"Word",x:"Excel",p:"PowerPoint"}[kk]:"Office")+' files found in Documents, Downloads, Desktop or OneDrive.</p>';
+  return '<div class="ofd-rec"><h4>Recent on this PC</h4>'+L.map(function(f){var k=ofKind(f.name);return '<div class="of-r"><i class="of-ic '+k+'">'+k.toUpperCase()+'</i><button class="of-x" data-act="ofd-open" data-p="'+esc(f.path)+'"><b>'+esc(f.name)+'</b><small>'+esc(f.where)+' · '+esc(bwAgo(f.mtime))+'</small></button><button class="btn sm ghost" data-act="of-show" data-p="'+esc(f.path)+'" title="Show in folder" aria-label="Show in folder"><svg viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2H10l2 2.5h6.5a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/></svg></button></div>'}).join("")+'</div>'}
+function ofdHome(apps){return '<div class="ofd-empty"><div class="ofd-new3">'+["word","excel","powerpoint"].map(function(k){var miss=apps&&apps[k]===null;return '<button class="of-app '+OFL[k]+'" data-act="ofd-new" data-k="'+k+'"'+(miss?' disabled title="Not installed"':'')+'><i>'+OFL[k].toUpperCase()+'</i><b>'+OFN[k]+'</b><small>'+(miss?"Not installed":OFNEW[k])+'</small></button>'}).join("")+'</div>'+
+  '<div class="ofd-tabs tabs" role="tablist">'+[["","All"],["w","Word"],["x","Excel"],["p","PowerPoint"]].map(function(t){return '<button class="tab" role="tab" data-act="ofd-filter" data-k="'+t[0]+'" aria-selected="'+((OFD.f||"")===t[0])+'">'+t[1]+'</button>'}).join("")+'</div>'+ofdRecent(OFD.f||"",60)+'</div>'}
+function ofdKeys(){var k=OFD.k==="home"?"excel":OFD.k,rows=function(L){return L.map(function(r){return '<div class="ofd-kr"><kbd>'+esc(r[0])+'</kbd><span>'+esc(r[1])+'</span></div>'}).join("")};
+  openModal("Office shortcuts",'<p class="note">Click into the document first. These are Office’s own shortcuts, so they all work.</p><div class="ofd-keys"><div><h4>Everywhere</h4>'+rows(OFKEYS.all)+'</div><div><h4>'+OFN[k]+'</h4>'+rows(OFKEYS[k])+'</div></div><div class="fbar"><button class="btn pri" data-act="modal-close">Done</button></div>')}
+async function ofdAct(a,b){if(!ofdOk())return;var D=APP.office.dock,k=b.dataset.k,h=+b.dataset.h||0;
+  try{
+    if(a==="ofd-app"){OFD.k=k;ofdRender();ofdSync(true);return}
+    if(a==="ofd-filter"){OFD.f=k;ofdRender();return}
+    if(a==="ofd-doc"){OFD.sel[OFD.k]=h;ofdRender();ofdSync(true);return}
+    if(a==="ofd-keys"){ofdKeys();return}
+    if(a==="ofd-new"){OFD.k=k;ofdRender();toast("Opening "+OFN[k]+"…","good");await D.create(k);return}
+    if(a==="ofd-start"){await D.start(k);toast("Opening "+OFN[k]+"…","good");return}
+    if(a==="ofd-pick"){await D.pick(k);return}
+    if(a==="ofd-open"){var kk=ofKind(b.dataset.p);OFD.k={w:"word",x:"excel",p:"powerpoint"}[kk]||OFD.k;ofdRender();await D.open(b.dataset.p);toast("Opening in "+(OFN[OFD.k]||"Office")+"…","good");return}
+    if(a==="ofd-close"){await D.close(h);return}
+    if(a==="ofd-adopt"){await D.adopt(h);return}
+    if(a==="ofd-pop"){await D.release(h);toast("Moved out of Regis. It’s a normal window again.","good");return}
+  }catch(e){toast((e&&e.message)||"Office didn’t answer.","bad")}}
+
 /* 1.8.2 links in emails and elsewhere in Regis open in the Regis Browser (Appearance > Browser), not the default browser */
 function linkHere(){return !!(opGet("linksin")&&typeof bwNative==="function"&&bwNative())}
 document.addEventListener("click",function(e){if(e.defaultPrevented||e.button!==0)return;var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(!a)return;var u=a.getAttribute("href")||"";if(!/^https?:\/\//i.test(u)||!linkHere())return;
@@ -6831,7 +7042,7 @@ setTimeout(function(){if(APP&&APP.linkMode)APP.linkMode(linkHere()).catch(functi
 /* 1.8.3 full screen: the button and F11 both use the desktop window's true full screen (no Windows title bar); the page follows its state */
 if(APP&&APP.onFullscreen)APP.onFullscreen(function(v){setFs(!!v)});
 if(APP&&APP.fsState)APP.fsState().then(function(v){setFs(!!v)}).catch(function(){});
-var SHELL_NEED="1.8.3";
+var SHELL_NEED="1.8.4";
 function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
   var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;

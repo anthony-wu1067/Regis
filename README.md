@@ -84,6 +84,15 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.4 Office inside Regis, Chrome-style tabs, smoother Home
+
+- **Office page (desktop app on Windows):** the real Word, Excel and PowerPoint, docked inside Regis. A sidebar switches between Files and the three apps; open documents show as tabs along the top. New, Open… and Templates start or open documents straight into Regis, and every Office keyboard shortcut works because it is the actual desktop app (Keys in the sidebar lists the common ones). Pop out moves a document back to its own window; Office files you opened elsewhere can be brought in. When Regis quits, documents become normal windows again, so nothing is lost.
+- **Browser tabs move like Chrome's:** press a tab to select it, drag and it follows the pointer while the others slide aside; drop between grouped tabs (or on the group name) to join a group, pull it past the group's end to leave. Tabs slide when one opens or closes, shrink down to their icon when many are open, and a middle click closes one.
+- **Home stays smooth:** the animated backgrounds (constellation and Milky Way) now draw on their own thread. Before, they kept the page busy around 60 times a second, which made Home slower the longer it stayed open. Work on the main thread dropped by about 85 to 95 percent.
+- **No more white flash** when leaving the Browser with a white website open: the site is hidden before Regis switches pages.
+- **Tidier screens:** the mail filter isn't cut off, the Home hint shows the Alt shortcuts, panel headers stay on one line on the phone, the Music setup only shows the address that applies, and the Browser's Appearance button is an icon like its neighbours.
+- Updating: the desktop app changed, so run *Install Regis* once.
+
 ## 1.8.3 True full screen
 
 - **Full screen hides the Windows title bar again**, from the full-screen button, F11 (fn+F11), or the Browser's ⋯ menu.

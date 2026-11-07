@@ -32,9 +32,14 @@ app.whenReady().then(async () => {
   await click('#vsw [data-v="browser"]'); await sleep(1500);
   await go(base + '/a'); await J('document.querySelector(\'[data-act="bw-new"]\').click()'); await sleep(400); await go(base + '/b'); await J('document.querySelector(\'[data-act="bw-new"]\').click()'); await sleep(400); await go(base + '/words');
   ok((await tabsOrder()).join('|') === 'Page a|Page b|Words', 'three tabs open (' + (await tabsOrder()).join(', ') + ')');
-  ok(await J('return !document.querySelector("#bw-tabs .bw-tab .g")&&document.querySelector("#bw-tabs .bw-tab").getAttribute("draggable")==="true"'), 'tabs are draggable and the group button is gone');
+  ok(await J('return !document.querySelector("#bw-tabs .bw-tab .g")&&!document.querySelector("#bw-tabs .bw-tab[draggable]")'), 'tabs use the new pointer dragging and the group button is gone');
+  const rectOf = (pred) => J('var t=[].find.call(document.querySelectorAll("#bw-tabs .bw-tab,#bw-tabs .bw-gh"),function(t){return ' + pred + '});if(!t)return null;var r=t.getBoundingClientRect();return [r.left,r.top,r.width,r.height]');
+  const drag = async (from, toX, steps) => { const x0 = Math.round(from[0] + from[2] / 2), y = Math.round(from[1] + from[3] / 2); const wc = win.webContents; wc.focus();
+    wc.sendInputEvent({ type: 'mouseMove', x: x0, y }); wc.sendInputEvent({ type: 'mouseDown', x: x0, y, button: 'left', clickCount: 1 });
+    for (let k = 1; k <= (steps || 10); k++) { wc.sendInputEvent({ type: 'mouseMove', x: Math.round(x0 + (toX - x0) * k / (steps || 10)), y, button: 'left', modifiers: ['leftButtonDown'] }); await sleep(30); }
+    wc.sendInputEvent({ type: 'mouseUp', x: Math.round(toX), y, button: 'left', clickCount: 1 }); await sleep(450); };
   // drag "Words" before "Page a"
-  await J('var ts=document.querySelectorAll("#bw-tabs .bw-tab"),src=ts[2],dst=ts[0],dt=new DataTransfer(),r=dst.getBoundingClientRect();src.dispatchEvent(new DragEvent("dragstart",{bubbles:true,dataTransfer:dt}));dst.dispatchEvent(new DragEvent("dragover",{bubbles:true,cancelable:true,clientX:r.left+4,clientY:r.top+8,dataTransfer:dt}));dst.dispatchEvent(new DragEvent("drop",{bubbles:true,cancelable:true,clientX:r.left+4,clientY:r.top+8,dataTransfer:dt}));src.dispatchEvent(new DragEvent("dragend",{bubbles:true,dataTransfer:dt}))');
+  { const w = await rectOf('/Words/.test(t.textContent)'), a = await rectOf('/Page a/.test(t.textContent)'); await drag(w, a[0] + 6); }
   ok(await until(async () => (await tabsOrder()).join('|') === 'Words|Page a|Page b'), 'dragging a tab moves it (' + (await tabsOrder()).join(', ') + ')');
   // right-click menu, make a group, drag another tab into it
   await J('var t=document.querySelectorAll("#bw-tabs .bw-tab")[1],r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent("contextmenu",{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))'); await sleep(300);
@@ -42,8 +47,24 @@ app.whenReady().then(async () => {
   await click('#bw-bmpop [data-act="bwt-grp"]'); await sleep(200); await click('#bw-bmpop [data-act="bwt-newg"]'); await sleep(300);
   await J('document.getElementById("tg-name").value="Research";document.querySelector(\'form[data-vt-form="tgrp"]\').requestSubmit()'); await sleep(500);
   ok(await J('return /Research/.test(document.getElementById("bw-tabs").textContent)'), 'Add to group > New group makes a group');
-  await J('var ts=document.querySelectorAll("#bw-tabs .bw-tab"),src=[].find.call(ts,function(t){return /Page b/.test(t.textContent)}),gh=document.querySelector("#bw-tabs .bw-gh"),dt=new DataTransfer();src.dispatchEvent(new DragEvent("dragstart",{bubbles:true,dataTransfer:dt}));gh.dispatchEvent(new DragEvent("dragover",{bubbles:true,cancelable:true,dataTransfer:dt}));gh.dispatchEvent(new DragEvent("drop",{bubbles:true,cancelable:true,dataTransfer:dt}));src.dispatchEvent(new DragEvent("dragend",{bubbles:true,dataTransfer:dt}))');
+  { const b = await rectOf('/Page b/.test(t.textContent)'), g = await rectOf('t.classList.contains("bw-gh")'); await drag(b, g[0] + g[2] / 2, 14); }
   ok(await until(() => J('var tg=JSON.parse(localStorage.getItem("regis-tg"));return Object.keys(tg.m).length===2')), 'dragging a tab onto a group name adds it to the group');
+  // mid-drag: the dragged tab follows the pointer and its neighbour slides aside; Escape puts everything back
+  { const order0 = (await tabsOrder()).join('|'); const tabs = await J('return [].map.call(document.querySelectorAll("#bw-tabs .bw-tab"),function(t){var r=t.getBoundingClientRect();return [r.left,r.top,r.width,r.height]})');
+    const a = tabs[tabs.length - 2], b = tabs[tabs.length - 1], x0 = Math.round(a[0] + a[2] / 2), y = Math.round(a[1] + a[3] / 2), wc = win.webContents;
+    wc.sendInputEvent({ type: 'mouseMove', x: x0, y }); wc.sendInputEvent({ type: 'mouseDown', x: x0, y, button: 'left', clickCount: 1 });
+    for (let k = 1; k <= 8; k++) { wc.sendInputEvent({ type: 'mouseMove', x: Math.round(x0 + (b[2] * 0.9) * k / 8), y, button: 'left', modifiers: ['leftButtonDown'] }); await sleep(30); }
+    await sleep(300);
+    const mid = await J('var ts=document.querySelectorAll("#bw-tabs .bw-tab");var a=ts[ts.length-2],b=ts[ts.length-1];return [a.classList.contains("lift"),a.style.transform,b.style.transform]');
+    ok(mid[0] && /translateX\(\d/.test(mid[1]) && /translateX\(-/.test(mid[2]), 'while dragging, the tab follows the pointer and the next tab slides aside (' + mid.join(' ') + ')');
+    wc.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' }); wc.sendInputEvent({ type: 'keyUp', keyCode: 'Escape' }); await sleep(100);
+    wc.sendInputEvent({ type: 'mouseUp', x: Math.round(x0 + b[2] * 0.9), y, button: 'left', clickCount: 1 }); await sleep(600);
+    ok((await tabsOrder()).join('|') === order0 && await J('return !document.querySelector("#bw-tabs .lift")'), 'Escape cancels a drag and nothing moves'); }
+  // drag a grouped tab out past the end: it leaves the group
+  { const inG = await J('var tg=JSON.parse(localStorage.getItem("regis-tg"));return Object.keys(tg.m).length');
+    const t = await rectOf('t.dataset.g&&/Page b/.test(t.textContent)'), last = await J('var ts=document.querySelectorAll("#bw-tabs .bw-tab,#bw-tabs .bw-gh"),r=ts[ts.length-1].getBoundingClientRect();return r.right');
+    if (t) await drag(t, last + 40, 12);
+    ok(t && await until(() => J('var tg=JSON.parse(localStorage.getItem("regis-tg"));return Object.keys(tg.m).length===' + (inG - 1))), 'dragging a tab out of its group takes it out of the group'); }
   // duplicate from the menu
   const n0 = await J('return document.querySelectorAll("#bw-tabs .bw-tab").length');
   await J('var t=[].find.call(document.querySelectorAll("#bw-tabs .bw-tab"),function(x){return /Words/.test(x.textContent)}),r=t.getBoundingClientRect();t.dispatchEvent(new MouseEvent("contextmenu",{bubbles:true,cancelable:true,clientX:r.left+20,clientY:r.top+10}))'); await sleep(250); await click('#bw-bmpop [data-act="bwt-dup"]');
