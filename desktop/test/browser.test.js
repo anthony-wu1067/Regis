@@ -53,7 +53,7 @@ app.whenReady().then(async () => {
   host.activate(a); ok(host.active === a && host.attached === host.tabs[0].view, 'switching tabs swaps the view');
   const shot = await host.show(false); ok(host.attached === null && host.tabs.every((t) => !t.view || t.vis === false), 'hiding makes the page invisible (so Regis dialogs can show)'); ok(/^data:image\/jpeg;base64,/.test(shot.snap || ''), 'hiding hands Regis a snapshot of the page to show meanwhile (no blank flash)');
   host.show(true);
-  ok(await until(() => Array.isArray(host._persisted), 4000) && Array.isArray(host._persisted) && host._persisted.length >= 1 && host._persisted.every((u) => /^https?:/.test(u)), 'open tabs are remembered');
+  ok(await until(() => Array.isArray(host._persisted), 4000) && Array.isArray(host._persisted) && host._persisted.length >= 1 && host._persisted.every((x) => /^https?:/.test(x.u) && typeof x.t === 'string'), 'open tabs are remembered (address and title)');
   // password manager: detect a login form, fill it, and notice a submitted login
   host.go(a, base + '/login'); ok(await until(() => host.snapshot().tabs[0].title === 'Login'), 'login page loads');
   ok(await until(() => host.snapshot().tabs[0].login === true, 5000), 'a visible password field is noticed (hidden ones are ignored)');
@@ -96,7 +96,7 @@ app.whenReady().then(async () => {
     ok(!/Electron|regis/i.test(sent[sent.length - 1]['User-Agent'] || ''), 'requests to Google carry no Electron or app name');
   }
   // 1.8.2 engine: tab order, duplicate, reopen, mute, find, history, sleeping tabs, downloads, Easy Files, shortcuts
-  ok(keyAction({ type: 'keyDown', key: 't', control: true, shift: true }) === 'reopen' && keyAction({ type: 'keyDown', key: 'f', control: true }) === 'find' && keyAction({ type: 'keyDown', key: '2', control: true }) === 'tab2' && keyAction({ type: 'keyDown', key: 'm', alt: true }) === 'view-m' && keyAction({ type: 'keyDown', key: 'q', alt: true }) === null, 'new shortcuts: Ctrl+Shift+T, Ctrl+F, Ctrl+1-9, Alt+page letter (other Alt keys stay with the site)');
+  ok(keyAction({ type: 'keyDown', key: 't', control: true, shift: true }) === 'reopen' && keyAction({ type: 'keyDown', key: 'f', control: true }) === 'find' && keyAction({ type: 'keyDown', key: '2', control: true }) === 'tab2' && keyAction({ type: 'keyDown', key: '3', alt: true }) === 'view-3' && keyAction({ type: 'keyDown', key: 'q', alt: true }) === null, 'new shortcuts: Ctrl+Shift+T, Ctrl+F, Ctrl+1-9, Alt+page letter (other Alt keys stay with the site)');
   const t1 = host.tabs[0].id; host.go(t1, base + '/a'); await until(() => host._tab(t1).title === 'Page A');
   const t2 = host.open(base + '/b'), t3 = host.open(base + '/words'); await until(() => host._tab(t3).title === 'Words');
   host.move(t3, 0); ok(host.tabs[0].id === t3, 'a tab can be moved to another position');

@@ -12,8 +12,9 @@ const { BrowserHost, keyAction, PARTITION } = require('./lib/browser');
 const { Downloads, readFile } = require('./lib/downloads');
 const { OfficeDock } = require('./lib/office');
 const { Extensions } = require('./lib/extensions');
+const { CommHost } = require('./lib/comm');
 
-let runningVersion = null, browserHost = null, linkInApp = false, officeDock = null, officeBye = false;
+let commHost = null, runningVersion = null, browserHost = null, linkInApp = false, officeDock = null, officeBye = false;
 let win = null, tray = null, quitting = false, capWin = null, mini = null, updater = null;
 const BUNDLED_PAGE = path.join(__dirname, 'renderer', 'index.html');
 const MINI_KEY = 'CommandOrControl+Shift+M';
@@ -196,6 +197,7 @@ app.whenReady().then(async () => {
   const dl = new Downloads({ dir: app.getPath('downloads'), load: () => { try { return JSON.parse(store.getMeta('downloads', '[]') || '[]'); } catch (_) { return []; } }, save: (l) => store.setMeta('downloads', JSON.stringify(l)), onChange: (l) => send('browser:downloads', l), onDone: (d) => send('browser:dldone', d) });
   dl.attach(session.fromPartition(PARTITION));
   const bw = browserHost;
+  bw.onActive = () => { try { if (win && !win.isDestroyed() && win.isVisible() && !win.isMinimized()) win.webContents.send('win:vis', true); } catch (_) {} };
   /* 1.8.5 Chrome extensions, loaded into the browser's session only (never into Regis's own pages) */
   const bses = session.fromPartition(PARTITION);
   const exts = new Extensions({ root: path.join(app.getPath('userData'), 'extensions'), getSession: () => bses, chromeVersion: process.versions.chrome, onChange: (l) => send('ext:list', l) });
@@ -229,6 +231,24 @@ app.whenReady().then(async () => {
     await fit(); if (!p.isDestroyed()) { p.show(); p.focus(); } setTimeout(fit, 400); setTimeout(fit, 1200); return true;
   };
   const extReady = exts.loadAll().catch(() => {});
+  /* 1.8.9 Comm: chat apps in their own signed-in views; one can float over every page */
+  commHost = new CommHost({ getWin: () => win, chromeVersion: process.versions.chrome,
+    load: () => { try { return JSON.parse(store.getMeta('comm', '{}') || '{}'); } catch (_) { return {}; } }, save: (o) => store.setMeta('comm', JSON.stringify(o)), onState: (st) => send('comm:state', st) });
+  commHost.onLink = (u) => { bw.open(u); send('ext:showBrowser'); };
+  commHost.onOpen = (id) => { send('comm:open', id); try { if (win && !win.isDestroyed()) win.focus(); } catch (_) {} };
+  { const oe = bw._emit.bind(bw); bw._emit = function () { oe(); try { commHost._layout(); } catch (_) {} }; }
+  ipcMain.handle('comm:state', wrap(() => commHost.state()));
+  ipcMain.handle('comm:add', wrap((a) => commHost.add(a || {})));
+  ipcMain.handle('comm:remove', wrap((id, wipe) => commHost.remove(String(id), !!wipe)));
+  ipcMain.handle('comm:mute', wrap((id, on) => commHost.setMute(String(id), !!on)));
+  ipcMain.handle('comm:bg', wrap((id, on) => commHost.setBg(String(id), !!on)));
+  ipcMain.handle('comm:reload', wrap((id) => commHost.reload(String(id))));
+  ipcMain.handle('comm:show', wrap((v, id) => commHost.show(!!v, id ? String(id) : null)));
+  ipcMain.handle('comm:bounds', wrap((b) => commHost.setBounds(b || null)));
+  ipcMain.handle('comm:float', wrap((id, min) => commHost.setFloat(id === null ? null : id ? String(id) : undefined, min === undefined || min === null ? undefined : !!min)));
+  ipcMain.handle('comm:overlay', wrap((on) => commHost.overlay(!!on)));
+  ipcMain.handle('comm:phoneLink', wrap(() => shell.openExternal('ms-phone:').then(() => true)));
+  setTimeout(() => { try { commHost.startBackground(); } catch (_) {} }, 1500);
   ipcMain.handle('ext:list', wrap(async () => { await extReady; return exts.list(); }));
   ipcMain.handle('ext:install', wrap((link) => exts.installStore(String(link || ''))));
   ipcMain.handle('ext:installPick', wrap(async (folder) => { const r = await require('electron').dialog.showOpenDialog(win, folder ? { title: 'Choose an unpacked extension folder', properties: ['openDirectory'] } : { title: 'Choose an extension file', properties: ['openFile'], filters: [{ name: 'Chrome extension', extensions: ['crx', 'zip'] }] }); if (r.canceled || !r.filePaths.length) return null; return folder ? exts.installFolder(r.filePaths[0]) : exts.installFile(r.filePaths[0]); }));

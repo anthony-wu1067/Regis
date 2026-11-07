@@ -28,7 +28,7 @@ app.whenReady().then(async () => {
   const go = async (u) => { await J('var a=document.getElementById("bw-addr");a.value=' + JSON.stringify(u) + ';document.getElementById("bw-form").requestSubmit()'); await until(() => { const w = tabWc(new RegExp(u.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$')); return w && !w.isLoading(); }); await sleep(500); };
   await sleep(3500);
   // navigator
-  ok(await J('return document.querySelectorAll("#vsw [data-act=view]").length===5&&!!document.querySelector(\'#vsw [data-v="office"]\')'), 'the page switcher lists all five pages, Office included');
+  ok(await J('return document.querySelectorAll("#vsw [data-act=view]").length>=5&&!!document.querySelector(\'#vsw [data-v="office"]\')'), 'the page switcher lists the pages, Office included');
   await click('#vsw [data-v="browser"]'); await sleep(1500);
   await go(base + '/a'); await J('document.querySelector(\'[data-act="bw-new"]\').click()'); await sleep(400); await go(base + '/b'); await J('document.querySelector(\'[data-act="bw-new"]\').click()'); await sleep(400); await go(base + '/words');
   ok((await tabsOrder()).join('|') === 'Page a|Page b|Words', 'three tabs open (' + (await tabsOrder()).join(', ') + ')');
@@ -104,11 +104,11 @@ app.whenReady().then(async () => {
   const sid = await J('return BW_TEST_ID=null,regisApp.browser.state().then(function(s){var t=s.tabs.find(function(x){return /\\/b$/.test(x.url)});return t&&t.id})');
   await J('return regisApp.browser.sleep(' + sid + ')'); await sleep(400);
   ok(await until(() => J('return !!document.querySelector("#bw-tabs .bw-tab.zz")')), 'a tab can be put to sleep (shown dimmed)');
-  // Alt + page letter, from inside a web page
-  const w = tabWc(/\/up$/); w.focus(); w.sendInputEvent({ type: 'keyDown', keyCode: 'M', modifiers: ['alt'] }); w.sendInputEvent({ type: 'keyUp', keyCode: 'M', modifiers: ['alt'] });
-  ok(await until(() => J('return document.documentElement.getAttribute("data-view")==="music"')), 'Alt+M from inside a web page goes to Music');
-  await J('document.dispatchEvent(new KeyboardEvent("keydown",{key:"o",altKey:true,bubbles:true}))');
-  ok(await until(() => J('return document.documentElement.getAttribute("data-view")==="office"')), 'Alt+O goes to the Office page');
+  // 1.8.9: Alt + the page's number in Nav (Home 1, Workspace 2, Music 3, Browser 4, Office 5), from inside a web page too
+  const w = tabWc(/\/up$/); w.focus(); w.sendInputEvent({ type: 'keyDown', keyCode: '3', modifiers: ['alt'] }); w.sendInputEvent({ type: 'keyUp', keyCode: '3', modifiers: ['alt'] });
+  ok(await until(() => J('return document.documentElement.getAttribute("data-view")==="music"')), 'Alt+3 from inside a web page goes to Music');
+  await J('document.dispatchEvent(new KeyboardEvent("keydown",{key:"5",code:"Digit5",altKey:true,bubbles:true}))');
+  ok(await until(() => J('return document.documentElement.getAttribute("data-view")==="office"')), 'Alt+5 goes to the Office page');
   // Office page
   ok(await until(() => J('var t=document.getElementById("of-list").textContent;return /Budget 2026\\.xlsx/.test(t)&&/Essay\\.docx/.test(t)&&/Pitch\\.pptx/.test(t)')), 'Office lists Word, Excel and PowerPoint files from Documents and Desktop');
   await click('#of-f [data-k="x"]'); await sleep(200);

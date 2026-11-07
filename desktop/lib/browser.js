@@ -52,7 +52,7 @@ function keyAction(i) {
     if (k === 'tab') return i.shift ? 'prevtab' : 'nexttab'; if (k === '=' || k === '+') return 'zoomin'; if (k === '-') return 'zoomout'; if (k === '0') return 'zoom0';
     if (k === 'd') return 'bookmark'; if (k === '[') return 'back'; if (k === ']') return 'forward';
   }
-  if (i.alt && !mod) { if (k === 'arrowleft') return 'back'; if (k === 'arrowright') return 'forward'; if (/^[a-z]$/.test(k) && !i.shift && keyAction.views.indexOf(k) >= 0) return 'view-' + k; }
+  if (i.alt && !mod) { if (k === 'arrowleft') return 'back'; if (k === 'arrowright') return 'forward'; if (/^[1-9]$/.test(k) && !i.shift) return 'view-' + k; }   /* 1.8.9: Alt + 1..9 = the pages in Nav order */
   if (k === 'f3') return i.shift ? 'findprev' : 'findnext';
   if (k === 'f5') return 'reload'; if (k === 'f11') return 'fullscreen'; if (k === 'escape') return 'stop';
   return null;
@@ -83,6 +83,7 @@ class BrowserHost {
   }
   _win() { const w = this.getWin && this.getWin(); return w && !w.isDestroyed() ? w : null; }
   _tab(id) { return this.tabs.find((t) => t.id === id); }
+  _active() { const n = Date.now(); if (n - (this.actT || 0) < 3000) return; this.actT = n; if (this.onActive) try { this.onActive(); } catch (_) {} }
   /* chrome.tabs for extensions: Regis's tabs in Chrome's shape (ids are the tabs' webContents ids) */
   extTabs(q) {
     q = q || {}; const glob = (p) => { p = String(p); if (p === '<all_urls>') return /^(https?|file|ftp):/; return new RegExp('^' + p.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*') + '$'); };
@@ -101,18 +102,23 @@ class BrowserHost {
   _emitSoon() { if (this.emitT) return; this.emitT = setTimeout(() => this._emit(), 120); }
   _persist(now) {
     clearTimeout(this.pT);
-    const run = () => { this.pT = null; try { const urls = this.tabs.filter((t) => t.url).map((t) => t.url).slice(0, 12), k = urls.join('\n'); if (k !== this.lastPersist) { this.lastPersist = k; this.onPersist(urls); } } catch (_) {} };
+    const run = () => { this.pT = null; try { const urls = this.tabs.filter((t) => t.url).map((t) => ({ u: t.url, t: String(t.title || '').slice(0, 120) })).slice(0, 12), k = urls.map((x) => x.u + '\t' + x.t).join('\n'); if (k !== this.lastPersist) { this.lastPersist = k; this.onPersist(urls); } } catch (_) {} };
     if (now) run(); else this.pT = setTimeout(run, 1500);
   }
   flush() { this._persist(true); }
-  open(input) {
+  /* bg: open behind the current tab, right after it (like Chrome's "Open link in new tab" and middle-click) */
+  open(input, bg) {
     this.init();
     const t = { id: ++this.n, title: 'New tab', url: '', view: null, loading: false, canBack: false, canFwd: false, born: Date.now() };
-    this.tabs.push(t); this.active = t.id;
+    const cur = this.tabs.findIndex((x) => x.id === this.active);
+    if (bg && cur >= 0) { let at = cur + 1; while (at < this.tabs.length && this.tabs[at].opener === this.active) at++; t.opener = this.active; this.tabs.splice(at, 0, t); } else { this.tabs.push(t); this.active = t.id; }
     const u = resolveInput(input); if (u) this._load(t, u);
     this._attach(); this._emit(); return t.id;
   }
-  restore(urls) { if (this.tabs.length) return; (urls || []).filter(isWeb).slice(0, 12).forEach((u, i) => { const id = this.open(u); if (i === 0) this.first = id; }); if (this.first) this.activate(this.first); }
+  /* 1.8.9: only the first tab loads at start-up; the others wait asleep (with their saved titles) until you open them, like Chrome */
+  restore(items) { if (this.tabs.length) return; const list = (items || []).map((x) => (typeof x === 'string' ? { u: x, t: '' } : x || {})).filter((x) => isWeb(x.u)).slice(0, 12); if (!list.length) return; this.init();
+    list.forEach((x, i) => { let host = ''; try { host = new URL(x.u).hostname.replace(/^www\./, ''); } catch (_) {} this.tabs.push({ id: ++this.n, title: x.t || host || 'Tab', url: x.u, view: null, loading: false, canBack: false, canFwd: false, born: Date.now(), asleep: i > 0 }); });
+    const first = this.tabs[0], tt = first.title; this.active = first.id; this.first = first.id; this._load(first, first.url); first.title = tt; this._attach(); this._emit(); }
   _ensureView(t) {
     if (t.view) return t.view;
     const v = new WebContentsView({ webPreferences: { partition: PARTITION, preload: path.join(__dirname, 'bw-preload.js'), sandbox: true, contextIsolation: true, nodeIntegration: false, spellcheck: true, backgroundThrottling: true } });
@@ -133,14 +139,16 @@ class BrowserHost {
     wc.on('will-navigate', (e, url) => { if (!isWeb(url)) e.preventDefault(); });
     wc.on('did-fail-load', (_e, code, desc, url, main) => { if (!main || code === -3 || !isWeb(url)) return; t.err = true; t.url = url; t.title = 'Can\u2019t reach this page'; wc.loadURL(errPage(url, desc)).catch(() => {}); });
     wc.on('did-start-navigation', (_e, url, inPlace, main) => { if (main && !inPlace && isWeb(url)) { t.err = false; if (t.login) { t.login = false; this._emitSoon(); } } });
-    wc.on('before-input-event', (e, input) => { const a = keyAction(input); if (a && this.key(a, t.id)) e.preventDefault(); });
+    wc.on('before-input-event', (e, input) => { this._active(); const a = keyAction(input); if (a && this.key(a, t.id)) e.preventDefault(); });
+    /* 1.8.9: using a website counts as using Regis (so it doesn't go idle and pause its animations) */
+    wc.on('input-event', () => this._active());
     wc.on('context-menu', (_e, p) => this._ctx(wc, t, p));
     /* a video (or any page) going full screen: the page fills the whole screen, not just the browser area,
        and leaving it puts Regis back the way it was (still full screen if it was before) */
     wc.on('enter-html-full-screen', () => { const w = this._win(); if (!w) return; this.vfs = { tab: t.id, was: w.isFullScreen() }; if (!this.vfs.was) w.setFullScreen(true); this._vfsFit(); setTimeout(() => this._vfsFit(), 350); });
     wc.on('leave-html-full-screen', () => { const w = this._win(), v = this.vfs; this.vfs = null; if (t.view) { try { t.view.setBounds(this.bounds); } catch (_) {} } if (w && !w.isDestroyed() && v && !v.was && w.isFullScreen()) w.setFullScreen(false); });
     wc.on('render-process-gone', () => { t.loading = false; t.title = 'This tab crashed. Reload it.'; this._emitSoon(); });
-    wc.setWindowOpenHandler(({ url }) => { if (isWeb(url)) setImmediate(() => this.open(url)); return { action: 'deny' }; });
+    wc.setWindowOpenHandler(({ url, disposition }) => { if (isWeb(url)) setImmediate(() => this.open(url, disposition === 'background-tab')); return { action: 'deny' }; });
     return v;
   }
   _load(t, url) { if (!isWeb(url)) return false; const v = this._ensureView(t); t.url = url; t.title = url.replace(/^https?:\/\//i, '').slice(0, 60); v.webContents.loadURL(url).catch(() => {}); return true; }
@@ -224,7 +232,7 @@ class BrowserHost {
   }
   _ctx(wc, t, p) {
     const m = [];
-    if (p.linkURL && isWeb(p.linkURL)) m.push({ label: 'Open link in new tab', click: () => this.open(p.linkURL) }, { label: 'Copy link address', click: () => clipboard.writeText(p.linkURL) }, { type: 'separator' });
+    if (p.linkURL && isWeb(p.linkURL)) m.push({ label: 'Open link in new tab', click: () => this.open(p.linkURL, true) }, { label: 'Copy link address', click: () => clipboard.writeText(p.linkURL) }, { type: 'separator' });
     if (p.misspelledWord) { (p.dictionarySuggestions || []).slice(0, 5).forEach((w) => m.push({ label: w, click: () => wc.replaceMisspelling(w) })); m.push({ label: 'Add to dictionary', click: () => { try { wc.session.addWordToSpellCheckerDictionary(p.misspelledWord); } catch (_) {} } }, { type: 'separator' }); }
     if (p.selectionText) m.push({ label: 'Copy', role: 'copy' }, { label: 'Search Google for \u201c' + String(p.selectionText).trim().slice(0, 24) + (String(p.selectionText).trim().length > 24 ? '\u2026' : '') + '\u201d', click: () => this.open(String(p.selectionText).trim().slice(0, 300)) });
     if (p.isEditable) m.push({ label: 'Cut', role: 'cut' }, { label: 'Paste', role: 'paste' }, { label: 'Select all', role: 'selectAll' });

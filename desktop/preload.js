@@ -16,6 +16,10 @@ contextBridge.exposeInMainWorld('regisBridge', {
   onVis: (cb) => { ipcRenderer.on('win:vis', (_e, v) => { try { cb(!!v); } catch (_) {} }); },
   saveUpdateUrl: (u) => call('app:saveUpdateUrl', u), updateCheck: () => call('app:updateCheck'), updateApply: () => call('app:updateApply'),
   onUpdate: (cb) => { ipcRenderer.on('update:ready', (_e, v) => { try { cb(String(v)); } catch (_) {} }); },
+  /* 1.8.9 Comm page: chat apps */
+  comm: { state: () => call('comm:state'), add: (a) => call('comm:add', a), remove: (id, wipe) => call('comm:remove', id, !!wipe), mute: (id, on) => call('comm:mute', id, !!on), bg: (id, on) => call('comm:bg', id, !!on),
+    reload: (id) => call('comm:reload', id), show: (v, id) => call('comm:show', !!v, id || null), bounds: (b) => call('comm:bounds', b), float: (id, min) => call('comm:float', id, min), overlay: (on) => call('comm:overlay', !!on),
+    phoneLink: () => call('comm:phoneLink'), onOpen: (cb) => { ipcRenderer.on('comm:open', (_e, id) => { try { cb(String(id || '')); } catch (_) {} }); }, onState: (cb) => { ipcRenderer.on('comm:state', (_e, s) => { try { cb(s); } catch (_) {} }); } },
   /* 1.8.5 Chrome extensions in the Regis Browser */
   ext: { list: () => call('ext:list'), install: (link) => call('ext:install', link), installPick: (folder) => call('ext:installPick', !!folder), on: (id, v) => call('ext:on', id, !!v), remove: (id) => call('ext:remove', id),
     popup: (id, at) => call('ext:popup', id, at), options: (id) => call('ext:options', id), onList: (cb) => { ipcRenderer.on('ext:list', (_e, l) => { try { cb(l); } catch (_) {} }); }, onShowBrowser: (cb) => { ipcRenderer.on('ext:showBrowser', () => { try { cb(); } catch (_) {} }); } },

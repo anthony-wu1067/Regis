@@ -1614,7 +1614,9 @@ html[data-view="browser"] .top .tools{display:none!important}
 /* browser: header must not swallow clicks meant for the tab strip */
 html:not(.mob)[data-view="browser"] .top{pointer-events:none}
 html:not(.mob)[data-view="browser"] .top .brand,html:not(.mob)[data-view="browser"] .top .right,html:not(.mob)[data-view="browser"] .top .vsw{pointer-events:auto}
-html[data-view="browser"] #toasts{top:56px;bottom:auto;left:76px;right:auto;z-index:95}
+html[data-view="browser"] #toasts{top:calc(var(--bwtop,72px) + 50px);bottom:auto;left:auto;right:18px;z-index:95;max-width:340px;align-items:flex-end;gap:4px}
+html[data-view="browser"] #toasts .toast{padding:5px 12px;font-size:12px;border-radius:999px;border-left-width:1px;line-height:1.35;box-shadow:0 4px 14px -6px rgba(0,0,0,.6)}
+html[data-view="browser"] #toasts .toast::before,html[data-view="browser"] #toasts .toast::after{display:none}
 
 /* v1.7 phone: pinned screen, safe areas, touch comfort */
 :root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
@@ -2546,9 +2548,7 @@ html .bw-search input,html[data-look="refined"] .bw-search input{padding:0 24px!
 #look .lk-ct[aria-selected=true]{background:var(--accent-soft);color:var(--fg);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 45%,transparent)}
 #look.lk-find .lk-cats{display:none}
 #look .lk-cat>details.lk-g{margin:0 0 14px}
-#look .lk-cat>details.lk-g>summary{pointer-events:none;list-style:none;cursor:default}
-#look .lk-cat>details.lk-g>summary::-webkit-details-marker{display:none}
-#look .lk-cat>details.lk-g>summary::after{display:none!important}
+#look .lk-cat>details.lk-g>summary{cursor:pointer}
 #look .lk-tv{padding:0;margin-top:8px}
 /* 1.8.6 selecting subtasks to copy: only their words are picked up, never the tick boxes, Edit or ✕ */
 .subs .chk,.subs .btn,.subs .sub-hd{-webkit-user-select:none;user-select:none}
@@ -2580,6 +2580,54 @@ html.mob #vscan{top:0}
 /* 1.8.8 Blackwall pin wall canvas (WebGL); the code text stays on #fx above it */
 #bwgl{display:none;position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 :root[data-bg="blackwall"] #bwgl{display:block}
+html[data-view="comm"] .top .tools{display:none!important}
+html:not(.mob)[data-view="comm"] .wrap{padding-top:0}
+html:not(.mob)[data-view="comm"] .top{position:fixed;inset:0 0 auto 0;height:44px;z-index:8;display:flex;align-items:center;gap:10px;padding:0 12px;min-height:0;background:color-mix(in srgb,var(--bg) 88%,transparent);border:0}
+html:not(.mob)[data-view="comm"] .top .hello{flex:none;display:flex;align-items:center}
+html:not(.mob)[data-view="comm"] .top .hello::before,html:not(.mob)[data-view="comm"] .top .brand::after{display:none}
+html:not(.mob)[data-view="comm"] .top .brand{gap:8px;margin:0}
+html:not(.mob)[data-view="comm"] .top .brand .mark{width:26px;height:26px}
+html:not(.mob)[data-view="comm"] .top .right{margin-left:auto;flex:none;width:auto}
+html.mob[data-view="comm"] .top .hello{display:none}
+html.mob[data-view="comm"] .top{padding-top:max(8px,var(--sat))}
+  html.mob[data-view="comm"] .top,html.mob[data-view="browser"] .top{min-height:0;height:max(8px,env(safe-area-inset-top,0px));padding:0;gap:0;overflow:hidden}
+html.mob[data-view="comm"] .top>*,html.mob[data-view="browser"] .top>*{display:none!important}
+html[data-view="comm"] #app>:not(.top):not(#comm):not(#banner):not(#upd-bar):not(#shell-bar){display:none!important}
+.cm{display:none}
+html[data-view="comm"] #comm{display:flex;position:fixed;left:0;right:0;bottom:0;top:44px;z-index:6;background:var(--bg)}
+html.mob[data-view="comm"] #comm{top:max(8px,env(safe-area-inset-top,0px));bottom:calc(66px + env(safe-area-inset-bottom,0px))}
+.cm-side .cm-t{width:28px;height:28px;border-radius:8px;font-size:13px}
+.cm-side .bw-ic[aria-current=page]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--inset))}
+.cm-side .bw-ic em{background:var(--bad);color:#fff}
+.cm-side .cm-mu{position:absolute;left:3px;bottom:3px;width:10px;height:10px;border-radius:50%;background:var(--fg3);box-shadow:0 0 0 2px var(--bg);text-decoration:none}
+.cm-side .cm-add{font-size:20px;color:var(--fg2)}
+.cm-t{display:grid;place-items:center;flex:none;width:22px;height:22px;border-radius:6px;background:var(--c,#6b4fd8);color:#fff;font:700 11px var(--f-body);font-style:normal;overflow:hidden}
+.cm-t img{width:100%;height:100%;object-fit:cover}
+.cm-t.sm{width:22px;height:22px}.cm-t.lg{width:52px;height:52px;border-radius:14px;font-size:24px}
+.cm-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.cm-bar{flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;border-bottom:1px solid var(--line)}
+.cm-bar .grow{flex:1}.cm-ttl{font:600 13.5px var(--f-body);color:var(--fg)}
+.cm-un{font:600 11px var(--f-mono);font-style:normal;color:var(--bad)}
+.cm-stage{position:relative;flex:1;min-height:0;overflow:auto;background:var(--bg)}
+.cm-ph{min-height:100%}
+.cm-hold{min-height:260px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--fg2)}
+.cm-hold small{color:var(--fg3)}
+.cm-empty{max-width:820px;margin:0 auto;padding:30px 24px 40px;display:flex;flex-direction:column;gap:18px}
+.cm-empty h3{margin:0;font:600 22px var(--f-display);color:var(--fg)}
+.cm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.cm-pick{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px;border-radius:12px;border:1px solid var(--line2);background:var(--inset);color:var(--fg);cursor:pointer;text-align:left}
+.cm-pick .cm-t{width:30px;height:30px;border-radius:8px;font-size:14px}
+.cm-pick b{font:600 13px var(--f-body)}.cm-pick small{color:var(--fg3);font-size:11.5px}
+.cm-pick[disabled]{opacity:.5;cursor:default}
+.cm-pick:not([disabled]):hover{border-color:var(--accent)}
+.cm-custom{display:flex;gap:8px;flex-wrap:wrap}.cm-custom input{flex:1;min-width:140px}
+.cm-imsg{padding:12px 14px;border-radius:12px;border:1px dashed var(--line2)}
+.cm-imsg b{font:600 13px var(--f-body);color:var(--fg)}
+#nav-btn.unread::after{content:"";position:absolute;right:6px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--bg)}
+#nav-btn{position:fixed}
+/* 1.8.9 pop-up windows (emails, settings dialogs): a solid dim instead of blurring the whole moving screen every frame */
+html .mdl{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:rgba(4,2,10,.78)}
+html[data-look] .mdl-card,html[data-glass="liquid"][data-look] .mdl-card{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:color-mix(in srgb,var(--bg) 94%,var(--fg) 6%)}
 /* 1.8.5 themed backgrounds and presets */
 :root[data-bg="cyber"] .blob,:root[data-bg="blackwall"] .blob,:root[data-bg="holo"] .blob{display:none}
 :root[data-bg="cyber"] #fx,:root[data-bg="blackwall"] #fx,:root[data-bg="holo"] #fx{opacity:1}
@@ -2893,6 +2941,10 @@ html[data-look] .chip.acc{color:var(--accent);background:var(--accent-soft);bord
       <div class="ofd-bar" id="ofd-bar" role="tablist" aria-label="Open documents"></div>
       <div class="ofd-stage" id="ofd-stage"><div class="ofd-ph" id="ofd-ph"></div></div>
     </div>
+  </section>
+  <section class="cm" id="comm" aria-label="Comm" hidden>
+    <aside class="bw-side cm-side" id="cm-side" aria-label="Chat apps"></aside>
+    <div class="cm-main"><div class="cm-bar" id="cm-bar"></div><div class="cm-stage" id="cm-stage"><div class="cm-ph" id="cm-ph"></div></div></div>
   </section>
 <section class="mview" id="music" aria-label="Music">
     <header class="mv-h"><h2>Music</h2><p id="sp-sub">Spotify inside Regis.</p></header>
@@ -3364,7 +3416,9 @@ function cfg(){var s=S.settings||{};
   return d}
 
 function toast(msg,kind,label){var el=document.createElement("div");el.className="toast "+(kind||"");el.textContent=msg;el.setAttribute("data-l",label||(kind==="bad"?"Warning":kind==="good"?"Notice":"Report"));$("#toasts").appendChild(el);
-  setTimeout(function(){el.remove()},kind==="bad"?9000:5000)}
+  /* 1.8.9: in the Browser they are small chips that clear sooner; at most three at a time */
+  var tb=$("#toasts");while(tb.children.length>3)tb.firstChild.remove();var br=S.view==="browser";
+  setTimeout(function(){el.remove()},br?(kind==="bad"?5000:2600):(kind==="bad"?9000:5000))}
 function setBanner(msg,kind){var b=$("#banner");if(!msg){b.hidden=true;return}b.hidden=false;b.className="banner"+(kind?" "+kind:"");b.textContent=msg}
 
 /* ---------- database layer ---------- */
@@ -3635,8 +3689,9 @@ function renderDock(){var d=$("#dock-dots");if(!d)return;
 /* scroll: progress bar, parallax blobs, quick bar, reveal-on-scroll */
 var scrollTick=false;
 function onScroll(){if(scrollTick)return;scrollTick=true;requestAnimationFrame(function(){scrollTick=false;
-  var y=window.scrollY||0,max=Math.max(1,document.documentElement.scrollHeight-window.innerHeight),st=document.documentElement.style;
-  st.setProperty("--sp",Math.min(1,y/max).toFixed(3));
+  /* 1.8.9: the scroll position goes only on the two things that use it; on <html> it re-styled the whole page every frame (~10 ms each) */
+  var y=window.scrollY||0,max=Math.max(1,document.documentElement.scrollHeight-window.innerHeight),v=Math.min(1,y/max).toFixed(3);
+  if(v!==onScroll.v){onScroll.v=v;var sb=onScroll.sb||(onScroll.sb=document.querySelector(".sbar")),bg=onScroll.bg||(onScroll.bg=document.querySelector(".bg"));if(sb)sb.style.setProperty("--sp",v);if(bg)bg.style.setProperty("--sp",v)}
   var d=$("#dock");if(d)d.classList.toggle("on",y>240)})}
 function initScroll(){window.addEventListener("scroll",onScroll,{passive:true});onScroll();
 }
@@ -3768,10 +3823,10 @@ function fxCore(G,inline){
     "void main(){vec2 p=a.xy;float z=F(p),e=uSp,zx=F(p+vec2(e,0.0))-z,zy=F(p+vec2(0.0,e))-z;vec3 n=normalize(vec3(-zx*5.0,-zy*5.0,1.0));"+
       "float lit=clamp(dot(n,normalize(vec3(-0.55,-0.65,0.75))),0.0,1.0);vec2 c=uR*0.5;vec2 q=c+(p-c)*(1.0+z*0.16);"+
       "float band=floor(q.y/(uR.y/30.0));float h=H(band*91.7+uGs);if(h>0.8)q.x+=(h-0.9)*1100.0*uGl;q+=uOff;"+
-      "vec2 cl=q/uR*2.0-1.0;gl_Position=vec4(cl.x,-cl.y,0.0,1.0);gl_PointSize=uSp*(0.42+z*0.55+a.z*0.06);"+
+      "vec2 cl=q/uR*2.0-1.0;gl_Position=vec4(cl.x,-cl.y,0.0,1.0);gl_PointSize=uSp*(0.56+z*0.5+a.z*0.05);"+
       "float hm=0.5+0.5*sin(uHue+p.x*0.0016-p.y*0.0012);vec3 red=vec3(1.0,0.07,0.1),mag=vec3(1.0,0.1,0.42),org=vec3(1.0,0.32,0.06);"+
       "vec3 col=mix(red,mix(mag,org,0.5+0.5*sin(uHue*0.37)),hm*0.42);"+
-      "float bright=0.13+0.07*a.z+z*(0.25+0.9*lit);col=mix(col,vec3(1.0,0.78,0.82),clamp(z*0.5*lit-0.15,0.0,0.75));"+
+      "float bright=0.32+0.05*a.z+0.06*sin(p.x*0.011+p.y*0.007+uT*0.6)+z*(0.2+0.8*lit);col=mix(col,vec3(1.0,0.78,0.82),clamp(z*0.5*lit-0.15,0.0,0.75));"+
       "vec2 bk=floor(q/48.0);float fl=H(bk.x*13.1+bk.y*71.7+uBk);if(fl>0.997)bright*=2.2;else if(uGl>0.0&&fl<0.03)bright*=0.25;"+
       "bright+=0.6*exp(-pow((q.y-uScan)/6.0,2.0));vC=col*bright;}";
   var FS="precision mediump float;varying vec3 vC;void main(){vec2 d=gl_PointCoord-0.5;float r=length(d);float a=smoothstep(0.5,0.12,r);float k=smoothstep(0.2,0.0,r);gl_FragColor=vec4(vC*(a*0.75+k*0.55),1.0);}";
@@ -3784,17 +3839,19 @@ function fxCore(G,inline){
     for(var j=0;j<rows;j++)for(var i=0;i<cols;i++){d[k++]=(i-1+(j%2)*.5)*gSp;d[k++]=(j-1)*gSp;d[k++]=Math.random()}
     gN=cols*rows;g.bindBuffer(g.ARRAY_BUFFER,gBuf);g.bufferData(g.ARRAY_BUFFER,d,g.STATIC_DRAW);var at=g.getAttribLocation(GP,"a");g.enableVertexAttribArray(at);g.vertexAttribPointer(at,3,g.FLOAT,false,0,0)}
   /* a rogue AI: grows, rolls across, morphs its outline, then sinks back */
-  function bwBulge(init){var W=K.W,H=K.H,big=Math.random()<.35;return{x:rnd(-.05,1.05)*W,y:rnd(.05,.95)*H,vx:rnd(-50,50),vy:rnd(-25,25),sx:rnd(big?140:50,big?340:150),sy:rnd(big?120:50,big?300:150),
-    rot:rnd(0,6.28),vr:rnd(-.25,.25),amp:rnd(.7,1.9),wob:rnd(.08,.38),ph:rnd(0,9),vph:rnd(.4,1.6),age:init?rnd(0,6):0,life:rnd(4,9),grow:rnd(.8,2)}}
-  function bwRoll(){var W=K.W,H=K.H,dir=Math.random()<.5?1:-1;return{x:dir>0?-.15*W:1.15*W,y:rnd(.2,.8)*H,vx:dir*rnd(90,200),vy:rnd(-10,10),sx:rnd(60,120),sy:rnd(.6,1.1)*H,rot:rnd(-.25,.25),vr:0,amp:rnd(.6,1.1),wob:rnd(.15,.3),ph:rnd(0,9),vph:1.2,age:0,life:(1.3*W)/Math.max(90,Math.abs(dir*150)),grow:.6,roll:1}}
+  /* 1.8.9 a rogue AI push: waits, swells out (a smallish, irregular shape), holds while it creeps a little, sinks back into the wall */
+  function bwBulge(init){var W=K.W,H=K.H,sz=rnd(34,115);return{x:rnd(.06,.94)*W,y:rnd(.08,.92)*H,vx:rnd(-10,10),vy:rnd(-8,8),sx:sz*rnd(.7,1.35),sy:sz*rnd(.7,1.35),
+    rot:rnd(0,6.28),vr:rnd(-.15,.15),amp:rnd(.8,1.6),wob:rnd(.12,.42),ph:rnd(0,9),vph:rnd(.3,.9),wait:init?rnd(0,7):rnd(1.5,7),age:0,up:rnd(.5,1.2),hold:rnd(.6,2.2),down:rnd(.8,1.6)}}
   function glDraw(dt){if(!glOK())return false;if(gW!==K.W||gH!==K.H)glGrid();var g=GL,W=K.W,H=K.H,s=K.reduce?0:K.s,d=dt*s;
-    if(!BWS){BWS={b:[],t:0,gl:0,gs:0,next:rnd(1,3),scan:-100,ns:rnd(2,5),bk:0,hue:rnd(0,6)};for(var i=0;i<7;i++)BWS.b.push(bwBulge(true));BWS.b.push(bwRoll())}
+    if(!BWS){BWS={b:[],t:0,gl:0,gs:0,next:rnd(1,3),scan:-100,ns:rnd(2,5),bk:0,hue:rnd(0,6)};for(var i=0;i<8;i++)BWS.b.push(bwBulge(true))}
     var S2=BWS;S2.t+=d;S2.hue+=d*.12;
     var B=new Float32Array(32),C=new Float32Array(32);
-    for(i=0;i<8;i++){var o=S2.b[i];o.age+=d;o.x+=o.vx*d;o.y+=o.vy*d;o.rot+=o.vr*d;o.ph+=o.vph*d;
-      if(o.age>o.life)S2.b[i]=o=(i===7||Math.random()<.15)?bwRoll():bwBulge(false);
-      /* swell up, hold with a slow breathing roll, sink back */
-      var env=Math.min(1,o.age/o.grow)*Math.min(1,Math.max(0,(o.life-o.age)/o.grow)),a2=o.amp*env*(0.85+0.15*Math.sin(o.ph*1.7));
+    var live=0;for(i=0;i<8;i++){var q0=S2.b[i];if(q0.wait<=0&&q0.age<q0.up+q0.hold+q0.down)live++}
+    for(i=0;i<8;i++){var o=S2.b[i];
+      /* only a few push at once; the rest wait their turn */
+      if(o.wait>0){o.wait-=d;if(o.wait<=0&&live>=3)o.wait=rnd(.5,2.5);else if(o.wait<=0)live++}
+      else{o.age+=d;o.x+=o.vx*d;o.y+=o.vy*d;o.rot+=o.vr*d;o.ph+=o.vph*d;if(o.age>o.up+o.hold+o.down)S2.b[i]=o=bwBulge(false)}
+      var e1=o.wait>0?0:o.age<o.up?(1-Math.cos(Math.PI*o.age/o.up))/2:o.age<o.up+o.hold?1:Math.max(0,(1+Math.cos(Math.PI*(o.age-o.up-o.hold)/o.down))/2),a2=o.amp*e1*(0.92+0.08*Math.sin(o.ph*1.7));
       B[i*4]=o.x;B[i*4+1]=o.y;B[i*4+2]=o.sx*(1+.12*Math.sin(o.ph));B[i*4+3]=o.sy*(1+.12*Math.cos(o.ph*.8));C[i*4]=o.rot;C[i*4+1]=a2;C[i*4+2]=o.wob;C[i*4+3]=o.ph}
     /* glitches: a burst every few seconds; a scan line now and then; blocks flicker all the time */
     if(d>0){S2.next-=d;if(S2.next<=0){S2.gl=1;S2.gs=Math.random()*1000;S2.next=rnd(1.2,4.5);S2.gt=rnd(.06,.22)}if(S2.gl>0){S2.gt-=d;if(S2.gt<=0)S2.gl=0;else if(Math.random()<.35)S2.gs=Math.random()*1000}
@@ -3817,7 +3874,10 @@ function fxCore(G,inline){
     var now=[K.bg,K.skin,K.W,K.H,K.mode].join("|");if(m.rebuild)built="";
     if(was!==now||m.rebuild){SC=null;if(fc&&(K.W!==fx.width||K.H!==fx.height||m.mode))auSize();if(K.bg==="cosmos")coBuild()}
     if(moving()){if(!busy){busy=true;lt=0;raf(step)}}else{busy=false;if(timer){clearTimeout(timer);timer=0}if(was!==now||m.rebuild||m.col)still()}}
-  function on(m){if(!m)return;if(m.t==="init"){gcv=m.gl||null;fx=m.fx;fc=fx&&fx.getContext("2d");cv=m.cosmos;st=m.stars;cx=cv&&cv.getContext("2d");sx=st&&st.getContext("2d");apply(m.k||{});if(K.bg==="aurora")auSize();still();return}apply(m)}
+  /* 1.8.9: if the graphics process resets, canvases come back empty: rebuild everything and draw again */
+  function healed(){built="";SC=null;GL=null;GP=null;gW=0;if(fc&&fx)auSize();if(moving()){if(!busy){busy=true;lt=0;raf(step)}}else still()}
+  function watch(c,gl){if(!c||!c.addEventListener)return;if(gl){c.addEventListener("webglcontextlost",function(e){e.preventDefault();GL=null;GP=null},false);c.addEventListener("webglcontextrestored",healed,false)}else c.addEventListener("contextrestored",healed,false)}
+  function on(m){if(!m)return;if(m.t==="init"){gcv=m.gl||null;watch(m.fx);watch(m.cosmos);watch(m.stars);watch(gcv,true);fx=m.fx;fc=fx&&fx.getContext("2d");cv=m.cosmos;st=m.stars;cx=cv&&cv.getContext("2d");sx=st&&st.getContext("2d");apply(m.k||{});if(K.bg==="aurora")auSize();still();return}apply(m)}
   if(!inline)G.onmessage=function(e){try{on(e.data)}catch(_){}};
   return on}
 
@@ -4537,11 +4597,13 @@ var NAV={pages:[
   {v:"work",n:"Workspace",key:"w",ic:'<rect x="3.5" y="4" width="17" height="16" rx="4"/><path d="M3.5 9.5h17M8 4V2.5M16 4V2.5"/>'},
   {v:"music",n:"Music",key:"m",ic:'<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>'},
   {v:"browser",n:"Browser",key:"b",ic:'<circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2 5-5 2 2-5z"/>'},
-  {v:"office",n:"Office",key:"o",ic:'<rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.6"/>'}],
+  {v:"office",n:"Office",key:"o",ic:'<rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.6"/>'},
+  {v:"comm",n:"Comm",key:"c",ic:'<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 3.5V16h0A2.5 2.5 0 0 1 4 13.5z"/><path d="M8.5 9h7M8.5 12h4"/>'}],
   hide:lsj("regis-navhide",[])};
 var VIEWS=NAV.pages.map(function(p){return p.v}),VORD=VIEWS.slice();
 function viewSaved(){var v=null;try{v=localStorage.getItem("regis-view")}catch(_){}return VIEWS.indexOf(v)>=0?v:"home"}
-function applyView(v,save){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;S.view=v;document.documentElement.setAttribute("data-view",v);try{navRender()}catch(_){}try{navCur()}catch(_){}if(v==="office")try{ofEnter()}catch(_){}else if(typeof ofdSync==="function")try{ofdSync()}catch(_){}$$("#tabbar [data-v]").forEach(function(b){b.setAttribute("aria-current",String(b.dataset.v===v))});
+function applyView(v,save){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;S.view=v;document.documentElement.setAttribute("data-view",v);try{navRender()}catch(_){}try{navCur()}catch(_){}if(v==="office")try{ofEnter()}catch(_){}else if(typeof ofdSync==="function")try{ofdSync()}catch(_){}
+  if(v==="comm")try{cmEnter()}catch(_){}else if(prev==="comm"&&typeof cmLeave==="function")try{cmLeave()}catch(_){}$$("#tabbar [data-v]").forEach(function(b){b.setAttribute("aria-current",String(b.dataset.v===v))});
   if(v==="music")requestAnimationFrame(mvLayout);
   if(save){try{localStorage.setItem("regis-view",v)}catch(_){}}
   $$('[data-act="view"]').forEach(function(b){var on=b.dataset.v===v;if(b.getAttribute("role")==="tab")b.setAttribute("aria-selected",String(on));else if(on)b.setAttribute("aria-current","true");else b.removeAttribute("aria-current")});
@@ -4573,8 +4635,8 @@ function pxRun(mode,fwd,done){var top=document.documentElement.classList.contain
   PX.raf=requestAnimationFrame(frame)}
 function setView(v,save,cb){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;
   /* 1.8.4: hide the web page first, then switch; otherwise a white website could stay on top of the new page for a frame or two */
-  if(!setView.hid&&prev!==v&&((prev==="browser"&&typeof bwNative==="function"&&bwNative())||(prev==="office"&&OFD.on))){var go=function(){if(go.d)return;go.d=1;setView.hid=1;try{setView(v,save,cb)}finally{setView.hid=0}};
-    var hide=prev==="browser"?(BW.leaving=1,APP.browser.show(false,false)):(OFD.leaving=1,ofdSync());Promise.resolve(hide).then(go,go);setTimeout(go,250);return}
+  if(!setView.hid&&prev!==v&&((prev==="browser"&&typeof bwNative==="function"&&bwNative())||(prev==="office"&&OFD.on)||(prev==="comm"&&typeof cmOk==="function"&&cmOk()))){var go=function(){if(go.d)return;go.d=1;setView.hid=1;try{setView(v,save,cb)}finally{setView.hid=0}};
+    var hide=prev==="browser"?(BW.leaving=1,APP.browser.show(false,false)):prev==="comm"?cmLeave():(OFD.leaving=1,ofdSync());Promise.resolve(hide).then(go,go);setTimeout(go,250);return}
   BW.leaving=0;OFD.leaving=0;
   if(PX.busy&&PX.fin){var f=PX.fin;f()}
   applyView(v,save);if(cb)cb();
@@ -4604,7 +4666,7 @@ function navPage(v){return NAV.pages.find(function(p){return p.v===v})}
 function navShown(){return VORD.filter(function(v){return NAV.hide.indexOf(v)<0||v===S.view})}
 /* desktop: a compact icon switcher; only the page you're on shows its name, the rest show it on hover; hidden pages sit under ⋯ */
 function navRender(){var sw=$("#vsw");if(sw){var shown=navShown(),more=VORD.filter(function(v){return shown.indexOf(v)<0});
-    sw.classList.toggle("icons",shown.length>5);sw.innerHTML=shown.map(function(v){var p=navPage(v),on=S.view===v;return '<button role="tab" data-act="view" data-v="'+v+'" aria-selected="'+on+'" title="'+esc(p.n)+' · Alt+'+p.key.toUpperCase()+'" aria-label="'+esc(p.n)+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+p.ic+'</svg><span>'+esc(p.n)+'</span></button>'}).join("")+
+    sw.classList.toggle("icons",shown.length>5);sw.innerHTML=shown.map(function(v,ix){var p=navPage(v),on=S.view===v;return '<button role="tab" data-act="view" data-v="'+v+'" aria-selected="'+on+'" title="'+esc(p.n)+' · Alt+'+(ix+1)+'" aria-label="'+esc(p.n)+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+p.ic+'</svg><span>'+esc(p.n)+'</span></button>'}).join("")+
       (more.length?'<button class="vsw-more" data-act="nav-more" aria-label="More pages" title="More pages" aria-haspopup="menu"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="18.5" cy="12" r="1.5"/></svg></button>':'')}
   /* phone: up to five tabs; more than that and the last one becomes "More" */
   var tb=$("#tabbar");if(tb){var all=VORD.filter(function(v){return NAV.hide.indexOf(v)<0}),show=all.length>5?all.slice(0,4):all,rest=VORD.filter(function(v){return show.indexOf(v)<0});
@@ -4614,7 +4676,7 @@ function navRender(){var sw=$("#vsw");if(sw){var shown=navShown(),more=VORD.filt
   if(APP&&APP.browser&&APP.browser.viewKeys)APP.browser.viewKeys(NAV.pages.map(function(p){return p.key}).join("")).catch(function(){});
   try{if(typeof bwLayout==="function"&&S.view==="browser")bwLayout()}catch(_){}}
 function navMore(btn){var pages=VORD.filter(function(v){return navShown().indexOf(v)<0||document.documentElement.classList.contains("mob")});
-  openModal("Pages",'<div class="nav-all">'+VORD.map(function(v){var p=navPage(v);return '<button class="nav-pg" data-act="view" data-v="'+v+'" aria-current="'+(S.view===v)+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+p.ic+'</svg><b>'+esc(p.n)+'</b><small>Alt+'+p.key.toUpperCase()+'</small></button>'}).join("")+'</div><div class="fbar"><button class="btn ghost" data-act="pages-order">Arrange pages…</button></div>');try{bwSync()}catch(_){}}
+  openModal("Pages",'<div class="nav-all">'+VORD.map(function(v){var p=navPage(v);return '<button class="nav-pg" data-act="view" data-v="'+v+'" aria-current="'+(S.view===v)+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+p.ic+'</svg><b>'+esc(p.n)+'</b><small>Alt+'+(navOrder().indexOf(v)+1)+'</small></button>'}).join("")+'</div><div class="fbar"><button class="btn ghost" data-act="pages-order">Arrange pages…</button></div>');try{bwSync()}catch(_){}}
 function voApply(){navRender();voRender()}
 function voRender(){var l=$("#vo-list");if(!l)return;l.innerHTML=VORD.map(function(v,i){return '<div class="vo-r"><span>'+VON[v]+'</span><span><button class="btn sm ghost" data-act="vo-vis" data-v="'+v+'" aria-pressed="'+(NAV.hide.indexOf(v)<0)+'" title="Show in the top bar">'+(NAV.hide.indexOf(v)<0?"In bar":"Under ⋯")+'</button><button class="btn sm ghost" data-act="vo-up" data-v="'+v+'" aria-label="Move '+VON[v]+' earlier"'+(i?"":" disabled")+'>↑</button><button class="btn sm ghost" data-act="vo-down" data-v="'+v+'" aria-label="Move '+VON[v]+' later"'+(i<VORD.length-1?"":" disabled")+'>↓</button></span></div>'}).join("")}
 function voMove(v,d){var i=VORD.indexOf(v),j=i+d;if(i<0||j<0||j>=VORD.length)return;VORD.splice(j,0,VORD.splice(i,1)[0]);lsw("regis-vord",VORD);voApply()}
@@ -5080,7 +5142,8 @@ var bwBR=0,bwBK="";
 function bwBounds(){if(bwBR)return;bwBR=requestAnimationFrame(function(){bwBR=0;if(!bwNative()||S.view!=="browser")return;var st=$("#bw-stage");if(!st)return;var r=st.getBoundingClientRect(),k=[r.left,r.top,r.width,r.height].map(Math.round).join();if(k===bwBK)return;bwBK=k;APP.browser.bounds({x:r.left,y:r.top,width:r.width,height:r.height}).catch(function(){})})}
 function bwLayout(){var tp=document.querySelector(".top");if(tp){var b=Math.ceil(tp.getBoundingClientRect().bottom);if(b>0)document.documentElement.style.setProperty("--bwtop",b+"px");var rt=document.getElementById("nav-btn");if(!rt||!rt.offsetWidth)rt=document.getElementById("vsw");if(!rt||!rt.offsetWidth)rt=tp.querySelector(".right");if(rt){var l=Math.floor(rt.getBoundingClientRect().left);if(l>0)document.documentElement.style.setProperty("--bwr",Math.max(120,innerWidth-l+12)+"px")}}try{bwBmFit()}catch(_){}bwBounds()}
 function bwSync(){try{ofdSync()}catch(_){}if(!bwNative())return;bwBK="";var on=S.view==="browser"&&!bwOverlay()&&!BW.leaving,want=S.view==="browser"&&!BW.leaving;APP.browser.show(on,want).then(function(r){var sn=$("#bw-snap");if(sn){if(!on&&want&&r&&r.snap){sn.src=r.snap;sn.hidden=false}else if(on||!want){clearTimeout(BW.snT);BW.snT=setTimeout(function(){sn.hidden=true;sn.removeAttribute("src")},on?160:0)}}bwBounds()}).catch(function(){})}
-function bwRender(st){if(st)BW.st=st;try{extStore()}catch(_){}var s2=BW.st,act=bwActive(),nat=bwNative();
+function bwCacheSave(){clearTimeout(bwCacheSave.t);bwCacheSave.t=setTimeout(function(){var s2=BW.st;if(!s2||!s2.tabs||!s2.tabs.length)return;lsw("regis-bwcache",{active:s2.active,tabs:s2.tabs.slice(0,30).map(function(t){return{id:t.id,title:t.title,url:t.url,blank:t.blank,asleep:t.asleep,icon:t.icon&&t.icon.length<4000?t.icon:""}})})},1500)}
+function bwRender(st){if(st){BW.st=st;bwCacheSave()}try{extStore()}catch(_){}var s2=BW.st,act=bwActive(),nat=bwNative();
   bwTabsSet(nat?tgTabsHtml(s2.tabs,s2.active)+'<button class="bw-new" data-act="bw-new" aria-label="New tab" title="New tab (Ctrl+T)">+</button>':"");
   document.documentElement.classList.toggle("bw-nonat",!nat);
   var ad=$("#bw-addr");if(ad&&document.activeElement!==ad)ad.value=act&&!act.blank?act.url:"";
@@ -5093,7 +5156,7 @@ function bwRender(st){if(st)BW.st=st;try{extStore()}catch(_){}var s2=BW.st,act=b
   try{bwMarks()}catch(_){}try{vtBar()}catch(_){}bwClock();
   var zc=$("#bw-zoom");if(zc){var zl=act&&act.zoom||0;zc.hidden=!zl;zc.textContent=bwZpct(act)}var zv=$("#bw-zv");if(zv)zv.textContent=bwZpct(act);
   if(BW.lastAct!==s2.active){BW.lastAct=s2.active;bwFindClose()}}
-function bwKey(a){if(/^view-[a-z]$/.test(a)){var vv=navKeyView(a.slice(5));if(vv)setView(vv,true);return}if(S.view!=="browser")return;
+function bwKey(a){if(/^view-[1-9]$/.test(a)){var vv=navKeyView(a.slice(5));if(vv)setView(vv,true);return}if(S.view!=="browser")return;
   if(a==="find"){bwFindOpen();return}if(a==="findnext"){bwFindGo(false);return}if(a==="findprev"){bwFindGo(true);return}if(a==="downloads"){bwDlOpen();return}if(a==="history"){bwHistOpen();return}
   if(a==="reopen"){if(bwNative()&&APP.browser.reopen)APP.browser.reopen();return}if(a==="print"){if(bwNative()&&APP.browser.print)APP.browser.print(BW.st.active);return}if(a==="newtab"){if(bwNative())APP.browser.open("").then(function(){setTimeout(function(){var q=$("#bw-addr");if(q)q.focus()},60)}).catch(function(){})}
   else if(a==="addr"){var q=$("#bw-addr");if(q){q.focus();q.select()}}else if(a==="bookmark")bwMarkAdd();else if(a==="close"&&bwNative()&&BW.st.active)APP.browser.close(BW.st.active).catch(function(){})}
@@ -5332,8 +5395,12 @@ document.addEventListener("input",function(e){if(e.target&&e.target.id==="bw-add
 document.addEventListener("keydown",function(e){if(!e.target||e.target.id!=="bw-addr")return;if(e.key==="ArrowDown"){if(bwSugMove(1))e.preventDefault()}else if(e.key==="ArrowUp"){if(bwSugMove(-1))e.preventDefault()}else if(e.key==="Escape"){bwSugClose()}else if(e.key==="Enter"&&BW.sug&&BW.sug.i>=0){e.preventDefault();bwSugPick(BW.sug.i)}else if(e.key==="Enter")bwSugClose()},true);
 document.addEventListener("focusout",function(e){if(e.target&&e.target.id==="bw-addr")setTimeout(function(){var a=document.activeElement;if(!a||!a.closest||!a.closest("#bw-sug"))bwSugClose()},150)});
 /* --- shortcuts that work everywhere: Alt + first letter of a page --- */
-function navKeyView(k){var v=null;(NAV.pages||[]).forEach(function(p){if(p.key===k)v=p.v});return v}
-document.addEventListener("keydown",function(e){if(!e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.repeat)return;var k=String(e.key||"").toLowerCase();if(!/^[a-z]$/.test(k))return;var v=navKeyView(k);if(!v)return;e.preventDefault();setView(v,true)},true);
+/* 1.8.9: Alt + 1..9 opens the pages in the order Nav shows them (then any under ⋯) */
+function navOrder(){var sh=navShown();return sh.concat(VORD.filter(function(v){return sh.indexOf(v)<0}))}
+document.addEventListener("keydown",function(e){if(e.key!=="/"||e.ctrlKey||e.metaKey||e.altKey||S.view!=="browser")return;var t=e.target,tg=t&&t.tagName;if(t&&(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(tg)))return;var m=$("#modal");if(m&&!m.hidden)return;
+  var a=$("#bw-addr");if(!a)return;e.preventDefault();a.focus();a.select()},true);
+function navKeyView(k){if(/^[1-9]$/.test(k))return navOrder()[+k-1]||null;return null}
+document.addEventListener("keydown",function(e){if(!e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.repeat)return;var k=String(e.code||"").replace(/^(Digit|Numpad)/,"");if(!/^[1-9]$/.test(k))return;var v=navKeyView(k);if(!v)return;e.preventDefault();setView(v,true)},true);
 document.addEventListener("keydown",function(e){if(S.view!=="browser"||!(e.ctrlKey||e.metaKey)||e.altKey)return;var k=String(e.key||"").toLowerCase(),a=e.shiftKey&&k==="t"?"reopen":k==="f"?"find":k==="j"?"downloads":k==="h"?"history":k==="p"?"print":null;if(!a)return;e.preventDefault();bwKey(a)});
 /* tab groups (kept on this device) */
 var TG=(function(){var o={g:[],m:{}};try{o=JSON.parse(localStorage.getItem("regis-tg"))||o}catch(_){}if(!o.g)o.g=[];if(!o.m)o.m={};return o})();
@@ -5501,7 +5568,7 @@ function bwSites(){var q=$("#bw-qs"),d=$("#bw-dial");if(!q||!d)return;var ed=!!B
 document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches||!f.matches("[data-actsubmit=bwf-add]"))return;e.preventDefault();var n=$("#bwf-n").value.trim(),u=$("#bwf-u").value.trim();if(u&&!/^https?:\/\//i.test(u))u="https://"+u;try{u=new URL(u).href}catch(_){toast("That address doesn’t look right.","bad");return}
   if(!n)n=new URL(u).hostname.replace(/^www\./,"");var h=0,i;for(i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;BWF.push({n:n.slice(0,16),u:u,c:"hsl("+h+" 80% 70%)",g:""});bwSave();bwSites()});
 /* 1.8.6 Nav: one button top right; pressing it slides the page list out to its left. Alt+letter shortcuts work either way. */
-function navBtnInit(){if(document.getElementById("nav-btn"))return;var b=document.createElement("button");b.id="nav-btn";b.type="button";b.setAttribute("data-act","nav-toggle");b.setAttribute("aria-expanded","false");b.setAttribute("aria-controls","vsw");b.title="Pages (Alt + first letter works any time)";
+function navBtnInit(){if(document.getElementById("nav-btn"))return;var b=document.createElement("button");b.id="nav-btn";b.type="button";b.setAttribute("data-act","nav-toggle");b.setAttribute("aria-expanded","false");b.setAttribute("aria-controls","vsw");b.title="Pages (Alt + 1, 2, 3… work any time)";
   b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span>Nav</span><em id="nav-cur"></em>';document.body.appendChild(b);navCur()}
 function navCur(){var e=document.getElementById("nav-cur");if(!e)return;var p=(NAV.pages||[]).find(function(x){return x.v===S.view});e.textContent=p?p.n:""}   /* 1.8.7: no measuring here (it forced a full layout on every page change); the button has a fixed width */
 function navToggle(on){var R=document.documentElement;if(on==null)on=!R.classList.contains("navx");R.classList.toggle("navx",!!on);var b=document.getElementById("nav-btn");if(b)b.setAttribute("aria-expanded",String(!!on));
@@ -5533,7 +5600,9 @@ function browserEnter(){var br=$("#browser");if(!br)return;br.hidden=false;bwTag
     if(bwNative()&&APP.browser.onState)APP.browser.onState(function(st){bwRender(st);if(S.view==="browser")bwBounds()});
     setInterval(function(){if(S.view==="browser"&&!document.hidden)bwClock()},15000)}
   bwLayout();try{bwSkyStart()}catch(_){}
-  if(bwNative()){APP.browser.state().then(function(st){bwRender(st);setTimeout(bwSync,PERF.lite||!opGet("pxfade")?0:440)}).catch(function(e){toast((e&&e.message)||"Couldn’t start the browser.","bad")})}
+  /* 1.8.9: show the last session's tabs at once (no empty strip while they come back), and the page as soon as it's ready */
+  if(bwNative()&&!BW.st.tabs.length){var bc=lsj("regis-bwcache",null);if(bc&&bc.tabs&&bc.tabs.length){BW.st=Object.assign({},BW.st,bc);bwRender()}}
+  if(bwNative()){APP.browser.state().then(function(st){bwRender(st);bwSync()}).catch(function(e){toast((e&&e.message)||"Couldn’t start the browser.","bad")})}
   else{BW.st={tabs:[{id:1,title:"Start",url:"",blank:true}],active:1,shield:false,blocked:0};bwRender()}}
 function parInit(){if(!window.matchMedia||!matchMedia("(hover:hover) and (pointer:fine)").matches)return;var tx=0,ty=0,cx=0,cy=0,raf=0;
   function put(el){if(el){el.style.setProperty("--px",cx.toFixed(3));el.style.setProperty("--py",cy.toFixed(3))}}
@@ -5749,12 +5818,15 @@ function lookCatGet(){try{return localStorage.getItem("regis-lkcat")||"Theme"}ca
 function lookCat(c){var L=$("#look");if(!L)return;var panes=L.querySelectorAll(".lk-cat");if(!panes.length)return;if(!L.querySelector('.lk-cat[data-cat="'+c+'"]'))c=panes[0].dataset.cat;
   panes.forEach(function(p){p.hidden=p.dataset.cat!==c});L.querySelectorAll(".lk-ct").forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.cat===c))});
   try{localStorage.setItem("regis-lkcat",c)}catch(_){}var bd=L.querySelector(".lk-b");if(bd)bd.scrollTop=0}
-function lookPages(b){var gs={};[].slice.call(b.querySelectorAll(":scope>details.lk-g")).forEach(function(d){gs[d.dataset.g]=d});
+/* 1.8.9: sections fold again; they start open and Regis remembers the ones you close */
+function lookClosed(){try{return JSON.parse(localStorage.getItem("regis-lkclosed")||"[]")||[]}catch(_){return[]}}
+function lookPages(b){var gs={},closed=lookClosed();
+  b.addEventListener("toggle",function(e){var d=e.target;if(!d||!d.classList||!d.classList.contains("lk-g"))return;var c=lookClosed().filter(function(x){return x!==d.dataset.g});if(!d.open)c.push(d.dataset.g);try{localStorage.setItem("regis-lkclosed",JSON.stringify(c))}catch(_){}},true);[].slice.call(b.querySelectorAll(":scope>details.lk-g")).forEach(function(d){gs[d.dataset.g]=d});
   var nav=document.createElement("div");nav.className="lk-cats";nav.setAttribute("role","tablist");nav.setAttribute("aria-label","Settings categories");
   LKC.forEach(function(c){var pane=document.createElement("div");pane.className="lk-cat";pane.dataset.cat=c[0];pane.setAttribute("role","tabpanel");
-    c[1].forEach(function(g){if(gs[g]){gs[g].open=true;pane.appendChild(gs[g]);delete gs[g]}});
+    c[1].forEach(function(g){if(gs[g]){gs[g].open=closed.indexOf(g)<0;pane.appendChild(gs[g]);delete gs[g]}});
     if(!pane.children.length)return;nav.insertAdjacentHTML("beforeend",'<button class="lk-ct" type="button" role="tab" data-act="lk-cat" data-cat="'+c[0]+'">'+c[0]+'</button>');b.appendChild(pane)});
-  var more=b.querySelector('.lk-cat[data-cat="More"]')||b.querySelector(".lk-cat:last-of-type");Object.keys(gs).forEach(function(g){gs[g].open=true;if(more)more.appendChild(gs[g])});
+  var more=b.querySelector('.lk-cat[data-cat="More"]')||b.querySelector(".lk-cat:last-of-type");Object.keys(gs).forEach(function(g){gs[g].open=closed.indexOf(g)<0;if(more)more.appendChild(gs[g])});
   var q=b.querySelector(".lk-q");if(q&&q.nextSibling)b.insertBefore(nav,q.nextSibling);else b.insertBefore(nav,b.firstChild);
   lookCat(lookCatGet())}
 function lookOpenPage(pg,grp){toggleLook(true);setTimeout(function(){var d=grp&&document.querySelector('#look details.lk-g[data-g="'+grp+'"]'),pane=d&&d.closest(".lk-cat");lookCat(pane?pane.dataset.cat:pg);if(d){d.open=true;try{d.scrollIntoView({block:"start"})}catch(_){}}},80)}
@@ -6067,6 +6139,7 @@ document.addEventListener("click",async function(ev){
     case "of-new":case "of-web":case "of-open":case "of-show":case "of-scan":case "of-folder":await ofAct(act,b);break;
     case "bw-exp":case "bw-extm":case "bw-extadd":case "ext-manage":case "ext-store":case "ext-on":case "ext-opt":case "ext-rm":case "ext-crx":case "ext-dir":await extAct(act,b);break;
     case "preset":applyPreset(b.dataset.v);break;
+    case "cm-app":case "cm-addopen":case "cm-add":case "cm-mute":case "cm-muteall":case "cm-pop":case "cm-reload":case "cm-menu":case "cm-bgt":case "cm-rm":case "cm-phonelink":await cmAct(act,b);break;
     case "lk-cat":lookCat(b.dataset.cat);break;
     case "nav-toggle":navToggle();break;
     case "ofd-app":case "ofd-filter":case "ofd-doc":case "ofd-keys":case "ofd-new":case "ofd-start":case "ofd-pick":case "ofd-open":case "ofd-close":case "ofd-adopt":case "ofd-pop":await ofdAct(act,b);break;
@@ -6958,7 +7031,7 @@ function showBanner(al){var host=$("#alerts");if(!host)return;var d=document.cre
     '<div class="al-a">'+(al.link?'<a class="btn sm pri" href="'+esc(al.link)+'" target="_blank" rel="noopener">'+esc(al.linkText||"Open")+"</a>":"")+'<button class="btn sm" data-act="al-go" data-id="'+esc(al.id)+'">Show</button><button class="btn sm ghost" data-act="al-snooze" data-id="'+esc(al.id)+'">Snooze 10 min</button><button class="btn sm ghost" data-act="al-dismiss" data-id="'+esc(al.id)+'">Dismiss</button></div>';
   host.appendChild(d);while(host.children.length>3)host.removeChild(host.firstChild);setTimeout(function(){if(d.parentNode)d.remove()},25000)}
 function dropBanner(id){var b=document.querySelector('.al-b[data-id="'+id+'"]');if(b)b.remove()}
-function renderBell(){var n=S.alerts.filter(function(a){return !a.read}).length,b=$("#bell-n"),bd=$("#dock-bell-n"),bm=$("#more-n");[b,bd,bm].forEach(function(e){if(e){e.hidden=!n;e.textContent=n>9?"9+":String(n)}});renderAlertPop()}
+function renderBell(){var n=S.alerts.filter(function(a){return !a.read}).length,b=$("#bell-n"),bd=$("#dock-bell-n"),bm=$("#more-n");[b,bd,bm].forEach(function(e){if(e){e.hidden=!n||(e===bm&&!document.documentElement.classList.contains("mob"));e.textContent=n>9?"9+":String(n)}});renderAlertPop()}
 function renderAlertPop(){var el=$("#alert-list");if(!el)return;var c=alCfg();
   el.innerHTML=S.alerts.length?S.alerts.map(function(a){return '<div class="al-r'+(a.read?"":" new")+' k-'+a.kind+'"><span class="al-k">'+esc(ALK[a.kind]||"Alert")+'</span><div class="grow"><div class="ttl wrapt">'+esc(a.title)+"</div>"+(a.body?'<div class="note wrapt">'+esc(a.body)+"</div>":"")+'<div class="note mono">'+esc(new Date(a.ts).toLocaleString([],{weekday:"short",hour:"numeric",minute:"2-digit"}))+"</div></div></div>"}).join(""):'<div class="empty">No alerts yet. Regis will tell you before events, when tasks are due, and when something important arrives.</div>';
   var set=function(id,v){var e=$("#"+id);if(e)e.checked=!!v};set("al-on",c.on);set("al-digest",c.digest);set("al-school",c.school);set("al-mail",c.mail);set("al-habit",c.habit);set("al-os",c.os);set("al-sound",c.sound);var l=$("#al-lead");if(l&&document.activeElement!==l)l.value=String(c.lead)}
@@ -7381,6 +7454,71 @@ async function extAct(a,b){if(!extOk())return;var id=b.dataset.id;
   }catch(err){toast((err&&err.message)||"That didn’t work.","bad")}}
 document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches||!f.matches("[data-ext-form]"))return;e.preventDefault();var v=($("#ext-link")||{}).value||"";if(v.trim())extInstall(v.trim())});
 
+/* 1.8.9 Comm: chat apps inside Regis (desktop app). Each app keeps its own sign-in and runs in the background (unless turned off),
+   so unread counts and notifications arrive on any page. Mute one app or all of Comm. Pop a chat out into a small window that floats
+   above every page; minimise it to a bar. */
+var CM={st:null,wired:false,key:""};
+var CMP=[{k:"discord",n:"Discord",u:"https://discord.com/app",c:"#5865F2"},{k:"slack",n:"Slack",u:"https://app.slack.com/client",c:"#611f69"},{k:"whatsapp",n:"WhatsApp",u:"https://web.whatsapp.com/",c:"#25D366"},
+  {k:"messenger",n:"Messenger",u:"https://www.messenger.com/",c:"#0084FF"},{k:"telegram",n:"Telegram",u:"https://web.telegram.org/a/",c:"#2AABEE"},{k:"teams",n:"Teams",u:"https://teams.microsoft.com/",c:"#5059C9"},
+  {k:"gmessages",n:"Google Messages",u:"https://messages.google.com/web",c:"#1A73E8"},{k:"instagram",n:"Instagram",u:"https://www.instagram.com/direct/inbox/",c:"#E1306C"},
+  {k:"linkedin",n:"LinkedIn",u:"https://www.linkedin.com/messaging/",c:"#0A66C2"},{k:"x",n:"X",u:"https://x.com/messages",c:"#3a3a3a"}];
+function cmOk(){return !!(APP&&APP.comm)}
+function cmApps(){return (CM.st&&CM.st.apps)||[]}
+function cmCur(){var a=cmApps(),id=CM.st&&CM.st.active;return a.find(function(x){return x.id===id})||a[0]||null}
+function cmTile(a,cls){var c=a.color||((CMP.find(function(p){return p.u===a.url})||{}).c)||"#6b4fd8";return '<i class="cm-t'+(cls?" "+cls:"")+'" style="--c:'+esc(c)+'">'+(a.icon&&/^data:image\//.test(a.icon)?'<img src="'+esc(a.icon)+'" alt="">':esc((a.name||"?").charAt(0).toUpperCase()))+'</i>'}
+function cmUn(n){return n>0?(n>99?"99+":String(n)):n<0?"•":""}
+function cmTotal(){var t=0,dot=false;cmApps().forEach(function(a){if(a.unread>0)t+=a.unread;else if(a.unread<0)dot=true});return t||(dot?-1:0)}
+function cmInit(){if(CM.wired||!cmOk())return;CM.wired=true;
+  APP.comm.onState(function(s){CM.st=s;cmRender();cmNav()});
+  if(APP.comm.onOpen)APP.comm.onOpen(function(id){if(id)CM.want=id;setView("comm",true)});
+  APP.comm.state().then(function(s){CM.st=s;cmRender();cmNav()}).catch(function(){});
+  /* Regis menus and dialogs go on top: the chat views step aside while one is open */
+  if(window.MutationObserver){var ov=new MutationObserver(function(){APP.comm.overlay(bwOverlay()).catch(function(){})});["#modal","#look","#alert-pop","#more-pop","#bw-bmpop","#bw-sug"].forEach(function(q){var e=$(q);if(e)ov.observe(e,{attributes:true,attributeFilter:["hidden"]})})}
+  if(window.ResizeObserver){var st=$("#cm-stage");if(st)new ResizeObserver(function(){cmBounds()}).observe(st)}}
+function cmNav(){var b=document.getElementById("nav-btn");if(b)b.classList.toggle("unread",cmTotal()!==0)}
+function cmBounds(){var st=$("#cm-stage");if(!st||!cmOk()||S.view!=="comm")return;var r=st.getBoundingClientRect();APP.comm.bounds({x:r.left,y:r.top,width:r.width,height:r.height}).catch(function(){})}
+function cmEnter(){var el=$("#comm");if(!el)return;el.hidden=false;cmInit();if(!cmOk()){cmRender();return}
+  var id=CM.want||null;CM.want=null;APP.comm.show(true,id).then(function(s){CM.st=s;cmRender();requestAnimationFrame(cmBounds)}).catch(function(){})}
+function cmLeave(){if(cmOk())return APP.comm.show(false).catch(function(){})}
+function cmRender(){var side=$("#cm-side"),bar=$("#cm-bar"),ph=$("#cm-ph");if(!side||!bar||!ph)return;cmNav();
+  if(!cmOk()){side.innerHTML="";bar.innerHTML="";ph.innerHTML='<div class="cm-empty"><h3>Comm</h3><p class="note">Discord, Slack, WhatsApp and other chats live here in the Regis desktop app.</p></div>';return}
+  var L=cmApps(),cur=cmCur(),st=CM.st||{};
+  side.innerHTML=L.map(function(a){var on=cur&&cur.id===a.id;return '<button class="bw-ic cm-a" type="button" data-act="cm-app" data-id="'+esc(a.id)+'" aria-current="'+(on?"page":"false")+'" title="'+esc(a.name)+(a.muted?" (muted)":"")+'">'+cmTile(a)+(a.unread?'<em>'+cmUn(a.unread)+'</em>':'')+(a.muted?'<s class="cm-mu" aria-hidden="true"></s>':'')+'</button>'}).join("")+
+    '<button class="bw-ic cm-add" type="button" data-act="cm-addopen" title="Add a chat app" aria-label="Add a chat app">+</button><span class="grow"></span>'+
+    '<button class="bw-ic" type="button" data-act="cm-muteall" aria-pressed="'+!!st.muteAll+'" title="'+(st.muteAll?"Comm is muted: press to unmute":"Mute all of Comm (no pop-ups or sounds)")+'">'+(st.muteAll?CM_SV.off:CM_SV.on)+'</button>';
+  if(!cur){bar.innerHTML='<span class="cm-ttl">Comm</span>';ph.innerHTML=cmPicker(true);return}
+  bar.innerHTML=cmTile(cur,"sm")+'<span class="cm-ttl">'+esc(cur.name)+'</span>'+(cur.unread?'<em class="cm-un">'+cmUn(cur.unread)+(cur.unread>0?" unread":" new")+'</em>':'')+'<span class="grow"></span>'+
+    '<button class="btn sm ghost" type="button" data-act="cm-mute" data-id="'+esc(cur.id)+'" aria-pressed="'+!!cur.muted+'">'+(cur.muted?"Unmute":"Mute")+'</button>'+
+    '<button class="btn sm ghost" type="button" data-act="cm-pop" data-id="'+esc(cur.id)+'" title="Float this chat in a small window over every page">Pop out</button>'+
+    '<button class="btn sm ghost" type="button" data-act="cm-reload" data-id="'+esc(cur.id)+'" title="Reload">Reload</button>'+
+    '<button class="btn sm ghost" type="button" data-act="cm-menu" data-id="'+esc(cur.id)+'" aria-label="More for '+esc(cur.name)+'">⋯</button>';
+  ph.innerHTML='<div class="cm-hold">'+cmTile(cur,"lg")+'<b>'+esc(cur.name)+'</b><small>'+(bwOverlay()?"Hidden while a Regis menu is open.":cur.loading?"Loading…":"")+'</small></div>'}
+var CM_SV={on:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2v-4a4.5 4.5 0 0 0-9 0v4zM10 20a2 2 0 0 0 4 0"/></svg>',off:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2v-4a4.5 4.5 0 0 0-9 0v4zM10 20a2 2 0 0 0 4 0M4 4l16 16"/></svg>'};
+function cmPicker(first){var have=cmApps().map(function(a){return a.url});
+  return '<div class="cm-empty">'+(first?'<h3>Your chats, inside Regis</h3><p class="note">Pick the apps you use. Each one keeps its own sign-in, keeps running in the background for notifications, and can be muted or popped out over any page.</p>':'')+
+    '<div class="cm-grid">'+CMP.map(function(p){var on=have.indexOf(p.u)>=0;return '<button class="cm-pick" type="button" data-act="cm-add" data-k="'+p.k+'"'+(on?" disabled":"")+'>'+cmTile({name:p.n,color:p.c})+'<b>'+esc(p.n)+'</b><small>'+(on?"Added":"Add")+'</small></button>'}).join("")+'</div>'+
+    '<form class="cm-custom" data-cm-form="1" autocomplete="off"><input id="cm-cn" placeholder="Name" maxlength="30" aria-label="App name"><input id="cm-cu" placeholder="https://… any web chat" aria-label="Web address" spellcheck="false"><button class="btn" type="submit">Add</button></form>'+
+    '<div class="cm-imsg"><b>iMessage</b><p class="note">Apple doesn’t offer iMessage on the web or on Windows, so it can’t run inside Regis. On Windows 11, Microsoft Phone Link can send and receive iMessages from your iPhone.</p><button class="btn sm ghost" type="button" data-act="cm-phonelink">Open Phone Link</button></div></div>'}
+async function cmAct(a,b){if(!cmOk())return;var C=APP.comm,id=b.dataset.id;
+  try{
+    if(a==="cm-app"){C.show(S.view==="comm",id).then(function(s){CM.st=s;cmRender();requestAnimationFrame(cmBounds)});return}
+    if(a==="cm-addopen"){openModal("Add a chat app",cmPicker(false));return}
+    if(a==="cm-add"){var p=CMP.find(function(x){return x.k===b.dataset.k});if(!p)return;var m=$("#modal");if(m&&!m.hidden)closeModal();await C.add({key:p.k,name:p.n,url:p.u,color:p.c});toast("Added "+p.n+". Sign in once and Regis remembers it.","good");return}
+    if(a==="cm-mute"||a==="cm-muteall"){CM.st=await C.state();}
+    if(a==="cm-mute"){var cur=cmApps().find(function(x){return x.id===id});if(cur){await C.mute(id,!cur.muted);CM.st=await C.state();cmRender()}return}
+    if(a==="cm-muteall"){var was=!!(CM.st&&CM.st.muteAll);await C.mute("*",!was);CM.st=await C.state();cmRender();toast(!was?"Comm muted: no pop-ups or sounds.":"Comm unmuted.","good");return}
+    if(a==="cm-pop"){await C.float(id);toast("Chat popped out. Drag it anywhere; it stays on top of every page.","good");return}
+    if(a==="cm-reload"){await C.reload(id);return}
+    if(a==="cm-menu"){var c2=cmApps().find(function(x){return x.id===id});if(!c2)return;var r=b.getBoundingClientRect();
+      bwPopAt(r.right-240,r.bottom+6,'<button role="menuitem" type="button" data-act="cm-bgt" data-id="'+esc(id)+'"><span>'+(c2.bg!==false?"✓ ":"")+'Keep running for notifications</span></button><hr><button role="menuitem" type="button" data-act="cm-rm" data-id="'+esc(id)+'"><span>Remove '+esc(c2.name)+'…</span></button>',"cm");return}
+    if(a==="cm-bgt"){bwBmClose();var c3=cmApps().find(function(x){return x.id===id});if(c3)await C.bg(id,c3.bg===false);return}
+    if(a==="cm-rm"){bwBmClose();var c4=cmApps().find(function(x){return x.id===id});if(!c4)return;if(!confirm("Remove "+c4.name+" from Comm? You'll be signed out of it here."))return;await C.remove(id,true);toast(c4.name+" removed.","good");return}
+    if(a==="cm-phonelink"){await C.phoneLink();return}
+  }catch(e){toast((e&&e.message)||"That didn’t work.","bad")}}
+document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches||!f.matches("[data-cm-form]"))return;e.preventDefault();if(!cmOk())return;var n=($("#cm-cn")||{}).value||"",u=(($("#cm-cu")||{}).value||"").trim();if(u&&!/^https?:\/\//i.test(u))u="https://"+u;
+  APP.comm.add({name:n.trim(),url:u}).then(function(){var m=$("#modal");if(m&&!m.hidden)closeModal();toast("Added.","good")}).catch(function(err){toast((err&&err.message)||"Couldn’t add that.","bad")})});
+setTimeout(function(){try{cmInit()}catch(_){}},1800);
+
 /* 1.8.2 links in emails and elsewhere in Regis open in the Regis Browser (Appearance > Browser), not the default browser */
 function linkHere(){return !!(opGet("linksin")&&typeof bwNative==="function"&&bwNative())}
 document.addEventListener("click",function(e){if(e.defaultPrevented||e.button!==0)return;var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(!a)return;var u=a.getAttribute("href")||"";if(!/^https?:\/\//i.test(u)||!linkHere())return;
@@ -7390,7 +7528,7 @@ setTimeout(function(){if(APP&&APP.linkMode)APP.linkMode(linkHere()).catch(functi
 /* 1.8.3 full screen: the button and F11 both use the desktop window's true full screen (no Windows title bar); the page follows its state */
 if(APP&&APP.onFullscreen)APP.onFullscreen(function(v){setFs(!!v)});
 if(APP&&APP.fsState)APP.fsState().then(function(v){setFs(!!v)}).catch(function(){});
-var SHELL_NEED="1.8.6";
+var SHELL_NEED="1.8.9";
 function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
   var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;

@@ -84,6 +84,17 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.9 Comm page, smooth scrolling, quicker Browser start
+
+- **Comm page:** Discord, Slack, WhatsApp, Messenger, Telegram, Teams, Google Messages, Instagram, LinkedIn, X, or any web chat, inside Regis. Add and remove apps; each keeps its own sign-in and keeps running in the background so unread counts and notifications arrive (the Nav button gets a red dot). Mute one app or all of Comm (no pop-ups or sounds). **Pop out** floats a chat in a small window above every page; drag it, minimise it to a bar, or send it back to Comm. iMessage can't run inside Regis (Apple doesn't offer it on the web or Windows); Comm links to Microsoft Phone Link, which can.
+- **Scrolling is smooth:** every scroll step used to make the whole page re-style itself (the scroll position was written onto the page root), taking most of the computer's time. Now only the two things that use it get it. Pop-up windows (emails, dialogs) no longer blur the whole moving screen behind them.
+- **Browser:** links opened with "Open link in new tab" or a middle-click open behind the current tab. At start-up only the tab you're on loads; the others wait (with their titles) until you open them, and the tab strip appears straight away. Press "/" to jump to the address bar. Notifications in the Browser are small chips that keep out of the way.
+- **Using a website no longer makes Regis think you're idle** (which paused its animations), and backgrounds redraw themselves if the graphics card resets.
+- **Page shortcuts are Alt + 1, 2, 3...** in the order Nav shows the pages.
+- **Blackwall** is a calm, solid pin wall with only a few small, organically shaped pushes at a time that swell and sink back.
+- **Appearance:** sections fold again (Regis remembers which you closed). The alert count no longer sits on the ⋯ button.
+- Updating: the desktop app changed, so run *Install Regis* once.
+
 ## 1.8.8 Blackwall pin wall, pixel transition back
 
 - **Blackwall** is now a wall of pins facing you, like a pin-art toy, drawn by the graphics chip at full sharpness. Rogue AIs are bulges of random place, size and shape that swell, roll across and sink back; the pins they push come forward, grow, spread and catch the light, so you see them in 3D. Mainly red, with hues slowly drifting towards magenta or orange. Glitches tear bands sideways, split the colours, flicker blocks and sweep a scan line. No rain. It runs at a steady 60 frames a second at 1920x1080 (the old one dropped to about 38 on Home).
