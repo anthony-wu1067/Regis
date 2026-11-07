@@ -43,6 +43,11 @@ egis`; localStorage for file:// is shared across folders, so settings carry over
 2. Phone layout was rebuilt in 1.7.6 (bottom tab bar). Only checked in simulated iPhone screenshots, not on a device.
 3. Google sign-in in the built-in browser (since 1.7.9): plain Chrome UA everywhere plus a `window.chrome` surface (app, runtime, csi, loadTimes; functions report `[native code]`) injected by `lib/bw-preload.js` in the main world. Never call `wc.setUserAgent` during a navigation: it crashed Electron on the docs.google.com to accounts.google.com redirect (1.7.7/1.7.8). Not yet tested with a real account.
 
+## Notes from 1.8.8
+- Blackwall: WebGL point grid on its own canvas `#bwgl` (transferred to the worker with the others; `gcv`). `glOK` compiles `VS`/`FS`; `glGrid` builds the pin grid (spacing 7-11 px); `glDraw` animates 8 bulges (`bwBulge`, one rolling wave `bwRoll`) passed as `uB`/`uC` uniforms; the vertex shader evaluates the field three times for a normal (lighting), pushes pins outward from the centre, and does glitch bands (`uGl`, `uGs`), flicker blocks (`uBk`) and the scan line (`uScan`). Colour split during glitches = two passes with `colorMask` and `uOff`. `#fx` above it only draws the drifting code. No rain.
+- Page change: `setView` runs `pxRun("in", ...)` again (content area only: the canvas starts 44 px down on desktop). `viewAnim`/`#vscan` are unused.
+- Cosmos checked from a fresh start, after presets, and in Lite/Balanced/Full: it draws.
+
 ## Notes from 1.8.7
 - Never read layout (offsetWidth, getBoundingClientRect) right after switching views: `navCur` did, forcing a full style+layout (~65 ms) on every page change. Find these with a trace that includes `disabled-by-default-devtools.timeline.stack` and group Layout/UpdateLayoutTree by `beginData.stackTrace`.
 - Don't toggle classes on `<html>` for short effects: it restyles the whole document (~50 ms). `viewAnim` puts `.vin`/`.vb` on the `#app` sections and `#vscan` (the sweep line), two rAFs after the switch.

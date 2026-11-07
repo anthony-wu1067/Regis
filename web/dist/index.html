@@ -1327,6 +1327,7 @@ html[data-view="browser"] #browser{display:flex;position:fixed;left:0;right:0;bo
 .bw-t:hover{border-color:var(--accent);box-shadow:0 0 18px var(--accent-soft);transform:translateY(-2px)}
 .bw-t i{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font:600 20px var(--f-display);font-style:normal;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
 .bw-note{margin:0;max-width:560px;text-align:center;font-size:12px;color:var(--fg3)}
+.bw-note:empty{display:none}
 @media (max-width:760px){
   html[data-view="browser"] #browser{top:var(--bwtop,120px);bottom:calc(66px + env(safe-area-inset-bottom,0px))}
   .bw-side{display:none}.bw-tabs{display:none}.bw-bar{padding:8px}
@@ -2576,6 +2577,9 @@ html.navx:not(.mob):not(.tv) #vsw{opacity:1;visibility:visible;transform:none;tr
 #vscan.vin{animation:vscan .44s cubic-bezier(.35,.5,.2,1) 1 both}
 #vscan.vin.vb{animation-direction:reverse}
 html.mob #vscan{top:0}
+/* 1.8.8 Blackwall pin wall canvas (WebGL); the code text stays on #fx above it */
+#bwgl{display:none;position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+:root[data-bg="blackwall"] #bwgl{display:block}
 /* 1.8.5 themed backgrounds and presets */
 :root[data-bg="cyber"] .blob,:root[data-bg="blackwall"] .blob,:root[data-bg="holo"] .blob{display:none}
 :root[data-bg="cyber"] #fx,:root[data-bg="blackwall"] #fx,:root[data-bg="holo"] #fx{opacity:1}
@@ -3709,16 +3713,7 @@ function fxCore(G,inline){
       var o=mk(W,Math.round(H*.36)),c=o.getContext("2d"),hz=o.height,x=0;c.fillStyle="rgba(10,6,24,.92)";
       while(x<W){var bw=rnd(24,70),bh=rnd(.25,.95)*hz;c.fillRect(x,hz-bh,bw,bh);for(var wy=hz-bh+6;wy<hz-4;wy+=7)for(var wx=x+4;wx<x+bw-4;wx+=6)if(Math.random()<.16){c.fillStyle=Math.random()<.7?"rgba(5,217,232,.55)":"rgba(255,42,109,.6)";c.fillRect(wx,wy,2,2);c.fillStyle="rgba(10,6,24,.92)"}x+=bw+rnd(2,8)}
       SC.off=o}
-    if(b==="blackwall"){
-      /* the wall is drawn into a small buffer (a quarter of the screen) and scaled up with hard edges, so every point is a chunky glowing pixel */
-      var q=4,bw=Math.max(64,Math.ceil(W/q)),bh=Math.max(48,Math.ceil(H/q));SC.q=q;SC.bw=bw;SC.bh=bh;SC.buf=mk(bw,bh);SC.bx=SC.buf.getContext("2d");SC.img=SC.bx.createImageData(bw,bh);
-      SC.R=new Float32Array(bw*bh);SC.G=new Float32Array(bw*bh);SC.B=new Float32Array(bw*bh);
-      /* points on the wall: columns along it (towards the vanishing side) and rows up it */
-      SC.cols=Math.round(Math.min(150,bw*.55));SC.rows=Math.round(Math.min(64,bh*.45));
-      /* rogue AIs: bulges that push through the wall, tear it, and throw pixels off */
-      SC.ai=[];for(i=0;i<3;i++)SC.ai.push({u:rnd(.2,.8),v:rnd(.25,.75),vu:rnd(-.05,.05),vv:rnd(-.04,.04),r:rnd(.07,.12),f:0,phase:rnd(0,9),next:rnd(1,5)});
-      SC.fly=[];SC.rain=[];for(i=0;i<70;i++)SC.rain.push({x:rnd(0,bw),y:rnd(0,bh),v:rnd(20,70),l:rnd(3,12)});
-      SC.cb=[];for(i=0;i<Math.max(3,Math.min(6,Math.round(W*H/350000)));i++)SC.cb.push(bwCode(W,H,rnd(0,1)))}
+    if(b==="blackwall"){SC.cb=[];for(i=0;i<Math.max(3,Math.min(6,Math.round(W*H/350000)));i++)SC.cb.push(bwCode(W,H,rnd(0,1)))}
     if(b==="holo"){var o3=mk(W,H),c3=o3.getContext("2d"),s=26,hh=s*Math.sqrt(3);c3.strokeStyle="rgba(79,227,255,.05)";c3.lineWidth=1;
       for(var yy=0;yy<H+hh;yy+=hh)for(var xx=0;xx<W+s*3;xx+=s*3){[0,1].forEach(function(o){var cx0=xx+o*s*1.5,cy0=yy+o*hh/2;c3.beginPath();for(var k=0;k<6;k++){var an=Math.PI/3*k;c3[k?"lineTo":"moveTo"](cx0+s*Math.cos(an),cy0+s*Math.sin(an))}c3.closePath();c3.stroke()})}
       SC.off=o3;SC.rings=[];var nr=Math.max(2,Math.min(4,Math.round(W/480)));
@@ -3741,45 +3736,11 @@ function fxCore(G,inline){
       /* digital rain */
       c.strokeStyle="rgba(5,217,232,.35)";c.beginPath();for(i=0;i<SC.p.length;i++){var r=SC.p[i];r.y+=r.v*d;if(r.y>hz){r.y=-r.l;r.x=rnd(0,W)}c.moveTo(r.x,r.y);c.lineTo(r.x,r.y+r.l)}c.stroke();
       for(i=0;i<SC.tags.length;i++){var tg=SC.tags[i];tg.y+=tg.vy*d;if(tg.y<-30){tg.y=hz-30;tg.x=rnd(.05,.85)*W;tg.txt=pick(TAGS.cyber);tg.w=0}var fl=(Math.sin(t*3+tg.ph)>.96)?.25:1;tag(c,tg,i%3?"#05d9e8":"#ff2a6d",.55*fl)}}
-    if(b==="blackwall"){var bw=SC.bw,bh=SC.bh,Rr=SC.R,Gg=SC.G,Bb=SC.B,N=bw*bh,k;
-      /* trails: the last frame fades instead of clearing, so motion smears like the reference */
-      var fd=d>0?Math.pow(.18,d*2.2):0;for(k=0;k<N;k++){Rr[k]*=fd;Gg[k]*=fd;Bb[k]*=fd}
-      var add=function(x,y,r,g,bl){x|=0;y|=0;if(x<0||y<0||x>=bw||y>=bh)return;var o=y*bw+x;Rr[o]+=r;Gg[o]+=g;Bb[o]+=bl};
-      /* move the AIs; every few seconds one surges */
-      for(i=0;i<SC.ai.length;i++){var A=SC.ai[i];A.u+=A.vu*d;A.v+=A.vv*d;if(A.u<.12||A.u>.88)A.vu*=-1;if(A.v<.18||A.v>.82)A.vv*=-1;A.next-=d;if(A.next<=0){A.f=1;A.next=rnd(3,8)}A.f=Math.max(0,A.f-d*.45)}
-      var C=SC.cols,Rw=SC.rows,iu,iv;
-      for(iu=0;iu<C;iu++){var u=iu/(C-1),pu=Math.pow(u,.8);
-        /* perspective: the wall starts big on the left and sweeps away to the right */
-        var sx=(-.08+.78*pu)*bw,sc=(1.25-.95*pu)*(.9+.1*Math.sin(u*5-t*.4)),cy=bh*(.5+.07*Math.sin(u*2.2+t*.15)-.05*Math.sin(u*3.14));
-        var fray=u>.72?(u-.72)/.28:0,hf=.86+.14*Math.sin(u*9+t*.35);
-        var colB=.45+.55*Math.pow(Math.abs(Math.sin(u*C*.5+t*.6)),3);           /* the bright vertical striations */
-        for(iv=0;iv<Rw;iv++){var v=iv/(Rw-1);
-          /* the far end and the top and bottom edges break up into loose pixels */
-          if(Math.abs(v-.5)>.5*hf&&Math.random()<.7)continue;if(fray&&Math.random()<fray*.85){if(d>0&&Math.random()<.02*fray&&SC.fly.length<900)SC.fly.push({x:sx+rnd(-2,2),y:cy+(v-.5)*bh*.95*sc,vx:rnd(8,30),vy:rnd(-6,6),l:rnd(.8,2.2),r:200*fray,g:30,b:140});continue}
-          /* waves rolling along the wall */
-          var w=Math.sin(u*14-t*1.4+v*2.3)*.6+Math.sin(u*31+t*2.1-v*5)*.25+Math.sin(v*9-t*.8+u*4)*.2,push=0,hot=0;
-          for(var ai=0;ai<SC.ai.length;ai++){var A2=SC.ai[ai],du=(u-A2.u)/A2.r,dv=(v-A2.v)/(A2.r*1.6),g2=du*du+dv*dv;if(g2<4){var e=Math.exp(-g2)*(.6+1.4*A2.f+.25*Math.sin(t*3+A2.phase));push+=e;hot+=e}}
-          var x=sx+(w*3+push*9)*sc-push*6*sc+(fray?rnd(-1,1)*fray*6:0),y=cy+(v-.5)*bh*.95*sc+w*2*sc;
-          /* dim red and blue stripes; pink-white only where an AI is breaking through */
-          var blue=(Math.sin(u*C*.21+1.3)>.35)?1:0,h=Math.min(1,hot),br=((.05+.15*colB)*(.45+.55*(1-u*.6))+h*.36)*(1-.45*Math.exp(-Math.pow((u-.45)/.18,2)-Math.pow((v-.5)/.3,2)));
-          var r0=(blue?110:235)*br+h*120*br,g0=(blue?30:22)*br+h*95*br,b0=(blue?235:60)*br+h*150*br;
-          /* a little chromatic split: red to one side, blue to the other */
-          add(x,y,r0,g0*.5,b0*.35);add(x+1,y,r0*.15,g0*.3,b0*.9);
-          if(sc>.9){add(x,y+1,r0*.6,g0*.3,b0*.3)}
-          /* pixels torn off where the AI pushes through */
-          if(hot>.7&&Math.random()<.012*hot*(d>0?1:0)&&SC.fly.length<900)SC.fly.push({x:x,y:y,vx:rnd(-6,26)*(1+hot),vy:rnd(-14,14),l:rnd(.6,1.8),r:r0,g:g0,b:b0})}}
-      /* the flying pixels drift off and fade */
-      for(i=SC.fly.length-1;i>=0;i--){var F=SC.fly[i];F.l-=d;if(F.l<=0){SC.fly.splice(i,1);continue}F.x+=F.vx*d;F.y+=F.vy*d;F.vy+=4*d;add(F.x,F.y,F.r*F.l*.7,F.g*F.l*.7,F.b*F.l*.9)}
-      /* faint vertical data rain */
-      for(i=0;i<SC.rain.length;i++){var Q=SC.rain[i];Q.y+=Q.v*d;if(Q.y>bh){Q.y=-Q.l;Q.x=rnd(0,bw)}for(k=0;k<Q.l;k++)add(Q.x,Q.y+k,18,4,10)}
-      /* into the image (additive light), then scaled up with hard pixel edges */
-      var D=SC.img.data;for(k=0;k<N;k++){var o4=k*4;D[o4]=Rr[k]>255?255:Rr[k];D[o4+1]=Gg[k]>255?255:Gg[k];D[o4+2]=Bb[k]>255?255:Bb[k];D[o4+3]=255}
-      SC.bx.putImageData(SC.img,0,0);c.imageSmoothingEnabled=false;c.globalCompositeOperation="lighter";c.drawImage(SC.buf,0,0,bw*SC.q,bh*SC.q);c.globalCompositeOperation="source-over";
-      /* stray hacking code */
+    if(b==="blackwall"){glDraw(dt);
       c.font="11px Consolas,monospace";for(i=0;i<SC.cb.length;i++){var cb=SC.cb[i];cb.age+=d;cb.x+=cb.vx*d;cb.y+=cb.vy*d;var typed=cb.age*cb.cps,fade=cb.age>cb.life?Math.max(0,1-(cb.age-cb.life)/2):Math.min(1,cb.age*2);
         if(fade<=0&&cb.age>cb.life){SC.cb[i]=bwCode(W,H,0);continue}var left=typed;
         for(var li=0;li<cb.lines.length&&left>0;li++){var L=cb.lines[li],n=Math.min(L.length,Math.floor(left));left-=L.length;
-          var gl=Math.random()<.012;c.globalAlpha=(li===0?.55:.32)*fade*(gl?.4:1);c.fillStyle=li===0?"#ff5a66":"#ff2b3d";c.fillText(L.slice(0,n)+(n<L.length&&((t*6)|0)%2?"\u2588":""),cb.x+(gl?rnd(-6,6):0),cb.y+li*14)}}
+          var gl=Math.random()<.012;c.globalAlpha=(li===0?.55:.32)*fade*(gl?.4:1);c.fillStyle=li===0?"#ff6a74":"#ff3346";c.fillText(L.slice(0,n)+(n<L.length&&((t*6)|0)%2?"\u2588":""),cb.x+(gl?rnd(-6,6):0),cb.y+li*14)}}
       c.globalAlpha=1}
     if(b==="holo"){if(SC.off)c.drawImage(SC.off,0,0);
       c.fillStyle="rgba(79,227,255,.55)";for(i=0;i<SC.p.length;i++){var q=SC.p[i];q.y-=q.v*d;if(q.y<-4){q.y=H+4;q.x=rnd(0,W)}c.fillRect(q.x,q.y,q.r,q.r)}
@@ -3796,6 +3757,55 @@ function fxCore(G,inline){
       for(i=0;i<SC.tags.length;i++){var th=SC.tags[i];th.y+=th.vy*.4*d;if(th.y<-30){th.y=H;th.x=rnd(.05,.85)*W;th.w=0}
         if(Math.sin(t*.8+th.ph)>.97){th.txt=pick(TAGS.holo);th.w=0}tag(c,th,i%2?"#4fe3ff":"#ffb84d",.5)}}}
 
+  /* 1.8.8 Blackwall: a pin screen facing you, drawn by the graphics chip (WebGL points). Rogue AIs are bulges of random place, size
+     and shape that roll and swell; pins they push come forward (bigger, brighter, spread out, lit from one side) like a pin-art toy.
+     Mainly red with slowly drifting hues; glitches tear bands sideways, split colours, flicker blocks and sweep a scan line. */
+  var gcv=null,GL=null,GP=null,GU={},gBuf=null,gN=0,gW=0,gH=0,gSp=9,BWS=null;
+  var VS="attribute vec3 a;uniform vec2 uR;uniform float uT,uSp,uGl,uGs,uHue,uScan,uBk;uniform vec2 uOff;uniform vec4 uB[8],uC[8];varying vec3 vC;"+
+    "float F(vec2 p){float z=0.0;for(int i=0;i<8;i++){vec4 b=uB[i],c=uC[i];vec2 d=p-b.xy;float cs=cos(c.x),sn=sin(c.x);vec2 q=vec2(cs*d.x+sn*d.y,-sn*d.x+cs*d.y)/b.zw;"+
+      "float an=atan(q.y,q.x);float r2=dot(q,q)*(1.0+c.z*sin(an*3.0+c.w)+c.z*0.5*sin(an*5.0-c.w*1.3));z+=c.y*exp(-r2);}return z;}"+
+    "float H(float n){return fract(sin(n)*43758.5453);}"+
+    "void main(){vec2 p=a.xy;float z=F(p),e=uSp,zx=F(p+vec2(e,0.0))-z,zy=F(p+vec2(0.0,e))-z;vec3 n=normalize(vec3(-zx*5.0,-zy*5.0,1.0));"+
+      "float lit=clamp(dot(n,normalize(vec3(-0.55,-0.65,0.75))),0.0,1.0);vec2 c=uR*0.5;vec2 q=c+(p-c)*(1.0+z*0.16);"+
+      "float band=floor(q.y/(uR.y/30.0));float h=H(band*91.7+uGs);if(h>0.8)q.x+=(h-0.9)*1100.0*uGl;q+=uOff;"+
+      "vec2 cl=q/uR*2.0-1.0;gl_Position=vec4(cl.x,-cl.y,0.0,1.0);gl_PointSize=uSp*(0.42+z*0.55+a.z*0.06);"+
+      "float hm=0.5+0.5*sin(uHue+p.x*0.0016-p.y*0.0012);vec3 red=vec3(1.0,0.07,0.1),mag=vec3(1.0,0.1,0.42),org=vec3(1.0,0.32,0.06);"+
+      "vec3 col=mix(red,mix(mag,org,0.5+0.5*sin(uHue*0.37)),hm*0.42);"+
+      "float bright=0.13+0.07*a.z+z*(0.25+0.9*lit);col=mix(col,vec3(1.0,0.78,0.82),clamp(z*0.5*lit-0.15,0.0,0.75));"+
+      "vec2 bk=floor(q/48.0);float fl=H(bk.x*13.1+bk.y*71.7+uBk);if(fl>0.997)bright*=2.2;else if(uGl>0.0&&fl<0.03)bright*=0.25;"+
+      "bright+=0.6*exp(-pow((q.y-uScan)/6.0,2.0));vC=col*bright;}";
+  var FS="precision mediump float;varying vec3 vC;void main(){vec2 d=gl_PointCoord-0.5;float r=length(d);float a=smoothstep(0.5,0.12,r);float k=smoothstep(0.2,0.0,r);gl_FragColor=vec4(vC*(a*0.75+k*0.55),1.0);}";
+  function glOK(){if(GL)return true;if(!gcv)return false;try{GL=gcv.getContext("webgl",{alpha:false,antialias:false,depth:false,stencil:false,premultipliedAlpha:false,powerPreference:"low-power"})}catch(_){GL=null}if(!GL)return false;
+    var g=GL,sh=function(t,src){var s=g.createShader(t);g.shaderSource(s,src);g.compileShader(s);return s},pr=g.createProgram();g.attachShader(pr,sh(g.VERTEX_SHADER,VS));g.attachShader(pr,sh(g.FRAGMENT_SHADER,FS));g.linkProgram(pr);
+    if(!g.getProgramParameter(pr,g.LINK_STATUS)){GL=null;return false}GP=pr;g.useProgram(pr);["uR","uT","uSp","uGl","uGs","uHue","uScan","uBk","uOff","uB","uC"].forEach(function(n){GU[n]=g.getUniformLocation(pr,n)});
+    gBuf=g.createBuffer();g.enable(g.BLEND);g.blendFunc(g.ONE,g.ONE);return true}
+  function glGrid(){var g=GL;if(!g)return;gW=K.W;gH=K.H;gcv.width=gW;gcv.height=gH;g.viewport(0,0,gW,gH);
+    gSp=Math.max(7,Math.min(11,Math.round(Math.sqrt(gW*gH/26000))));var cols=Math.ceil(gW/gSp)+2,rows=Math.ceil(gH/gSp)+2,d=new Float32Array(cols*rows*3),k=0;
+    for(var j=0;j<rows;j++)for(var i=0;i<cols;i++){d[k++]=(i-1+(j%2)*.5)*gSp;d[k++]=(j-1)*gSp;d[k++]=Math.random()}
+    gN=cols*rows;g.bindBuffer(g.ARRAY_BUFFER,gBuf);g.bufferData(g.ARRAY_BUFFER,d,g.STATIC_DRAW);var at=g.getAttribLocation(GP,"a");g.enableVertexAttribArray(at);g.vertexAttribPointer(at,3,g.FLOAT,false,0,0)}
+  /* a rogue AI: grows, rolls across, morphs its outline, then sinks back */
+  function bwBulge(init){var W=K.W,H=K.H,big=Math.random()<.35;return{x:rnd(-.05,1.05)*W,y:rnd(.05,.95)*H,vx:rnd(-50,50),vy:rnd(-25,25),sx:rnd(big?140:50,big?340:150),sy:rnd(big?120:50,big?300:150),
+    rot:rnd(0,6.28),vr:rnd(-.25,.25),amp:rnd(.7,1.9),wob:rnd(.08,.38),ph:rnd(0,9),vph:rnd(.4,1.6),age:init?rnd(0,6):0,life:rnd(4,9),grow:rnd(.8,2)}}
+  function bwRoll(){var W=K.W,H=K.H,dir=Math.random()<.5?1:-1;return{x:dir>0?-.15*W:1.15*W,y:rnd(.2,.8)*H,vx:dir*rnd(90,200),vy:rnd(-10,10),sx:rnd(60,120),sy:rnd(.6,1.1)*H,rot:rnd(-.25,.25),vr:0,amp:rnd(.6,1.1),wob:rnd(.15,.3),ph:rnd(0,9),vph:1.2,age:0,life:(1.3*W)/Math.max(90,Math.abs(dir*150)),grow:.6,roll:1}}
+  function glDraw(dt){if(!glOK())return false;if(gW!==K.W||gH!==K.H)glGrid();var g=GL,W=K.W,H=K.H,s=K.reduce?0:K.s,d=dt*s;
+    if(!BWS){BWS={b:[],t:0,gl:0,gs:0,next:rnd(1,3),scan:-100,ns:rnd(2,5),bk:0,hue:rnd(0,6)};for(var i=0;i<7;i++)BWS.b.push(bwBulge(true));BWS.b.push(bwRoll())}
+    var S2=BWS;S2.t+=d;S2.hue+=d*.12;
+    var B=new Float32Array(32),C=new Float32Array(32);
+    for(i=0;i<8;i++){var o=S2.b[i];o.age+=d;o.x+=o.vx*d;o.y+=o.vy*d;o.rot+=o.vr*d;o.ph+=o.vph*d;
+      if(o.age>o.life)S2.b[i]=o=(i===7||Math.random()<.15)?bwRoll():bwBulge(false);
+      /* swell up, hold with a slow breathing roll, sink back */
+      var env=Math.min(1,o.age/o.grow)*Math.min(1,Math.max(0,(o.life-o.age)/o.grow)),a2=o.amp*env*(0.85+0.15*Math.sin(o.ph*1.7));
+      B[i*4]=o.x;B[i*4+1]=o.y;B[i*4+2]=o.sx*(1+.12*Math.sin(o.ph));B[i*4+3]=o.sy*(1+.12*Math.cos(o.ph*.8));C[i*4]=o.rot;C[i*4+1]=a2;C[i*4+2]=o.wob;C[i*4+3]=o.ph}
+    /* glitches: a burst every few seconds; a scan line now and then; blocks flicker all the time */
+    if(d>0){S2.next-=d;if(S2.next<=0){S2.gl=1;S2.gs=Math.random()*1000;S2.next=rnd(1.2,4.5);S2.gt=rnd(.06,.22)}if(S2.gl>0){S2.gt-=d;if(S2.gt<=0)S2.gl=0;else if(Math.random()<.35)S2.gs=Math.random()*1000}
+      S2.ns-=d;if(S2.ns<=0){S2.scan=-20;S2.ns=rnd(3,8)}if(S2.scan>-50){S2.scan+=d*H*1.4;if(S2.scan>H+30)S2.scan=-100}if(Math.random()<.3)S2.bk=Math.random()*1000}
+    g.clearColor(.018,.003,.007,1);g.clear(g.COLOR_BUFFER_BIT);g.useProgram(GP);
+    g.uniform2f(GU.uR,W,H);g.uniform1f(GU.uT,S2.t);g.uniform1f(GU.uSp,gSp);g.uniform1f(GU.uGl,S2.gl);g.uniform1f(GU.uGs,S2.gs);g.uniform1f(GU.uHue,S2.hue);g.uniform1f(GU.uScan,S2.scan);g.uniform1f(GU.uBk,S2.bk);
+    g.uniform4fv(GU.uB,B);g.uniform4fv(GU.uC,C);
+    if(S2.gl>0){var k2=rnd(4,12);g.colorMask(true,false,false,true);g.uniform2f(GU.uOff,k2,0);g.drawArrays(g.POINTS,0,gN);g.colorMask(false,true,true,true);g.uniform2f(GU.uOff,-k2,0);g.drawArrays(g.POINTS,0,gN);g.colorMask(true,true,true,true)}
+    else{g.uniform2f(GU.uOff,0,0);g.drawArrays(g.POINTS,0,gN)}
+    return true}
+
   var SCN={cyber:1,blackwall:1,holo:1};
   /* one loop for both; paced by a timer so nothing runs between frames (30 fps, 13-15 fps in Balanced) */
   function moving(){return K.run&&!K.reduce&&K.mode!=="lite"&&(K.bg==="aurora"||SCN[K.bg]?!!fc:K.bg==="cosmos"&&!!sx)}
@@ -3807,21 +3817,21 @@ function fxCore(G,inline){
     var now=[K.bg,K.skin,K.W,K.H,K.mode].join("|");if(m.rebuild)built="";
     if(was!==now||m.rebuild){SC=null;if(fc&&(K.W!==fx.width||K.H!==fx.height||m.mode))auSize();if(K.bg==="cosmos")coBuild()}
     if(moving()){if(!busy){busy=true;lt=0;raf(step)}}else{busy=false;if(timer){clearTimeout(timer);timer=0}if(was!==now||m.rebuild||m.col)still()}}
-  function on(m){if(!m)return;if(m.t==="init"){fx=m.fx;fc=fx&&fx.getContext("2d");cv=m.cosmos;st=m.stars;cx=cv&&cv.getContext("2d");sx=st&&st.getContext("2d");apply(m.k||{});if(K.bg==="aurora")auSize();still();return}apply(m)}
+  function on(m){if(!m)return;if(m.t==="init"){gcv=m.gl||null;fx=m.fx;fc=fx&&fx.getContext("2d");cv=m.cosmos;st=m.stars;cx=cv&&cv.getContext("2d");sx=st&&st.getContext("2d");apply(m.k||{});if(K.bg==="aurora")auSize();still();return}apply(m)}
   if(!inline)G.onmessage=function(e){try{on(e.data)}catch(_){}};
   return on}
 
 function initFx(){
   var host=$(".bg");if(!host||!document.createElement("canvas").getContext)return;
   var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var fx=document.createElement("canvas"),cv=document.createElement("canvas"),st=document.createElement("canvas"),met=document.createElement("div");
-  fx.id="fx";cv.id="cosmos";st.id="stars";met.className="metal";host.appendChild(fx);host.insertBefore(st,host.firstChild);host.insertBefore(cv,host.firstChild);host.insertBefore(met,host.firstChild);
+  var fx=document.createElement("canvas"),cv=document.createElement("canvas"),st=document.createElement("canvas"),gw=document.createElement("canvas"),met=document.createElement("div");
+  fx.id="fx";cv.id="cosmos";st.id="stars";gw.id="bwgl";met.className="metal";host.appendChild(gw);host.appendChild(fx);host.insertBefore(st,host.firstChild);host.insertBefore(cv,host.firstChild);host.insertBefore(met,host.firstChild);
   var send=null,last="";
   if(fx.transferControlToOffscreen&&window.Worker&&typeof OffscreenCanvas!=="undefined"){
     try{var url=URL.createObjectURL(new Blob(["("+fxCore.toString()+")(self,false)"],{type:"text/javascript"})),w=new Worker(url);
-      var o={fx:fx.transferControlToOffscreen(),cosmos:cv.transferControlToOffscreen(),stars:st.transferControlToOffscreen()};
-      w.onerror=function(){};send=function(m,tr){w.postMessage(m,tr||[])};send({t:"init",fx:o.fx,cosmos:o.cosmos,stars:o.stars,k:cfg()},[o.fx,o.cosmos,o.stars]);FX.worker=true}catch(_){send=null}}
-  if(!send){var h=fxCore(window,true);send=function(m){h(m)};send({t:"init",fx:fx,cosmos:cv,stars:st,k:cfg()})}
+      var o={fx:fx.transferControlToOffscreen(),cosmos:cv.transferControlToOffscreen(),stars:st.transferControlToOffscreen(),gl:gw.transferControlToOffscreen()};
+      w.onerror=function(){};send=function(m,tr){w.postMessage(m,tr||[])};send({t:"init",fx:o.fx,cosmos:o.cosmos,stars:o.stars,gl:o.gl,k:cfg()},[o.fx,o.cosmos,o.stars,o.gl]);FX.worker=true}catch(_){send=null}}
+  if(!send){var h=fxCore(window,true);send=function(m){h(m)};send({t:"init",fx:fx,cosmos:cv,stars:st,gl:gw,k:cfg()})}
   function col(){var c=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),m;
     if(m=c.match(/^#([0-9a-f]{6})$/i))return[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)];
     if(m=c.match(/(\d+)\D+(\d+)\D+(\d+)/))return[+m[1],+m[2],+m[3]];return[185,154,255]}
@@ -4546,12 +4556,13 @@ function applyView(v,save){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;S.view
    One tiny canvas (one pixel per block) is scaled up, so each frame is a few hundred 1-pixel fills. */
 var PX={cv:null,ctx:null,busy:false,raf:0,fin:null};
 function pxOK(){return skyOK()&&!PERF.lite&&!S.tv&&!document.hidden&&opGet("pxfade")&&!(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)}
-function pxRun(mode,fwd,done){var W=innerWidth,H=innerHeight,cell=Math.max(40,Math.round(Math.max(W,H)/24)),cols=Math.ceil(W/cell),rows=Math.ceil(H/cell),n=cols*rows,i;
+/* 1.8.8: the pixel dissolve is back, over the page content only (under the top bar) and only the "in" half, so nothing goes blank */
+function pxRun(mode,fwd,done){var top=document.documentElement.classList.contains("mob")?0:44,W=innerWidth,H=Math.max(1,innerHeight-top),cell=Math.max(36,Math.round(Math.max(W,H)/26)),cols=Math.ceil(W/cell),rows=Math.ceil(H/cell),n=cols*rows,i;
   if(!PX.cv){PX.cv=document.createElement("canvas");PX.cv.id="px";PX.cv.setAttribute("aria-hidden","true");document.body.appendChild(PX.cv);PX.ctx=PX.cv.getContext("2d")}
   var cv=PX.cv,ctx=PX.ctx;if(!ctx){done();return}cv.width=cols;cv.height=rows;cv.style.display="block";
   var R=document.documentElement,cs=getComputedStyle(R),bg=(cs.getPropertyValue("--bg")||"#0a0713").trim(),ac=(cs.getPropertyValue("--accent")||"#b794ff").trim(),thr=new Float32Array(n);
   for(i=0;i<n;i++){var cx=i%cols/cols,k=fwd?cx:1-cx;thr[i]=Math.min(1,.62*Math.random()+.38*k)}
-  var dur=mode==="out"?260:400,t0=0,fin=false;PX.busy=true;
+  cv.style.top=top+"px";cv.style.height=H+"px";var dur=mode==="out"?260:360,t0=0,fin=false;PX.busy=true;
   function end(){if(fin)return;fin=true;cancelAnimationFrame(PX.raf);cv.style.display="none";PX.busy=false;PX.fin=null;done()}
   PX.fin=end;
   function frame(now){if(fin)return;if(!t0)t0=now;var t=Math.min(1,(now-t0)/dur);ctx.clearRect(0,0,cols,rows);
@@ -4569,7 +4580,7 @@ function setView(v,save,cb){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;
   applyView(v,save);if(cb)cb();
   /* 1.8.6: the new page's content fades and rises into place; the top bar and background never disappear
      (the old pixel dissolve covered the whole window, which looked like the app blanking). The Browser shows its page at once. */
-  if(prev&&prev!==v&&pxOK()&&v!=="browser")viewAnim(VORD.indexOf(v)<VORD.indexOf(prev))}
+  if(prev&&prev!==v&&pxOK()&&v!=="browser")pxRun("in",VORD.indexOf(v)>VORD.indexOf(prev),function(){})}
 
 /* ---------- Music + Chat pages ---------- */
 function appGo(u){if(typeof bwNative==="function"&&bwNative())setView("browser",true,function(){bwGo(u,true)});else window.open(u,"_blank","noopener")}
@@ -5077,7 +5088,7 @@ function bwRender(st){if(st)BW.st=st;try{extStore()}catch(_){}var s2=BW.st,act=b
   var lk=$("#bw-lock");if(lk)lk.classList.toggle("sec",!!(act&&act.secure));
   var sh=$("#bw-shield");if(sh){sh.setAttribute("aria-pressed",String(!!s2.shield));var e=$("#bw-blocked");if(e)e.textContent=s2.blocked?(s2.blocked>99?"99+":s2.blocked):""}
   var start=$("#bw-start");if(start){start.hidden=nat&&!!act&&!act.blank;if(!start.hidden)try{bwSkyStart()}catch(_){}}
-  var nt=$("#bw-note");if(nt)nt.textContent=nat?"Your Google sign-in is remembered between launches. Browsing is kept separate from Regis.":"This is the Regis desktop app’s browser screen. Here on the web and phone, sites open in a new browser tab. Install the desktop app to browse inside Regis.";
+  var nt=$("#bw-note");if(nt)nt.textContent=nat?"":"This is the Regis desktop app’s browser screen. Here on the web and phone, sites open in a new browser tab. Install the desktop app to browse inside Regis.";
   var sb=$("#bw-sq");if(sb&&!nat)sb.placeholder="Search Google or type a web address";
   try{bwMarks()}catch(_){}try{vtBar()}catch(_){}bwClock();
   var zc=$("#bw-zoom");if(zc){var zl=act&&act.zoom||0;zc.hidden=!zl;zc.textContent=bwZpct(act)}var zv=$("#bw-zv");if(zv)zv.textContent=bwZpct(act);

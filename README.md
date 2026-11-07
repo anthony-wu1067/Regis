@@ -84,6 +84,13 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.8 Blackwall pin wall, pixel transition back
+
+- **Blackwall** is now a wall of pins facing you, like a pin-art toy, drawn by the graphics chip at full sharpness. Rogue AIs are bulges of random place, size and shape that swell, roll across and sink back; the pins they push come forward, grow, spread and catch the light, so you see them in 3D. Mainly red, with hues slowly drifting towards magenta or orange. Glitches tear bands sideways, split the colours, flicker blocks and sweep a scan line. No rain. It runs at a steady 60 frames a second at 1920x1080 (the old one dropped to about 38 on Home).
+- **The pixel transition is back:** the new page dissolves in from pixels. It covers only the page area under the top bar and has no "out" half, so the app never blanks; the Browser still opens instantly.
+- The note under the Browser start page ("Your Google sign-in is remembered...") is gone.
+- No reinstall needed: this update arrives by itself.
+
 ## 1.8.7 Smooth again, page transitions back, Blackwall as a pixel wall
 
 - **Lag fixed:** 1.8.6 made every page change freeze Regis for a moment (the Nav label measured itself, which forced the whole page to be laid out again, and the page animation did the same). Both are gone; a page change now costs about half as much as before.
