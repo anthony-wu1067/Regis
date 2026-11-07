@@ -1,18 +1,18 @@
 {
- "version": "1.8.5",
- "built": "2026-11-07T03:09:09.617Z",
+ "version": "1.8.6",
+ "built": "2026-11-07T18:08:27.179Z",
  "files": {
   "apple-touch-icon.png": "d5a535183834d47a94771fad94ccc4f08b4e38c294b601d446e6fb446c7cde72",
   "callback.html": "8d71e05f15296d305ec3459eca578f0967dc2d66562a05b78dd57c890c818012",
-  "desktop-bundle.json": "97c7a73423d18f3e6914c949bcc4fa568ac7c437da1afbf0dd86ed5770061928",
+  "desktop-bundle.json": "cc584893899ff6f1e4fbbad74706cc9fd4eb60d8f51450dd98550ba7fe190c1a",
   "icon-192.png": "6223493193baa60f6bcd5e31fe3d263a9452fad0def7ccfc92f5d62ac8351887",
   "icon-512.png": "b11083869212b82b57f029d054c39f0642977f7bd20bdd17dacbe707e957f14f",
-  "index.html": "6920b72bfac3cc69df40c5519abf5769ac0e9f2b281a6bff7a0abf96b6fb09e1",
+  "index.html": "657df6ae8496e9a0202cd024b83348edd70aaa6518660ad41494cbcb145fd606",
   "localdb.js": "6152135aee1699cdd783f407c243c426e8960df4995ea307db4c87642e55e4be",
   "manifest.webmanifest": "9648a33ef8ada1b2864e936809ab2e1749fa09f86b3a5f42ef26e5113d309127",
   "regis-lib.js": "5c1ea9f095f1681f0ce5e3f42c7efc5bd70da587913b3ad692327633d4ee65b1",
   "shim.js": "9829ead96c75a4837877f7ec8f136f05e6d2b8562ffa673e5ae07e63f9c2fdec",
-  "sw.js": "059b6071e23ef1cfa910e7ebfa0d8b19f51c9d99b88d7cb28b0d6d2765e3e3ee",
+  "sw.js": "7c0be29196db1c6c031c593bd73e6f625546f0db9e158528fbca0ebb8b5ef7b8",
   "sync.js": "5d9859f07dd608cf12173e5b65e91d6f83f7e9f9abb8c6b52792936f00102aac",
   "webbridge.js": "e21c69f738f32c7fb7759df1ab56291f1ef8b8e6c2a91ae310c004032023c274"
  }

@@ -84,6 +84,18 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.6 Nav button, calmer Appearance, no more blanking, true video full screen
+
+- **Nav:** the page switcher is now one **Nav** button at the top right (it shows the page you're on). Press it and the pages slide out to its left; pick one and it tucks away. Alt + first letter still switches pages any time.
+- **No more blank app** when opening pages: with Balanced or Full effects, changing pages used to cover the whole window for up to half a second (that's what blanked when a link opened in the Browser). The new page now simply fades and slides in; the top bar and background stay put, and the Browser shows its page straight away.
+- **Video full screen:** a video's full-screen button now fills the whole screen, and leaving it puts Regis back the way it was (still full screen if it was before).
+- **Browser tabs** sit closer together with a holographic look: glassy tabs with lit edges, a glowing line under the open tab, and neon group labels whose colour runs along their tabs. The address bar and the start-page search have more room before the first letter.
+- **Blackwall** now has rogue-AI tendrils that wander, lunge and glitch across the screen, and stray hacking code that types itself out and drifts away.
+- **Appearance** is split into tabs (Theme, Effects, Home, Workspace, Music, Browser, More), so each shows only its own settings; search still looks through everything. **TV mode** moved here (Home tab), and the Home page no longer shows the shortcut hint. The Pages section (it had gone missing) is back under More.
+- **Spotify:** the repeat button cycles off, repeat all, and **repeat this song** (shown with a small 1), and it changes straight away.
+- **Subtasks:** selecting them to copy picks up only their words, not the tick boxes, Edit or ✕, and dragging across one no longer opens it for editing.
+- Updating: the desktop app changed (video full screen), so run *Install Regis* once.
+
 ## 1.8.5 Extensions, ad-free YouTube, new presets, Office ribbon back
 
 - **Chrome extensions in the Regis Browser:** press the puzzle button > Manage extensions and paste a Chrome Web Store link, or open an extension's page in the Chrome Web Store and press **Add to Regis**. Installed extensions show in the toolbar; press one to open its popup. Turn them on or off, open their options or remove them in the same place. Tested with Dark Reader and Google Translate. A few Chrome-only parts aren't available (the blocking rules some ad blockers use; signing in through Chrome), and Regis says so for an extension that needs them.

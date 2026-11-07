@@ -135,8 +135,10 @@ class BrowserHost {
     wc.on('did-start-navigation', (_e, url, inPlace, main) => { if (main && !inPlace && isWeb(url)) { t.err = false; if (t.login) { t.login = false; this._emitSoon(); } } });
     wc.on('before-input-event', (e, input) => { const a = keyAction(input); if (a && this.key(a, t.id)) e.preventDefault(); });
     wc.on('context-menu', (_e, p) => this._ctx(wc, t, p));
-    wc.on('enter-html-full-screen', () => { const w = this._win(); if (w) w.setFullScreen(true); });
-    wc.on('leave-html-full-screen', () => { const w = this._win(); if (w && !w.isDestroyed()) w.setFullScreen(false); });
+    /* a video (or any page) going full screen: the page fills the whole screen, not just the browser area,
+       and leaving it puts Regis back the way it was (still full screen if it was before) */
+    wc.on('enter-html-full-screen', () => { const w = this._win(); if (!w) return; this.vfs = { tab: t.id, was: w.isFullScreen() }; if (!this.vfs.was) w.setFullScreen(true); this._vfsFit(); setTimeout(() => this._vfsFit(), 350); });
+    wc.on('leave-html-full-screen', () => { const w = this._win(), v = this.vfs; this.vfs = null; if (t.view) { try { t.view.setBounds(this.bounds); } catch (_) {} } if (w && !w.isDestroyed() && v && !v.was && w.isFullScreen()) w.setFullScreen(false); });
     wc.on('render-process-gone', () => { t.loading = false; t.title = 'This tab crashed. Reload it.'; this._emitSoon(); });
     wc.setWindowOpenHandler(({ url }) => { if (isWeb(url)) setImmediate(() => this.open(url)); return { action: 'deny' }; });
     return v;
@@ -152,10 +154,12 @@ class BrowserHost {
       if (!t.added) { try { w.contentView.addChildView(t.view); t.view.setVisible(false); t.added = true; t.vis = false; } catch (_) {} }
       const on = t.view === want; if (t.vis !== on) { try { t.view.setVisible(on); } catch (_) {} t.vis = on; }
     }
-    if (want) { want.setBounds(this.bounds); if (act) act.last = Date.now(); }
+    if (want) { if (this.vfs && this.vfs.tab === act.id) this._vfsFit(); else want.setBounds(this.bounds); if (act) act.last = Date.now(); }
     this.attached = want;
   }
-  setBounds(b) { const n = (v) => Math.max(0, Math.round(+v || 0)); this.bounds = { x: n(b.x), y: n(b.y), width: n(b.width), height: n(b.height) }; if (this.attached) this.attached.setBounds(this.bounds); return true; }
+  setBounds(b) { const n = (v) => Math.max(0, Math.round(+v || 0)); this.bounds = { x: n(b.x), y: n(b.y), width: n(b.width), height: n(b.height) }; if (this.vfs) { this._vfsFit(); return true; } if (this.attached) this.attached.setBounds(this.bounds); return true; }
+  /* the full-screen page covers the whole window */
+  _vfsFit() { const w = this._win(), t = this.vfs && this._tab(this.vfs.tab); if (!w || !t || !t.view) return; const cb = w.getContentBounds(); try { t.view.setBounds({ x: 0, y: 0, width: cb.width, height: cb.height }); } catch (_) {} }
   /* hiding (a Regis panel opens over the page): hand back a picture of the page so Regis can show it underneath instead of a blank */
   async show(v, wantSnap) { v = !!v; let snap = '';
     if (!v && wantSnap !== false && this.visible && this.attached) { try { const img = await this.attached.webContents.capturePage(); if (img && !img.isEmpty()) snap = 'data:image/jpeg;base64,' + img.toJPEG(72).toString('base64'); } catch (_) {} }

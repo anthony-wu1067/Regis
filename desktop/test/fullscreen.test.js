@@ -23,6 +23,21 @@ app.whenReady().then(async () => {
   await J('document.querySelector(\'#vsw [data-v="music"]\').click()'); await sleep(1500);
   out.push((win.webContents.isFocused() ? 'PASS' : 'FAIL') + ' leaving the Browser gives the keyboard back to Regis');
   F11(win.webContents); await sleep(1500); out.push((win.isFullScreen() ? 'PASS' : 'FAIL') + ' F11 works on Music after using the Browser'); await reset();
+  // a video going full screen fills the whole screen; leaving it restores Regis the way it was
+  await J('document.querySelector(\'#vsw [data-v="browser"]\').click()'); await sleep(1200);
+  const vt = webContents.getAllWebContents().find((w) => /\/p$/.test(w.getURL()));
+  const vfsOn = () => vt.executeJavaScript('document.documentElement.requestFullscreen().then(function(){return true},function(){return false})', true);
+  const vfsOff = () => vt.executeJavaScript('document.exitFullscreen().then(function(){return true},function(){return false})', true);
+  const fills = () => { const v = require('electron').BrowserWindow.fromWebContents(win.webContents); const cb = win.getContentBounds(); const vv = win.contentView.children.find((c) => c.webContents === vt); const b = vv ? vv.getBounds() : null; return b && b.x === 0 && b.y === 0 && b.width === cb.width && b.height === cb.height; };
+  await vfsOn(); await sleep(1500);
+  out.push((win.isFullScreen() ? 'PASS' : 'FAIL') + ' a video going full screen makes the window full screen');
+  out.push((fills() ? 'PASS' : 'FAIL') + ' and the video fills the whole window, not just the browser area');
+  await vfsOff(); await sleep(1500);
+  out.push((!win.isFullScreen() ? 'PASS' : 'FAIL') + ' leaving the video\'s full screen leaves the window full screen too (Regis wasn\'t full screen before)');
+  out.push((!fills() ? 'PASS' : 'FAIL') + ' and the page goes back into the browser area');
+  win.setFullScreen(true); await sleep(1500); await vfsOn(); await sleep(1500); await vfsOff(); await sleep(1500);
+  out.push((win.isFullScreen() ? 'PASS' : 'FAIL') + ' when Regis was already full screen, leaving the video\'s full screen keeps Regis full screen');
+  await reset();
   out.forEach((l) => console.log(l)); const nf = out.filter((l) => /^FAIL/.test(l)).length;
   console.log((out.length - nf) + ' passed, ' + nf + ' failed'); srv.close(); app.exit(nf ? 1 : 0);
 });

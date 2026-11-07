@@ -18,7 +18,7 @@ app.whenReady().then(async () => {
   // address bar: typed text sits clear of the lock
   await J('var a=document.getElementById("bw-addr");a.focus();a.value="asd"');
   const gap = await J('var a=document.getElementById("bw-addr"),l=document.getElementById("bw-lock"),cs=getComputedStyle(a);return Math.round(a.getBoundingClientRect().left+parseFloat(cs.paddingLeft)-l.getBoundingClientRect().right)');
-  ok(gap >= 12 && gap <= 24, 'typed text starts ' + gap + 'px after the lock (was 8px)');
+  ok(gap >= 20 && gap <= 34, 'typed text starts ' + gap + 'px after the lock, with room before the first letter');
   await J('document.getElementById("bw-addr").blur()');
   // sidebar shortcut: preset icon + colour
   await click('[data-act="bws-edit"]'); await sleep(400);
