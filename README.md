@@ -84,6 +84,14 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.8.7 Smooth again, page transitions back, Blackwall as a pixel wall
+
+- **Lag fixed:** 1.8.6 made every page change freeze Regis for a moment (the Nav label measured itself, which forced the whole page to be laid out again, and the page animation did the same). Both are gone; a page change now costs about half as much as before.
+- **Home is smoother on big screens:** the Home clock's nine layers each had their own shadow, four of them moving, so the graphics card redrew them every frame. The clock now has one shadow (Home went from about 38 to 55 frames a second at 1920x1080 with Blackwall).
+- **Page transitions are back and visible:** the new page slides and fades in while a light line sweeps across in the direction you're going. Nothing blanks.
+- **Blackwall** is now a vast wall of glowing pixels in red and blue stripes, sweeping away in perspective, rippling in waves. Rogue AIs push bulges through it and tear pixels off; the far end frays into drifting pixels; stray code still types itself out. It is drawn at a quarter resolution and scaled up with hard edges, which gives the chunky look and keeps it cheap.
+- No reinstall needed: this update arrives by itself.
+
 ## 1.8.6 Nav button, calmer Appearance, no more blanking, true video full screen
 
 - **Nav:** the page switcher is now one **Nav** button at the top right (it shows the page you're on). Press it and the pages slide out to its left; pick one and it tucks away. Alt + first letter still switches pages any time.

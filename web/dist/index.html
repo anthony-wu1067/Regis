@@ -1548,7 +1548,8 @@ html.d3 .btn:active:not(:disabled){transform:translateY(1px);box-shadow:inset 0 
 html.d3 .bw-ic,html.d3 .bw-nb,html.d3 .bw-look,html.d3 .mtc,html.d3 .bw-go{box-shadow:inset 0 1px 0 rgba(255,255,255,calc(.1 * var(--d3))),0 2px 6px -2px rgba(0,0,0,calc(.45 * var(--d3)))}
 html.d3 .bw-tab.on{box-shadow:inset 0 1px 0 rgba(255,255,255,calc(.1 * var(--d3))),0 -4px 10px -6px rgba(0,0,0,calc(.4 * var(--d3)))}
 html.d3 #look,html.d3 .modal-card{box-shadow:inset 0 1px 0 rgba(255,255,255,calc(.1 * var(--d3))),0 30px 80px -20px rgba(0,0,0,calc(.65 * var(--d3)))}
-html.d3 .hm-dial{filter:drop-shadow(0 calc(16px * var(--d3)) calc(24px * var(--d3)) rgba(0,0,0,.45))}
+/* 1.8.7: one shadow under the clock, not one per layer (9 large shadowed layers, 4 of them moving, were redrawn every frame) */
+html.d3 #hm-dial{filter:drop-shadow(0 calc(16px * var(--d3)) calc(24px * var(--d3)) rgba(0,0,0,.45))}
 html.d3:not(.x-tilt):not(.lite) .hm-card,html.d3:not(.x-tilt):not(.lite) .sat,html.d3:not(.x-tilt):not(.lite) .bw-t{transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .18s ease-out}
 html.d3 .hm-card.tl-on,html.d3 .sat.tl-on,html.d3 .bw-t.tl-on{transition:transform .06s linear}
 html:not(.o-ticker) #ticker{display:none!important}
@@ -2553,22 +2554,28 @@ html .bw-search input,html[data-look="refined"] .bw-search input{padding:0 24px!
 .subs .wrapt{-webkit-user-select:text;user-select:text;cursor:text}
 /* 1.8.6 Nav button and slide-out page list (desktop) */
 #nav-btn{display:none}
-html:not(.mob):not(.tv) #nav-btn{position:fixed;top:6px;right:calc(max(14px,env(safe-area-inset-right,0px)) + 100% - 100vw);z-index:31;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 12px 0 10px;border-radius:12px;
+html:not(.mob):not(.tv) #nav-btn{box-sizing:border-box;width:152px;position:fixed;top:6px;right:calc(max(14px,env(safe-area-inset-right,0px)) + 100% - 100vw);z-index:31;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 12px 0 10px;border-radius:12px;
   border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line2));background:color-mix(in srgb,var(--bg) 86%,transparent);color:var(--fg);font:600 12.5px var(--f-body);cursor:pointer;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 30px -12px rgba(0,0,0,.7)}
 #nav-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 #nav-btn em{width:72px;font:500 11px var(--f-mono);font-style:normal;color:var(--fg3);letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
 
 #nav-btn:hover,html.navx #nav-btn{border-color:var(--accent);box-shadow:0 0 14px -4px var(--accent),inset 0 1px 0 rgba(255,255,255,.08)}
-html:not(.mob):not(.tv) #vsw{right:calc(max(14px,env(safe-area-inset-right,0px)) + 100% - 100vw + var(--navw,96px));transform-origin:right center;
+html:not(.mob):not(.tv) #vsw{right:calc(max(14px,env(safe-area-inset-right,0px)) + 100% - 100vw + var(--navw,160px));transform-origin:right center;
   transition:opacity .2s var(--e-out,ease),transform .26s var(--e-out,cubic-bezier(.2,.8,.2,1)),visibility 0s linear .26s}
 html:not(.mob):not(.tv):not(.navx) #vsw{opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(28px,0,0) scaleX(.96)}
 html.navx:not(.mob):not(.tv) #vsw{opacity:1;visibility:visible;transform:none;transition:opacity .2s var(--e-out,ease),transform .26s var(--e-out,cubic-bezier(.2,.8,.2,1)),visibility 0s}
 /* 1.8.6 page change: content only, quick, never a blank window */
-@keyframes viewIn{from{opacity:.15;transform:translate3d(14px,6px,0)}to{opacity:1;transform:none}}
-@keyframes viewInB{from{opacity:.15;transform:translate3d(-14px,6px,0)}to{opacity:1;transform:none}}
-html.vin #app>:not(.top):not(#banner):not(#upd-bar):not(#shell-bar),html.vin #ofd{animation:viewIn .26s var(--e-out,cubic-bezier(.2,.8,.2,1)) 1 both}
-html.vin.vback #app>:not(.top):not(#banner):not(#upd-bar):not(#shell-bar),html.vin.vback #ofd{animation-name:viewInB}
+@keyframes viewIn{from{opacity:0;transform:translate3d(36px,0,0)}to{opacity:1;transform:none}}
+@keyframes viewInB{from{opacity:0;transform:translate3d(-36px,0,0)}to{opacity:1;transform:none}}
+@keyframes vscan{0%{opacity:0;transform:translate3d(-160px,0,0)}12%{opacity:1}100%{opacity:0;transform:translate3d(calc(100vw + 40px),0,0)}}
+#app>.vin,#ofd.vin{animation:viewIn .34s var(--e-out,cubic-bezier(.2,.8,.2,1)) 1 both}
+#app>.vin.vb,#ofd.vin.vb{animation-name:viewInB}
+#vscan{position:fixed;top:44px;bottom:0;left:0;width:150px;z-index:29;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 10%,transparent) 55%,color-mix(in srgb,var(--accent) 55%,transparent) 94%,var(--accent) 97%,transparent)}
+#vscan.vin{animation:vscan .44s cubic-bezier(.35,.5,.2,1) 1 both}
+#vscan.vin.vb{animation-direction:reverse}
+html.mob #vscan{top:0}
 /* 1.8.5 themed backgrounds and presets */
 :root[data-bg="cyber"] .blob,:root[data-bg="blackwall"] .blob,:root[data-bg="holo"] .blob{display:none}
 :root[data-bg="cyber"] #fx,:root[data-bg="blackwall"] #fx,:root[data-bg="holo"] #fx{opacity:1}
@@ -3702,18 +3709,16 @@ function fxCore(G,inline){
       var o=mk(W,Math.round(H*.36)),c=o.getContext("2d"),hz=o.height,x=0;c.fillStyle="rgba(10,6,24,.92)";
       while(x<W){var bw=rnd(24,70),bh=rnd(.25,.95)*hz;c.fillRect(x,hz-bh,bw,bh);for(var wy=hz-bh+6;wy<hz-4;wy+=7)for(var wx=x+4;wx<x+bw-4;wx+=6)if(Math.random()<.16){c.fillStyle=Math.random()<.7?"rgba(5,217,232,.55)":"rgba(255,42,109,.6)";c.fillRect(wx,wy,2,2);c.fillStyle="rgba(10,6,24,.92)"}x+=bw+rnd(2,8)}
       SC.off=o}
-    if(b==="blackwall"){var cols=Math.ceil(W/90)+1,rows=Math.ceil(H/90)+1,N=[],E=[];
-      for(var r=0;r<rows;r++)for(var q=0;q<cols;q++)N.push({x:q*90+rnd(-30,30),y:r*90+rnd(-30,30)});
-      for(i=0;i<N.length;i++){var a=N[i];if(i%cols<cols-1&&Math.random()<.62)E.push([a,N[i+1]]);if(i+cols<N.length&&Math.random()<.5)E.push([a,N[i+cols]])}
-      var o2=mk(W,H),c2=o2.getContext("2d");c2.lineWidth=1;
-      E.forEach(function(e){c2.strokeStyle="rgba(255,43,61,"+rnd(.05,.18).toFixed(2)+")";c2.beginPath();c2.moveTo(e[0].x,e[0].y);if(Math.random()<.5){c2.lineTo(e[1].x,e[0].y);c2.lineTo(e[1].x,e[1].y)}else{c2.lineTo(e[0].x,e[1].y);c2.lineTo(e[1].x,e[1].y)}c2.stroke()});
-      N.forEach(function(n){if(Math.random()<.3){c2.fillStyle="rgba(255,60,70,.35)";c2.fillRect(n.x-1.5,n.y-1.5,3,3)}});
-      SC.off=o2;SC.E=E;for(i=0;i<Math.min(26,E.length);i++)SC.p.push({e:pick(E),k:Math.random(),v:rnd(.15,.5)});
-      /* rogue AI: tendrils that wander, lunge and glitch; their bodies follow the head like a chain */
-      SC.td=[];var nT=Math.max(3,Math.min(6,Math.round(W*H/320000)));
-      for(i=0;i<nT;i++){var hx=rnd(.1,.9)*W,hy=rnd(.1,.9)*H,pts=[];for(var k=0;k<52;k++)pts.push({x:hx,y:hy});SC.td.push({p:pts,a:rnd(0,6.28),sp:rnd(38,70),ph:rnd(0,99),ph2:rnd(0,99),lunge:0,nextL:rnd(2,7),seg:rnd(7,11),spk:[]})}
-      /* stray hacking code: blocks that type themselves out, drift and fade */
-      SC.cb=[];for(i=0;i<Math.max(5,Math.min(10,Math.round(W*H/170000)));i++)SC.cb.push(bwCode(W,H,rnd(0,1)))}
+    if(b==="blackwall"){
+      /* the wall is drawn into a small buffer (a quarter of the screen) and scaled up with hard edges, so every point is a chunky glowing pixel */
+      var q=4,bw=Math.max(64,Math.ceil(W/q)),bh=Math.max(48,Math.ceil(H/q));SC.q=q;SC.bw=bw;SC.bh=bh;SC.buf=mk(bw,bh);SC.bx=SC.buf.getContext("2d");SC.img=SC.bx.createImageData(bw,bh);
+      SC.R=new Float32Array(bw*bh);SC.G=new Float32Array(bw*bh);SC.B=new Float32Array(bw*bh);
+      /* points on the wall: columns along it (towards the vanishing side) and rows up it */
+      SC.cols=Math.round(Math.min(150,bw*.55));SC.rows=Math.round(Math.min(64,bh*.45));
+      /* rogue AIs: bulges that push through the wall, tear it, and throw pixels off */
+      SC.ai=[];for(i=0;i<3;i++)SC.ai.push({u:rnd(.2,.8),v:rnd(.25,.75),vu:rnd(-.05,.05),vv:rnd(-.04,.04),r:rnd(.07,.12),f:0,phase:rnd(0,9),next:rnd(1,5)});
+      SC.fly=[];SC.rain=[];for(i=0;i<70;i++)SC.rain.push({x:rnd(0,bw),y:rnd(0,bh),v:rnd(20,70),l:rnd(3,12)});
+      SC.cb=[];for(i=0;i<Math.max(3,Math.min(6,Math.round(W*H/350000)));i++)SC.cb.push(bwCode(W,H,rnd(0,1)))}
     if(b==="holo"){var o3=mk(W,H),c3=o3.getContext("2d"),s=26,hh=s*Math.sqrt(3);c3.strokeStyle="rgba(79,227,255,.05)";c3.lineWidth=1;
       for(var yy=0;yy<H+hh;yy+=hh)for(var xx=0;xx<W+s*3;xx+=s*3){[0,1].forEach(function(o){var cx0=xx+o*s*1.5,cy0=yy+o*hh/2;c3.beginPath();for(var k=0;k<6;k++){var an=Math.PI/3*k;c3[k?"lineTo":"moveTo"](cx0+s*Math.cos(an),cy0+s*Math.sin(an))}c3.closePath();c3.stroke()})}
       SC.off=o3;SC.rings=[];var nr=Math.max(2,Math.min(4,Math.round(W/480)));
@@ -3736,31 +3741,45 @@ function fxCore(G,inline){
       /* digital rain */
       c.strokeStyle="rgba(5,217,232,.35)";c.beginPath();for(i=0;i<SC.p.length;i++){var r=SC.p[i];r.y+=r.v*d;if(r.y>hz){r.y=-r.l;r.x=rnd(0,W)}c.moveTo(r.x,r.y);c.lineTo(r.x,r.y+r.l)}c.stroke();
       for(i=0;i<SC.tags.length;i++){var tg=SC.tags[i];tg.y+=tg.vy*d;if(tg.y<-30){tg.y=hz-30;tg.x=rnd(.05,.85)*W;tg.txt=pick(TAGS.cyber);tg.w=0}var fl=(Math.sin(t*3+tg.ph)>.96)?.25:1;tag(c,tg,i%3?"#05d9e8":"#ff2a6d",.55*fl)}}
-    if(b==="blackwall"){var pu=.55+.45*Math.sin(t*.7);c.globalAlpha=.65+.35*pu;if(SC.off)c.drawImage(SC.off,0,0);c.globalAlpha=1;
-      c.fillStyle="#ff2b3d";for(i=0;i<SC.p.length;i++){var p=SC.p[i];p.k+=p.v*d;if(p.k>1){p.k=0;p.e=pick(SC.E)}var e=p.e,x0=e[0].x,y0=e[0].y,x1=e[1].x,y1=e[1].y;c.globalAlpha=.8;c.fillRect(x0+(x1-x0)*p.k-1.5,y0+(y1-y0)*p.k-1.5,3,3)}
-      /* code first, so the tendrils move over it */
+    if(b==="blackwall"){var bw=SC.bw,bh=SC.bh,Rr=SC.R,Gg=SC.G,Bb=SC.B,N=bw*bh,k;
+      /* trails: the last frame fades instead of clearing, so motion smears like the reference */
+      var fd=d>0?Math.pow(.18,d*2.2):0;for(k=0;k<N;k++){Rr[k]*=fd;Gg[k]*=fd;Bb[k]*=fd}
+      var add=function(x,y,r,g,bl){x|=0;y|=0;if(x<0||y<0||x>=bw||y>=bh)return;var o=y*bw+x;Rr[o]+=r;Gg[o]+=g;Bb[o]+=bl};
+      /* move the AIs; every few seconds one surges */
+      for(i=0;i<SC.ai.length;i++){var A=SC.ai[i];A.u+=A.vu*d;A.v+=A.vv*d;if(A.u<.12||A.u>.88)A.vu*=-1;if(A.v<.18||A.v>.82)A.vv*=-1;A.next-=d;if(A.next<=0){A.f=1;A.next=rnd(3,8)}A.f=Math.max(0,A.f-d*.45)}
+      var C=SC.cols,Rw=SC.rows,iu,iv;
+      for(iu=0;iu<C;iu++){var u=iu/(C-1),pu=Math.pow(u,.8);
+        /* perspective: the wall starts big on the left and sweeps away to the right */
+        var sx=(-.08+.78*pu)*bw,sc=(1.25-.95*pu)*(.9+.1*Math.sin(u*5-t*.4)),cy=bh*(.5+.07*Math.sin(u*2.2+t*.15)-.05*Math.sin(u*3.14));
+        var fray=u>.72?(u-.72)/.28:0,hf=.86+.14*Math.sin(u*9+t*.35);
+        var colB=.45+.55*Math.pow(Math.abs(Math.sin(u*C*.5+t*.6)),3);           /* the bright vertical striations */
+        for(iv=0;iv<Rw;iv++){var v=iv/(Rw-1);
+          /* the far end and the top and bottom edges break up into loose pixels */
+          if(Math.abs(v-.5)>.5*hf&&Math.random()<.7)continue;if(fray&&Math.random()<fray*.85){if(d>0&&Math.random()<.02*fray&&SC.fly.length<900)SC.fly.push({x:sx+rnd(-2,2),y:cy+(v-.5)*bh*.95*sc,vx:rnd(8,30),vy:rnd(-6,6),l:rnd(.8,2.2),r:200*fray,g:30,b:140});continue}
+          /* waves rolling along the wall */
+          var w=Math.sin(u*14-t*1.4+v*2.3)*.6+Math.sin(u*31+t*2.1-v*5)*.25+Math.sin(v*9-t*.8+u*4)*.2,push=0,hot=0;
+          for(var ai=0;ai<SC.ai.length;ai++){var A2=SC.ai[ai],du=(u-A2.u)/A2.r,dv=(v-A2.v)/(A2.r*1.6),g2=du*du+dv*dv;if(g2<4){var e=Math.exp(-g2)*(.6+1.4*A2.f+.25*Math.sin(t*3+A2.phase));push+=e;hot+=e}}
+          var x=sx+(w*3+push*9)*sc-push*6*sc+(fray?rnd(-1,1)*fray*6:0),y=cy+(v-.5)*bh*.95*sc+w*2*sc;
+          /* dim red and blue stripes; pink-white only where an AI is breaking through */
+          var blue=(Math.sin(u*C*.21+1.3)>.35)?1:0,h=Math.min(1,hot),br=((.05+.15*colB)*(.45+.55*(1-u*.6))+h*.36)*(1-.45*Math.exp(-Math.pow((u-.45)/.18,2)-Math.pow((v-.5)/.3,2)));
+          var r0=(blue?110:235)*br+h*120*br,g0=(blue?30:22)*br+h*95*br,b0=(blue?235:60)*br+h*150*br;
+          /* a little chromatic split: red to one side, blue to the other */
+          add(x,y,r0,g0*.5,b0*.35);add(x+1,y,r0*.15,g0*.3,b0*.9);
+          if(sc>.9){add(x,y+1,r0*.6,g0*.3,b0*.3)}
+          /* pixels torn off where the AI pushes through */
+          if(hot>.7&&Math.random()<.012*hot*(d>0?1:0)&&SC.fly.length<900)SC.fly.push({x:x,y:y,vx:rnd(-6,26)*(1+hot),vy:rnd(-14,14),l:rnd(.6,1.8),r:r0,g:g0,b:b0})}}
+      /* the flying pixels drift off and fade */
+      for(i=SC.fly.length-1;i>=0;i--){var F=SC.fly[i];F.l-=d;if(F.l<=0){SC.fly.splice(i,1);continue}F.x+=F.vx*d;F.y+=F.vy*d;F.vy+=4*d;add(F.x,F.y,F.r*F.l*.7,F.g*F.l*.7,F.b*F.l*.9)}
+      /* faint vertical data rain */
+      for(i=0;i<SC.rain.length;i++){var Q=SC.rain[i];Q.y+=Q.v*d;if(Q.y>bh){Q.y=-Q.l;Q.x=rnd(0,bw)}for(k=0;k<Q.l;k++)add(Q.x,Q.y+k,18,4,10)}
+      /* into the image (additive light), then scaled up with hard pixel edges */
+      var D=SC.img.data;for(k=0;k<N;k++){var o4=k*4;D[o4]=Rr[k]>255?255:Rr[k];D[o4+1]=Gg[k]>255?255:Gg[k];D[o4+2]=Bb[k]>255?255:Bb[k];D[o4+3]=255}
+      SC.bx.putImageData(SC.img,0,0);c.imageSmoothingEnabled=false;c.globalCompositeOperation="lighter";c.drawImage(SC.buf,0,0,bw*SC.q,bh*SC.q);c.globalCompositeOperation="source-over";
+      /* stray hacking code */
       c.font="11px Consolas,monospace";for(i=0;i<SC.cb.length;i++){var cb=SC.cb[i];cb.age+=d;cb.x+=cb.vx*d;cb.y+=cb.vy*d;var typed=cb.age*cb.cps,fade=cb.age>cb.life?Math.max(0,1-(cb.age-cb.life)/2):Math.min(1,cb.age*2);
         if(fade<=0&&cb.age>cb.life){SC.cb[i]=bwCode(W,H,0);continue}var left=typed;
         for(var li=0;li<cb.lines.length&&left>0;li++){var L=cb.lines[li],n=Math.min(L.length,Math.floor(left));left-=L.length;
           var gl=Math.random()<.012;c.globalAlpha=(li===0?.55:.32)*fade*(gl?.4:1);c.fillStyle=li===0?"#ff5a66":"#ff2b3d";c.fillText(L.slice(0,n)+(n<L.length&&((t*6)|0)%2?"\u2588":""),cb.x+(gl?rnd(-6,6):0),cb.y+li*14)}}
-      /* rogue AI tendrils */
-      for(i=0;i<SC.td.length;i++){var T=SC.td[i],h=T.p[0];T.nextL-=d;if(T.nextL<=0){T.lunge=1;T.nextL=rnd(3,9)}T.lunge=Math.max(0,T.lunge-d*.9);
-        var cx0=W/2-h.x,cy0=H/2-h.y,home=Math.atan2(cy0,cx0),edge=(h.x<W*.08||h.x>W*.92||h.y<H*.08||h.y>H*.92)?1.6:.15;
-        var turn=Math.sin(t*.9+T.ph)*1.1+Math.sin(t*2.3+T.ph2)*.6+Math.sin(home-T.a)*edge;T.a+=turn*d*1.2;
-        var sp=T.sp*(1+T.lunge*2.6);h.x+=Math.cos(T.a)*sp*d;h.y+=Math.sin(T.a)*sp*d;
-        for(var k=1;k<T.p.length;k++){var A=T.p[k-1],B=T.p[k],dx=B.x-A.x,dy=B.y-A.y,dl=Math.hypot(dx,dy)||1;if(dl>T.seg){B.x=A.x+dx/dl*T.seg;B.y=A.y+dy/dl*T.seg}}
-        var glitch=Math.random()<.04+T.lunge*.08,gx=glitch?rnd(-14,14):0;
-        /* a soft red glow under the body, then the body itself (thick at the head, thin at the tail) */
-        c.lineCap="round";c.strokeStyle="#ff2b3d";c.globalAlpha=.1+T.lunge*.1;c.lineWidth=12;c.beginPath();c.moveTo(T.p[0].x,T.p[0].y);for(k=1;k<T.p.length;k+=2)c.lineTo(T.p[k].x,T.p[k].y);c.stroke();
-        for(k=1;k<T.p.length;k++){var f=1-k/T.p.length,P0=T.p[k-1],P1=T.p[k],off=glitch&&k>8&&k<26?gx:0;
-          c.globalAlpha=(.2+.7*f)*(1+T.lunge*.3);c.strokeStyle=k<3?"#ffd0d4":"#ff2b3d";c.lineWidth=.6+4.4*f;c.beginPath();c.moveTo(P0.x+off,P0.y);c.lineTo(P1.x+off,P1.y);c.stroke()}
-        /* jagged spikes off the body, like it is reaching out */
-        if(Math.random()<.18+T.lunge*.4){var bi=(rnd(3,T.p.length-4))|0,Bp=T.p[bi],Bq=T.p[bi+1],ang=Math.atan2(Bq.y-Bp.y,Bq.x-Bp.x)+(Math.random()<.5?1:-1)*1.5708;T.spk.push({x:Bp.x,y:Bp.y,a:ang,l:rnd(10,36),life:.5})}
-        c.lineWidth=1;for(k=T.spk.length-1;k>=0;k--){var sk=T.spk[k];sk.life-=d;if(sk.life<=0){T.spk.splice(k,1);continue}c.globalAlpha=sk.life*1.2;c.strokeStyle="#ff4b5a";c.beginPath();c.moveTo(sk.x,sk.y);var mx=sk.x+Math.cos(sk.a)*sk.l*.5+rnd(-4,4),my=sk.y+Math.sin(sk.a)*sk.l*.5+rnd(-4,4);c.lineTo(mx,my);c.lineTo(sk.x+Math.cos(sk.a+.4)*sk.l,sk.y+Math.sin(sk.a+.4)*sk.l);c.stroke()}
-        c.globalAlpha=.9;c.fillStyle="#fff";c.beginPath();c.arc(h.x,h.y,2.2+T.lunge*2,0,6.283);c.fill()}
-      /* static and the odd tear across the screen */
-      c.globalAlpha=.45;c.fillStyle="#ff2b3d";for(i=0;i<36;i++)c.fillRect(Math.random()*W,Math.random()*H,1,1);
-      if(Math.random()<.025){var ty=rnd(0,H);c.globalAlpha=.18;c.fillRect(0,ty,W,rnd(1,4));}
       c.globalAlpha=1}
     if(b==="holo"){if(SC.off)c.drawImage(SC.off,0,0);
       c.fillStyle="rgba(79,227,255,.55)";for(i=0;i<SC.p.length;i++){var q=SC.p[i];q.y-=q.v*d;if(q.y<-4){q.y=H+4;q.x=rnd(0,W)}c.fillRect(q.x,q.y,q.r,q.r)}
@@ -4550,7 +4569,7 @@ function setView(v,save,cb){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;
   applyView(v,save);if(cb)cb();
   /* 1.8.6: the new page's content fades and rises into place; the top bar and background never disappear
      (the old pixel dissolve covered the whole window, which looked like the app blanking). The Browser shows its page at once. */
-  if(prev&&prev!==v&&pxOK()&&v!=="browser"){var R=document.documentElement;R.classList.remove("vin");void R.offsetWidth;R.classList.add("vin");R.classList.toggle("vback",VORD.indexOf(v)<VORD.indexOf(prev));clearTimeout(setView.vt);setView.vt=setTimeout(function(){R.classList.remove("vin","vback")},320)}}
+  if(prev&&prev!==v&&pxOK()&&v!=="browser")viewAnim(VORD.indexOf(v)<VORD.indexOf(prev))}
 
 /* ---------- Music + Chat pages ---------- */
 function appGo(u){if(typeof bwNative==="function"&&bwNative())setView("browser",true,function(){bwGo(u,true)});else window.open(u,"_blank","noopener")}
@@ -5473,12 +5492,19 @@ document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches|
 /* 1.8.6 Nav: one button top right; pressing it slides the page list out to its left. Alt+letter shortcuts work either way. */
 function navBtnInit(){if(document.getElementById("nav-btn"))return;var b=document.createElement("button");b.id="nav-btn";b.type="button";b.setAttribute("data-act","nav-toggle");b.setAttribute("aria-expanded","false");b.setAttribute("aria-controls","vsw");b.title="Pages (Alt + first letter works any time)";
   b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg><span>Nav</span><em id="nav-cur"></em>';document.body.appendChild(b);navCur()}
-function navCur(){var e=document.getElementById("nav-cur");if(!e)return;var p=(NAV.pages||[]).find(function(x){return x.v===S.view});e.textContent=p?p.n:"";var b=document.getElementById("nav-btn");if(b&&b.offsetWidth)document.documentElement.style.setProperty("--navw",(b.offsetWidth+8)+"px");if(typeof bwLayout==="function"&&S.view==="browser")setTimeout(bwLayout,0)}
+function navCur(){var e=document.getElementById("nav-cur");if(!e)return;var p=(NAV.pages||[]).find(function(x){return x.v===S.view});e.textContent=p?p.n:""}   /* 1.8.7: no measuring here (it forced a full layout on every page change); the button has a fixed width */
 function navToggle(on){var R=document.documentElement;if(on==null)on=!R.classList.contains("navx");R.classList.toggle("navx",!!on);var b=document.getElementById("nav-btn");if(b)b.setAttribute("aria-expanded",String(!!on));
   if(on){var f=document.querySelector('#vsw [aria-selected="true"],#vsw [aria-current="true"]')||document.querySelector("#vsw button");if(f)try{f.focus({preventScroll:true})}catch(_){}}}
 document.addEventListener("pointerdown",function(e){if(!document.documentElement.classList.contains("navx"))return;var t=e.target;if(t&&t.closest&&(t.closest("#vsw")||t.closest("#nav-btn")))return;navToggle(false)},true);
 document.addEventListener("keydown",function(e){if(e.key==="Escape"&&document.documentElement.classList.contains("navx")){e.stopPropagation();navToggle(false);var b=document.getElementById("nav-btn");if(b)b.focus()}},true);
 document.addEventListener("click",function(e){var t=e.target&&e.target.closest&&e.target.closest('#vsw [data-act="view"]');if(t)setTimeout(function(){navToggle(false)},60)});
+/* 1.8.7 page change: the new page slides and fades in while a light line sweeps across in the direction you're going.
+   Classes are swapped on the next frames (never by forcing a layout), and only compositor-friendly properties move. */
+function viewAnim(back){var R=document.documentElement,sc=document.getElementById("vscan");if(!sc){sc=document.createElement("i");sc.id="vscan";sc.setAttribute("aria-hidden","true");document.body.appendChild(sc)}
+  /* the classes go on the page sections themselves, not on <html>: a class on <html> makes the browser re-check every element (~50 ms each time) */
+  var els=[].slice.call(document.querySelectorAll("#app>:not(.top):not(#banner):not(#upd-bar):not(#shell-bar),#ofd")).concat([sc]);
+  els.forEach(function(e){e.classList.remove("vin","vb")});cancelAnimationFrame(viewAnim.r);clearTimeout(viewAnim.t);
+  viewAnim.r=requestAnimationFrame(function(){viewAnim.r=requestAnimationFrame(function(){els.forEach(function(e){e.classList.add("vin");if(back)e.classList.add("vb")});viewAnim.t=setTimeout(function(){els.forEach(function(e){e.classList.remove("vin","vb")})},480)})})}
 function vswPin(){var v=document.getElementById("vsw");if(v&&v.parentNode!==document.body)document.body.appendChild(v)}
 try{vswPin();navBtnInit()}catch(_){}
 function browserEnter(){var br=$("#browser");if(!br)return;br.hidden=false;bwTagQuick();try{extInit()}catch(_){}

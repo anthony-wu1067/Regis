@@ -43,6 +43,12 @@ egis`; localStorage for file:// is shared across folders, so settings carry over
 2. Phone layout was rebuilt in 1.7.6 (bottom tab bar). Only checked in simulated iPhone screenshots, not on a device.
 3. Google sign-in in the built-in browser (since 1.7.9): plain Chrome UA everywhere plus a `window.chrome` surface (app, runtime, csi, loadTimes; functions report `[native code]`) injected by `lib/bw-preload.js` in the main world. Never call `wc.setUserAgent` during a navigation: it crashed Electron on the docs.google.com to accounts.google.com redirect (1.7.7/1.7.8). Not yet tested with a real account.
 
+## Notes from 1.8.7
+- Never read layout (offsetWidth, getBoundingClientRect) right after switching views: `navCur` did, forcing a full style+layout (~65 ms) on every page change. Find these with a trace that includes `disabled-by-default-devtools.timeline.stack` and group Layout/UpdateLayoutTree by `beginData.stackTrace`.
+- Don't toggle classes on `<html>` for short effects: it restyles the whole document (~50 ms). `viewAnim` puts `.vin`/`.vb` on the `#app` sections and `#vscan` (the sweep line), two rAFs after the switch.
+- Home dial: only `#hm-dial` has the d3 drop-shadow; shadows on the other lifted layers made ~13 render passes a frame.
+- Blackwall: pixel wall rendered into a quarter-size buffer (`SC.R/G/B` additive, fade for trails, `putImageData`, `drawImage` with smoothing off, `lighter`). AIs are moving gaussian bulges (`SC.ai`), torn pixels `SC.fly`, rain `SC.rain`, code `SC.cb`.
+
 ## Notes from 1.8.6
 - Page changes: `pxRun` (full-window pixel dissolve) is no longer used by `setView`; it covered the top bar too and read as the app blanking. `setView` applies the view, then adds `html.vin` (+`vback`) for a 0.26 s content-only `viewIn`. The Browser gets no animation (`.bw-main` fade removed). `blank.js`-style check: film the window with desktopCapturer and flag frames with almost no luminance spread.
 - Video full screen (`lib/browser.js`): `enter-html-full-screen` remembers whether the window was already full screen (`vfs.was`), makes it full screen and sizes the tab view to the whole content area (`_vfsFit`, also from `setBounds`/`_attach` while `vfs`); `leave-html-full-screen` restores the stage bounds and only leaves full screen if it wasn't before. `test/fullscreen.test.js` is 11.
