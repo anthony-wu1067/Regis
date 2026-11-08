@@ -14,7 +14,7 @@ const { OfficeDock } = require('./lib/office');
 const { Extensions } = require('./lib/extensions');
 const { CommHost } = require('./lib/comm');
 
-let commHost = null, runningVersion = null, browserHost = null, linkInApp = false, officeDock = null, officeBye = false;
+let plDock = null, commHost = null, runningVersion = null, browserHost = null, linkInApp = false, officeDock = null, officeBye = false;
 let win = null, tray = null, quitting = false, capWin = null, mini = null, updater = null;
 const BUNDLED_PAGE = path.join(__dirname, 'renderer', 'index.html');
 const MINI_KEY = 'CommandOrControl+Shift+M';
@@ -80,7 +80,7 @@ function createWindow() {
   const vis = (v) => () => { try { if (win && !win.isDestroyed()) win.webContents.send('win:vis', v); } catch (_) {} };
   win.on('hide', vis(false)); win.on('minimize', vis(false)); win.on('show', vis(true)); win.on('restore', vis(true));
   /* docked Office windows follow the Regis window */
-  ['move', 'resize', 'maximize', 'unmaximize', 'enter-full-screen', 'leave-full-screen', 'hide', 'show', 'minimize', 'restore'].forEach((ev) => win.on(ev, () => { if (officeDock) officeDock.follow(); }));
+  ['move', 'resize', 'maximize', 'unmaximize', 'enter-full-screen', 'leave-full-screen', 'hide', 'show', 'minimize', 'restore'].forEach((ev) => win.on(ev, () => { if (officeDock) officeDock.follow(); if (plDock) plDock.follow(); }));
   const staged = updater && updater.current();      // a newer interface downloaded over the air, if any
   runningVersion = staged ? staged.version : app.getVersion();
   win.loadFile(staged ? path.join(staged.dir, 'index.html') : BUNDLED_PAGE);
@@ -197,6 +197,12 @@ app.whenReady().then(async () => {
   const dl = new Downloads({ dir: app.getPath('downloads'), load: () => { try { return JSON.parse(store.getMeta('downloads', '[]') || '[]'); } catch (_) { return []; } }, save: (l) => store.setMeta('downloads', JSON.stringify(l)), onChange: (l) => send('browser:downloads', l), onDone: (d) => send('browser:dldone', d) });
   dl.attach(session.fromPartition(PARTITION));
   const bw = browserHost;
+  /* 1.9.0: if the graphics process restarts, the page redraws its backgrounds (pre-drawn layers are lost otherwise) */
+  app.on('child-process-gone', (_e, d) => {
+    /* a small log so a crash can be confirmed later: <userData>/regis-events.log (type, reason, exit code; nothing personal) */
+    try { require('fs').appendFileSync(path.join(app.getPath('userData'), 'regis-events.log'), new Date().toISOString() + ' ' + (d && d.type) + ' ' + (d && d.reason) + ' ' + (d && d.exitCode) + '\n'); } catch (_) {}
+    if (d && d.type === 'GPU') setTimeout(() => send('app:gpuReset', true), 1200);
+  });
   bw.onActive = () => { try { if (win && !win.isDestroyed() && win.isVisible() && !win.isMinimized()) win.webContents.send('win:vis', true); } catch (_) {} };
   /* 1.8.5 Chrome extensions, loaded into the browser's session only (never into Regis's own pages) */
   const bses = session.fromPartition(PARTITION);
@@ -248,6 +254,20 @@ app.whenReady().then(async () => {
   ipcMain.handle('comm:float', wrap((id, min) => commHost.setFloat(id === null ? null : id ? String(id) : undefined, min === undefined || min === null ? undefined : !!min)));
   ipcMain.handle('comm:overlay', wrap((on) => commHost.overlay(!!on)));
   ipcMain.handle('comm:phoneLink', wrap(() => shell.openExternal('ms-phone:').then(() => true)));
+  /* 1.9.0 iMessage through Phone Link: the real Phone Link app docked into the Comm page (same way as Office) */
+  plDock = new OfficeDock(() => win, path.join(__dirname, 'lib', 'office-dock.ps1'), ['phonelink']);
+  plDock.onState = (st) => send('comm:pl', { docked: st.docs.some((d) => d.docked), waiting: !!st.waiting });
+  ipcMain.handle('comm:plState', wrap(async () => Object.assign(plDock.state(), { rect: plDock.rect, screen: plDock._screenRect(), helper: !!plDock.ps, list: plDock.ps ? await plDock._cmd({ op: 'list' }).catch(() => null) : null })));
+  ipcMain.handle('comm:plInstalled', wrap(() => process.platform === 'win32' && plDock.phoneLinkInstalled()));
+  ipcMain.handle('comm:native', wrap(async (v, r) => {
+    if (process.platform !== 'win32') throw new Error('Phone Link needs Windows.');
+    if (r) plDock.bounds(r);
+    if (!v) { await plDock.show(false); return true; }
+    await plDock.show(true, 0, true);
+    if (!plDock.state().docs.some((d) => d.docked)) { await plDock.startPhoneLink(); await plDock.scan(); }
+    return true;
+  }));
+  ipcMain.handle('comm:plOpen', wrap(async () => { const st = plDock.state(); for (const d of st.docs) if (d.docked) await plDock.release(d.h); return shell.openExternal('ms-phone:').then(() => true).catch(() => plDock.startPhoneLink()); }));
   setTimeout(() => { try { commHost.startBackground(); } catch (_) {} }, 1500);
   ipcMain.handle('ext:list', wrap(async () => { await extReady; return exts.list(); }));
   ipcMain.handle('ext:install', wrap((link) => exts.installStore(String(link || ''))));
@@ -370,7 +390,7 @@ app.whenReady().then(async () => {
   try { globalShortcut.register(MINI_KEY, () => { showWindow(); setMini(!(mini && mini.on)); }); } catch (_) { /* shortcut unsupported */ }
   try { if (!globalShortcut.register(CAPTURE_KEY, openCapture)) console.warn('Quick capture shortcut is taken by another app.'); } catch (_) { /* shortcut unsupported */ }
   /* give docked Office windows their frames back before the Regis window goes away */
-  app.on('before-quit', (e) => { if (officeDock && officeDock.ps && !officeBye) { e.preventDefault(); officeBye = true; quitting = true; officeDock.releaseAll().finally(() => app.quit()); return; } });
+  app.on('before-quit', (e) => { const docks = [officeDock, plDock].filter((d) => d && d.ps); if (docks.length && !officeBye) { e.preventDefault(); officeBye = true; quitting = true; Promise.all(docks.map((d) => d.releaseAll())).finally(() => app.quit()); return; } });
   app.on('before-quit', () => { quitting = true; try { browserHost && browserHost.destroy(); } catch (_) {} globalShortcut.unregisterAll(); store.flush(); });
   app.on('activate', showWindow);
 });

@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('regisBridge', {
   sample: (input, opts) => call('claude:sample', input, opts),
   getStatus: () => call('app:status'), saveGoogle: (v) => call('app:saveGoogle', v), connectGoogle: () => call('app:connectGoogle'),
   disconnectGoogle: () => call('app:disconnectGoogle'), saveCanvas: (v) => call('app:saveCanvas', v), removeCanvas: () => call('app:removeCanvas'), saveKey: (k) => call('app:saveKey', k), setOpenAtLogin: (b) => call('app:openAtLogin', b),
+  onGpuReset: (cb) => { ipcRenderer.on('app:gpuReset', () => { try { cb(); } catch (_) {} }); },
   fullscreen: (on) => call('win:fullscreen', on), fsState: () => call('win:fsState'), onFullscreen: (cb) => { ipcRenderer.on('win:fs', (_e, v) => { try { cb(!!v); } catch (_) {} }); },
   notify: (title, body) => call('app:notify', title, body),
   spotifyAuth: (url) => call('spotify:auth', url), drm: () => call('app:drm'),
@@ -19,7 +20,7 @@ contextBridge.exposeInMainWorld('regisBridge', {
   /* 1.8.9 Comm page: chat apps */
   comm: { state: () => call('comm:state'), add: (a) => call('comm:add', a), remove: (id, wipe) => call('comm:remove', id, !!wipe), mute: (id, on) => call('comm:mute', id, !!on), bg: (id, on) => call('comm:bg', id, !!on),
     reload: (id) => call('comm:reload', id), show: (v, id) => call('comm:show', !!v, id || null), bounds: (b) => call('comm:bounds', b), float: (id, min) => call('comm:float', id, min), overlay: (on) => call('comm:overlay', !!on),
-    phoneLink: () => call('comm:phoneLink'), onOpen: (cb) => { ipcRenderer.on('comm:open', (_e, id) => { try { cb(String(id || '')); } catch (_) {} }); }, onState: (cb) => { ipcRenderer.on('comm:state', (_e, s) => { try { cb(s); } catch (_) {} }); } },
+    phoneLink: () => call('comm:phoneLink'), plInstalled: () => call('comm:plInstalled'), plState: () => call('comm:plState'), native: (v, r) => call('comm:native', !!v, r || null), plOpen: () => call('comm:plOpen'), onPl: (cb) => { ipcRenderer.on('comm:pl', (_e, s) => { try { cb(s); } catch (_) {} }); }, onOpen: (cb) => { ipcRenderer.on('comm:open', (_e, id) => { try { cb(String(id || '')); } catch (_) {} }); }, onState: (cb) => { ipcRenderer.on('comm:state', (_e, s) => { try { cb(s); } catch (_) {} }); } },
   /* 1.8.5 Chrome extensions in the Regis Browser */
   ext: { list: () => call('ext:list'), install: (link) => call('ext:install', link), installPick: (folder) => call('ext:installPick', !!folder), on: (id, v) => call('ext:on', id, !!v), remove: (id) => call('ext:remove', id),
     popup: (id, at) => call('ext:popup', id, at), options: (id) => call('ext:options', id), onList: (cb) => { ipcRenderer.on('ext:list', (_e, l) => { try { cb(l); } catch (_) {} }); }, onShowBrowser: (cb) => { ipcRenderer.on('ext:showBrowser', () => { try { cb(); } catch (_) {} }); } },

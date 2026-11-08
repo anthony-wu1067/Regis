@@ -14,20 +14,21 @@ function unreadOf(title) { const t = String(title || ''); const m = t.match(/^\s
 class CommHost {
   constructor({ getWin, load, save, onState, chromeVersion, preload }) {
     this.getWin = getWin; this.load = load; this.save = save; this.onState = onState; this.ua = CHROME_UA(chromeVersion); this.preload = preload;
-    const s = this.load() || {}; this.apps = Array.isArray(s.apps) ? s.apps.filter((a) => a && a.id && isWeb(a.url)) : []; this.muteAll = !!s.muteAll;
+    const s = this.load() || {}; this.apps = Array.isArray(s.apps) ? s.apps.filter((a) => a && a.id && (isWeb(a.url) || a.native === 'phonelink')) : []; this.muteAll = !!s.muteAll;
     this.views = new Map(); this.active = null; this.visible = false; this.bounds = null; this.float = null; this.floatMin = false; this.fw = null; this.emitT = 0; this.over = false;
     ipcMain.on('cmf:act', (e, a) => { if (!this.fw || e.sender !== this.fw.webContents) return; this._floatAct(a); });
   }
   _win() { const w = this.getWin(); return w && !w.isDestroyed() ? w : null; }
-  _persist() { try { this.save({ apps: this.apps.map((a) => ({ id: a.id, name: a.name, url: a.url, icon: a.icon || '', color: a.color || '', muted: !!a.muted, bg: a.bg !== false })), muteAll: this.muteAll }); } catch (_) {} }
+  _persist() { try { this.save({ apps: this.apps.map((a) => ({ id: a.id, name: a.name, url: a.url, native: a.native || '', icon: a.icon || '', color: a.color || '', muted: !!a.muted, bg: a.bg !== false })), muteAll: this.muteAll }); } catch (_) {} }
   muted(id) { const a = this.apps.find((x) => x.id === id); return this.muteAll || !!(a && a.muted); }
   state() {
-    return { apps: this.apps.map((a) => { const v = this.views.get(a.id); return { id: a.id, name: a.name, url: a.url, icon: a.icon || '', color: a.color || '', muted: !!a.muted, bg: a.bg !== false, live: !!v, unread: v ? v.unread : 0, title: v ? v.title : '', loading: v ? v.loading : false }; }),
+    return { apps: this.apps.map((a) => { const v = this.views.get(a.id); return { id: a.id, name: a.name, url: a.url, native: a.native || '', icon: a.icon || '', color: a.color || '', muted: !!a.muted, bg: a.bg !== false, live: !!v, unread: v ? v.unread : 0, title: v ? v.title : '', loading: v ? v.loading : false }; }),
       active: this.active, muteAll: this.muteAll, float: this.float, floatMin: this.floatMin };
   }
   _emit() { if (this.emitT) return; this.emitT = setTimeout(() => { this.emitT = 0; if (this.onState) try { this.onState(this.state()); } catch (_) {} }, 120); }
   _part(id) { return 'persist:comm-' + id; }
   _ensure(a) {
+    if (!a || a.native) return null;
     let v = this.views.get(a.id); if (v) return v;
     const ses = session.fromPartition(this._part(a.id));
     if (!ses.__regisComm) {
@@ -52,8 +53,10 @@ class CommHost {
     return v;
   }
   /* apps set to run in the background start a little after Regis, one by one, so start-up stays quick */
-  startBackground() { let n = 0; this.apps.filter((a) => a.bg !== false).forEach((a) => { setTimeout(() => { if (this.apps.includes(a)) { this._ensure(a); this._layout(); this._emit(); } }, 6000 + 2500 * n++); }); }
+  startBackground() { let n = 0; this.apps.filter((a) => a.bg !== false && !a.native).forEach((a) => { setTimeout(() => { if (this.apps.includes(a)) { this._ensure(a); this._layout(); this._emit(); } }, 6000 + 2500 * n++); }); }
   add(app) {
+    /* Phone Link (iMessage) is a native app docked by main, not a web view */
+    if (app && app.native === 'phonelink') { if (this.apps.some((a) => a.native === 'phonelink')) throw new Error('iMessage is already in Comm.'); const pl = { id: 'phonelink-' + Math.random().toString(36).slice(2, 7), name: 'iMessage', url: '', native: 'phonelink', color: '#34C759', muted: false, bg: false }; this.apps.push(pl); this._persist(); this.active = pl.id; this._layout(); this._emit(); return pl.id; }
     const url = String(app && app.url || '').trim(); if (!isWeb(url)) throw new Error('Use a secure web address (https://…).');
     if (this.apps.length >= 16) throw new Error('That’s a lot of apps: remove one first.');
     const id = (String(app.key || '').replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 16) || 'app') + '-' + Math.random().toString(36).slice(2, 7);
@@ -77,7 +80,7 @@ class CommHost {
   /* pop out: the app moves into a small borderless window that stays above Regis on every page */
   setFloat(id, min) {
     if (id === null) { this._floatClose(); return this.state(); }
-    if (id) { if (!this.apps.some((a) => a.id === id)) return false; this.float = id; this._ensure(this.apps.find((a) => a.id === id)); this._floatOpen(); }
+    if (id) { const fa = this.apps.find((a) => a.id === id); if (!fa || fa.native) return false; this.float = id; this._ensure(this.apps.find((a) => a.id === id)); this._floatOpen(); }
     if (min !== undefined) this._floatMin(!!min);
     this._layout(); this._emit(); return this.state();
   }

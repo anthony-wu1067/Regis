@@ -84,6 +84,13 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.0 Calendar back, iMessage in Comm, backgrounds survive
+
+- **Calendar month view is back.** The Comm page added in 1.8.9 used a style name the calendar's month grid already used, which hid the grid. Comm's styles have their own names now.
+- **iMessage in Comm:** "Add iMessage (Phone Link)" puts Microsoft's Phone Link app (which talks to your iPhone over Bluetooth) right inside the Comm page, the same way Office docks Word and Excel. The page walks you through pairing the first time. Phone Link keeps running, so new messages pop up on any page; "Open on its own" gives it its own window again.
+- **Backgrounds come back after the graphics card resets** (this can happen after heavy websites in the Browser): Regis now notices and redraws them, including the Milky Way in Cosmos, which used to stay blank. A small log of crashes is kept in Regis's data folder (regis-events.log) so a repeat can be confirmed.
+- Updating: the desktop app changed, so run *Install Regis* once.
+
 ## 1.8.9 Comm page, smooth scrolling, quicker Browser start
 
 - **Comm page:** Discord, Slack, WhatsApp, Messenger, Telegram, Teams, Google Messages, Instagram, LinkedIn, X, or any web chat, inside Regis. Add and remove apps; each keeps its own sign-in and keeps running in the background so unread counts and notifications arrive (the Nav button gets a red dot). Mute one app or all of Comm (no pop-ups or sounds). **Pop out** floats a chat in a small window above every page; drag it, minimise it to a bar, or send it back to Comm. iMessage can't run inside Regis (Apple doesn't offer it on the web or Windows); Comm links to Microsoft Phone Link, which can.

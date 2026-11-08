@@ -16,23 +16,23 @@ app.whenReady().then(async () => {
   const chatWc = () => webContents.getAllWebContents().find((w) => /chat\.test/.test(w.getURL()));
   ok(await J('return !!document.querySelector(\'#vsw [data-v="comm"]\')'), 'Comm is in the page list');
   await J('document.querySelector(\'#vsw [data-v="comm"]\').click()'); await sleep(1200);
-  ok(await J('return /Discord/.test(document.getElementById("cm-ph").textContent)&&/Slack/.test(document.getElementById("cm-ph").textContent)&&/iMessage/.test(document.getElementById("cm-ph").textContent)'), 'with no apps, Comm offers Discord, Slack and the others, and explains iMessage');
-  await J('document.getElementById("cm-cn").value="Chat";document.getElementById("cm-cu").value="https://chat.test/";document.querySelector("form[data-cm-form]").requestSubmit()');
+  ok(await J('return /Discord/.test(document.getElementById("cmx-ph").textContent)&&/Slack/.test(document.getElementById("cmx-ph").textContent)&&/iMessage/.test(document.getElementById("cmx-ph").textContent)'), 'with no apps, Comm offers Discord, Slack and the others, and explains iMessage');
+  await J('document.getElementById("cmx-cn").value="Chat";document.getElementById("cmx-cu").value="https://chat.test/";document.querySelector("form[data-cmx-form]").requestSubmit()');
   ok(await until(async () => { const s = await st(); return s.apps.length === 1 && s.apps[0].name === 'Chat'; }), 'a chat app can be added by its web address');
   ok(await until(() => !!chatWc()), 'it opens in its own view');
-  ok(await until(() => J('return /^2|3$/.test((document.querySelector("#cm-side .cm-a em")||{}).textContent||"")')), 'the unread count from the app shows on its icon');
+  ok(await until(() => J('return /^2|3$/.test((document.querySelector("#cmx-side .cmx-a em")||{}).textContent||"")')), 'the unread count from the app shows on its icon');
   ok(await until(() => J('return document.getElementById("nav-btn").classList.contains("unread")')), 'the Nav button gets an unread dot');
   ok(await until(async () => (await st()).apps[0].unread === 3), 'the count follows the app (now 3)');
   const id = (await st()).apps[0].id;
   // mute
-  await J('document.querySelector(\'#cm-bar [data-act="cm-mute"]\').click()');
+  await J('document.querySelector(\'#cmx-bar [data-act="cmx-mute"]\').click()');
   ok(await until(async () => (await st()).apps[0].muted && chatWc().isAudioMuted()), 'Mute silences the app');
-  await J('document.querySelector(\'#cm-side [data-act="cm-muteall"]\').click()');
+  await J('document.querySelector(\'#cmx-side [data-act="cmx-muteall"]\').click()');
   ok(await until(async () => (await st()).muteAll), 'Mute all mutes every app');
-  await J('document.querySelector(\'#cm-side [data-act="cm-muteall"]\').click()'); await J('document.querySelector(\'#cm-bar [data-act="cm-mute"]\').click()');
+  await J('document.querySelector(\'#cmx-side [data-act="cmx-muteall"]\').click()'); await J('document.querySelector(\'#cmx-bar [data-act="cmx-mute"]\').click()');
   ok(await until(async () => { const s = await st(); return !s.muteAll && !s.apps[0].muted && !chatWc().isAudioMuted(); }), 'and both can be turned back on');
   // pop out
-  await J('document.querySelector(\'#cm-bar [data-act="cm-pop"]\').click()');
+  await J('document.querySelector(\'#cmx-bar [data-act="cmx-pop"]\').click()');
   let fw; ok(await until(() => { fw = BrowserWindow.getAllWindows().find((w) => w.getTitle() === 'Regis chat'); return !!fw; }), 'Pop out opens a small chat window');
   await J('document.querySelector(\'#vsw [data-v="music"]\').click()'); await sleep(1500);
   ok(fw.isVisible() && fw.contentView.children.some((c) => c.webContents === chatWc()), 'on another page the chat window shows the app');
@@ -44,8 +44,8 @@ app.whenReady().then(async () => {
   ok(await until(() => J('return document.documentElement.dataset.view==="comm"')), '↗ opens the app on the Comm page');
   ok(await until(() => !BrowserWindow.getAllWindows().some((w) => w.getTitle() === 'Regis chat')), 'and closes the floating window');
   // remove
-  await J('window.confirm=function(){return true}'); await J('document.querySelector(\'#cm-bar [data-act="cm-menu"]\').click()'); await sleep(300);
-  await J('document.querySelector(\'#bw-bmpop [data-act="cm-rm"]\').click()');
+  await J('window.confirm=function(){return true}'); await J('document.querySelector(\'#cmx-bar [data-act="cmx-menu"]\').click()'); await sleep(300);
+  await J('document.querySelector(\'#bw-bmpop [data-act="cmx-rm"]\').click()');
   ok(await until(async () => (await st()).apps.length === 0), 'an app can be removed');
   ok(await until(() => !chatWc()), 'and its view is closed');
   console.log(pass + ' passed, ' + fail + ' failed'); app.exit(fail ? 1 : 0);

@@ -26,7 +26,9 @@ function findExe(name) {
 }
 
 class OfficeDock {
-  constructor(getWin, script) {
+  /* kinds: which apps this dock manages (Office uses word/excel/powerpoint; Comm uses phonelink) */
+  constructor(getWin, script, kinds) {
+    this.kinds = kinds || ['word', 'excel', 'powerpoint'];
     this.getWin = getWin; this.script = script; this.ps = null; this.ready = null; this.n = 0; this.wait = new Map(); this.buf = '';
     this.docs = new Map();            // hwnd -> { h, k, pid, t, docked }
     this.active = 0; this.visible = false; this.rect = null; this.expect = null; this.onState = null; this.timer = 0; this.lastKey = '';
@@ -79,20 +81,24 @@ class OfficeDock {
   async scan() {
     if (!this.ps && !this.docs.size && !this.expect) return this.state();
     let list; try { list = await this._cmd({ op: 'list' }, 8000); } catch (_) { return this.state(); }
+    list = (list || []).filter((w) => this.kinds.includes(w.k));
     const seen = new Set(), owner = this._owner();
     for (const w of list || []) {
       seen.add(w.h); let d = this.docs.get(w.h);
       const title = String(w.t || '').replace(/\s+[-–—]\s+(Word|Excel|PowerPoint)$/i, '').trim() || ({ word: 'Word', excel: 'Excel', powerpoint: 'PowerPoint' })[w.k];
       if (!d) {
-        const mine = (this.expect && this.expect.k === w.k && Date.now() < this.expect.until && !this.expect.before.has(w.h)) || [...this.docs.values()].some((x) => x.docked && x.pid === w.pid);
+        /* Phone Link has a single window: take it whenever we asked for it, even if it was already open */
+        const mine = (this.expect && this.expect.k === w.k && Date.now() < this.expect.until && (w.k === 'phonelink' || !this.expect.before.has(w.h))) || [...this.docs.values()].some((x) => x.docked && x.pid === w.pid);
         d = { h: w.h, k: w.k, pid: w.pid, t: title, docked: !!w.docked }; this.docs.set(w.h, d);
         if (mine && owner) { try { d.docked = !!(await this._cmd({ op: 'dock', h: w.h, owner })); } catch (_) {} if (d.docked) { this.active = w.h; if (this.expect && this.expect.k === w.k) this.expect = null; await this.place(true); } }
-      } else { d.t = title; d.docked = !!w.docked; }
+      } else { d.t = title; d.docked = !!w.docked;
+        /* Phone Link was already open before we asked for it: take it now */
+        if (!d.docked && w.k === 'phonelink' && this.expect && this.expect.k === 'phonelink' && Date.now() < this.expect.until && owner) { try { d.docked = !!(await this._cmd({ op: 'dock', h: w.h, owner })); } catch (_) {} if (d.docked) { this.active = w.h; this.expect = null; await this.place(true); } } }
     }
     /* the last file of an app closed: if that app now has nothing open, let it quit instead of idling in the background */
     const had = {}; this.docs.forEach((d) => { if (d.docked) had[d.k] = 1; });
     for (const h of [...this.docs.keys()]) if (!seen.has(h)) { this.docs.delete(h); if (this.active === h) { const next = [...this.docs.values()].find((x) => x.docked); this.active = next ? next.h : 0; if (next) await this.place(false); } }
-    Object.keys(had).forEach((k) => { if (![...this.docs.values()].some((d) => d.k === k)) this._cmd({ op: 'quitIdle', k }, 20000).catch(() => {}); });
+    Object.keys(had).forEach((k) => { if (k !== 'phonelink' && ![...this.docs.values()].some((d) => d.k === k)) this._cmd({ op: 'quitIdle', k }, 20000).catch(() => {}); });
     if (this.expect && Date.now() > this.expect.until) this.expect = null;
     /* Office keeps its own title bar now, so it could be dragged away: put it back */
     if (this.visible) await this.place(false);
@@ -122,6 +128,9 @@ class OfficeDock {
     this.scan().catch(() => {}); return true;
   }
   /* the app's own start screen (templates, recent files) */
+  /* Phone Link is a Store app: started through its app id */
+  async startPhoneLink() { await this._expect('phonelink'); cp.spawn('explorer.exe', ['shell:AppsFolder\\Microsoft.YourPhone_8wekyb3d8bbwe!App'], { detached: true, stdio: 'ignore' }).unref(); return true; }
+  phoneLinkInstalled() { if (this.plOk !== undefined) return this.plOk; try { const out = cp.execFileSync('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', '(Get-AppxPackage -Name Microsoft.YourPhone) -ne $null'], { encoding: 'utf8', windowsHide: true, timeout: 15000 }); this.plOk = /True/i.test(out); } catch (_) { this.plOk = false; } return this.plOk; }
   async start(k) { if (!this.apps()[k]) throw new Error('That app isn’t installed on this PC.'); await this._expect(k); cp.spawn(this.apps()[k], [], { detached: true, stdio: 'ignore' }).unref(); return true; }
   async openPath(p) { const k = kindOf(p); if (!k) throw new Error('That isn’t a Word, Excel or PowerPoint file.'); if (!fs.existsSync(p)) throw new Error('That file is no longer there.'); await this._expect(k); const e = await shell.openPath(p); if (e) { this.expect = null; throw new Error(e); } return k; }
   async pick(k) { const w = this.getWin(); const r = await dialog.showOpenDialog(w, { properties: ['openFile', 'multiSelections'], filters: KINDS[k] ? KINDS[k].filters.concat([{ name: 'All files', extensions: ['*'] }]) : [{ name: 'Office files', extensions: ['docx', 'doc', 'xlsx', 'xls', 'csv', 'pptx', 'ppt'] }] }); if (r.canceled || !r.filePaths.length) return false; for (const p of r.filePaths.slice(0, 8)) await this.openPath(p); return true; }

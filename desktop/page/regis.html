@@ -2593,36 +2593,39 @@ html.mob[data-view="comm"] .top{padding-top:max(8px,var(--sat))}
   html.mob[data-view="comm"] .top,html.mob[data-view="browser"] .top{min-height:0;height:max(8px,env(safe-area-inset-top,0px));padding:0;gap:0;overflow:hidden}
 html.mob[data-view="comm"] .top>*,html.mob[data-view="browser"] .top>*{display:none!important}
 html[data-view="comm"] #app>:not(.top):not(#comm):not(#banner):not(#upd-bar):not(#shell-bar){display:none!important}
-.cm{display:none}
+.cmx{display:none}
 html[data-view="comm"] #comm{display:flex;position:fixed;left:0;right:0;bottom:0;top:44px;z-index:6;background:var(--bg)}
 html.mob[data-view="comm"] #comm{top:max(8px,env(safe-area-inset-top,0px));bottom:calc(66px + env(safe-area-inset-bottom,0px))}
-.cm-side .cm-t{width:28px;height:28px;border-radius:8px;font-size:13px}
-.cm-side .bw-ic[aria-current=page]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--inset))}
-.cm-side .bw-ic em{background:var(--bad);color:#fff}
-.cm-side .cm-mu{position:absolute;left:3px;bottom:3px;width:10px;height:10px;border-radius:50%;background:var(--fg3);box-shadow:0 0 0 2px var(--bg);text-decoration:none}
-.cm-side .cm-add{font-size:20px;color:var(--fg2)}
-.cm-t{display:grid;place-items:center;flex:none;width:22px;height:22px;border-radius:6px;background:var(--c,#6b4fd8);color:#fff;font:700 11px var(--f-body);font-style:normal;overflow:hidden}
-.cm-t img{width:100%;height:100%;object-fit:cover}
-.cm-t.sm{width:22px;height:22px}.cm-t.lg{width:52px;height:52px;border-radius:14px;font-size:24px}
-.cm-main{flex:1;min-width:0;display:flex;flex-direction:column}
-.cm-bar{flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;border-bottom:1px solid var(--line)}
-.cm-bar .grow{flex:1}.cm-ttl{font:600 13.5px var(--f-body);color:var(--fg)}
-.cm-un{font:600 11px var(--f-mono);font-style:normal;color:var(--bad)}
-.cm-stage{position:relative;flex:1;min-height:0;overflow:auto;background:var(--bg)}
-.cm-ph{min-height:100%}
-.cm-hold{min-height:260px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--fg2)}
-.cm-hold small{color:var(--fg3)}
-.cm-empty{max-width:820px;margin:0 auto;padding:30px 24px 40px;display:flex;flex-direction:column;gap:18px}
-.cm-empty h3{margin:0;font:600 22px var(--f-display);color:var(--fg)}
-.cm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
-.cm-pick{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px;border-radius:12px;border:1px solid var(--line2);background:var(--inset);color:var(--fg);cursor:pointer;text-align:left}
-.cm-pick .cm-t{width:30px;height:30px;border-radius:8px;font-size:14px}
-.cm-pick b{font:600 13px var(--f-body)}.cm-pick small{color:var(--fg3);font-size:11.5px}
-.cm-pick[disabled]{opacity:.5;cursor:default}
-.cm-pick:not([disabled]):hover{border-color:var(--accent)}
-.cm-custom{display:flex;gap:8px;flex-wrap:wrap}.cm-custom input{flex:1;min-width:140px}
-.cm-imsg{padding:12px 14px;border-radius:12px;border:1px dashed var(--line2)}
-.cm-imsg b{font:600 13px var(--f-body);color:var(--fg)}
+.cmx-side .cmx-t{width:28px;height:28px;border-radius:8px;font-size:13px}
+.cmx-side .bw-ic[aria-current=page]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,var(--inset))}
+.cmx-side .bw-ic em{background:var(--bad);color:#fff}
+.cmx-side .cmx-mu{position:absolute;left:3px;bottom:3px;width:10px;height:10px;border-radius:50%;background:var(--fg3);box-shadow:0 0 0 2px var(--bg);text-decoration:none}
+.cmx-side .cmx-add{font-size:20px;color:var(--fg2)}
+.cmx-t{display:grid;place-items:center;flex:none;width:22px;height:22px;border-radius:6px;background:var(--c,#6b4fd8);color:#fff;font:700 11px var(--f-body);font-style:normal;overflow:hidden}
+.cmx-t img{width:100%;height:100%;object-fit:cover}
+.cmx-t.sm{width:22px;height:22px}.cmx-t.lg{width:52px;height:52px;border-radius:14px;font-size:24px}
+.cmx-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.cmx-bar{flex:none;display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;border-bottom:1px solid var(--line)}
+.cmx-bar .grow{flex:1}.cmx-ttl{font:600 13.5px var(--f-body);color:var(--fg)}
+.cmx-un{font:600 11px var(--f-mono);font-style:normal;color:var(--bad)}
+.cmx-stage{position:relative;flex:1;min-height:0;overflow:auto;background:var(--bg)}
+.cmx-ph{min-height:100%}
+.cmx-hold{min-height:260px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--fg2)}
+.cmx-hold small{color:var(--fg3)}
+.cmx-empty{max-width:820px;margin:0 auto;padding:30px 24px 40px;display:flex;flex-direction:column;gap:18px}
+.cmx-empty h3{margin:0;font:600 22px var(--f-display);color:var(--fg)}
+.cmx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.cmx-pick{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:12px;border-radius:12px;border:1px solid var(--line2);background:var(--inset);color:var(--fg);cursor:pointer;text-align:left}
+.cmx-pick .cmx-t{width:30px;height:30px;border-radius:8px;font-size:14px}
+.cmx-pick b{font:600 13px var(--f-body)}.cmx-pick small{color:var(--fg3);font-size:11.5px}
+.cmx-pick[disabled]{opacity:.5;cursor:default}
+.cmx-pick:not([disabled]):hover{border-color:var(--accent)}
+.cmx-custom{display:flex;gap:8px;flex-wrap:wrap}.cmx-custom input{flex:1;min-width:140px}
+.cmx-imsg{padding:12px 14px;border-radius:12px;border:1px dashed var(--line2)}
+.cmx-imsg b{font:600 13px var(--f-body);color:var(--fg)}
+.cmx-sub{font:500 11.5px var(--f-body);color:var(--fg3)}
+.cmx-hero{display:flex;align-items:center;gap:14px}.cmx-hero h3{margin:0}
+.cmx-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;color:var(--fg2);line-height:1.5}
 #nav-btn.unread::after{content:"";position:absolute;right:6px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px var(--bg)}
 #nav-btn{position:fixed}
 /* 1.8.9 pop-up windows (emails, settings dialogs): a solid dim instead of blurring the whole moving screen every frame */
@@ -2942,9 +2945,9 @@ html[data-look] .chip.acc{color:var(--accent);background:var(--accent-soft);bord
       <div class="ofd-stage" id="ofd-stage"><div class="ofd-ph" id="ofd-ph"></div></div>
     </div>
   </section>
-  <section class="cm" id="comm" aria-label="Comm" hidden>
-    <aside class="bw-side cm-side" id="cm-side" aria-label="Chat apps"></aside>
-    <div class="cm-main"><div class="cm-bar" id="cm-bar"></div><div class="cm-stage" id="cm-stage"><div class="cm-ph" id="cm-ph"></div></div></div>
+  <section class="cmx" id="comm" aria-label="Comm" hidden>
+    <aside class="bw-side cmx-side" id="cmx-side" aria-label="Chat apps"></aside>
+    <div class="cmx-main"><div class="cmx-bar" id="cmx-bar"></div><div class="cmx-stage" id="cmx-stage"><div class="cmx-ph" id="cmx-ph"></div></div></div>
   </section>
 <section class="mview" id="music" aria-label="Music">
     <header class="mv-h"><h2>Music</h2><p id="sp-sub">Spotify inside Regis.</p></header>
@@ -3875,9 +3878,9 @@ function fxCore(G,inline){
     if(was!==now||m.rebuild){SC=null;if(fc&&(K.W!==fx.width||K.H!==fx.height||m.mode))auSize();if(K.bg==="cosmos")coBuild()}
     if(moving()){if(!busy){busy=true;lt=0;raf(step)}}else{busy=false;if(timer){clearTimeout(timer);timer=0}if(was!==now||m.rebuild||m.col)still()}}
   /* 1.8.9: if the graphics process resets, canvases come back empty: rebuild everything and draw again */
-  function healed(){built="";SC=null;GL=null;GP=null;gW=0;if(fc&&fx)auSize();if(moving()){if(!busy){busy=true;lt=0;raf(step)}}else still()}
+  function healed(){built="";SC=null;GL=null;GP=null;gW=0;if(fc&&fx)auSize();if(K.bg==="cosmos")coBuild();if(moving()){if(!busy){busy=true;lt=0;raf(step)}}else still()}
   function watch(c,gl){if(!c||!c.addEventListener)return;if(gl){c.addEventListener("webglcontextlost",function(e){e.preventDefault();GL=null;GP=null},false);c.addEventListener("webglcontextrestored",healed,false)}else c.addEventListener("contextrestored",healed,false)}
-  function on(m){if(!m)return;if(m.t==="init"){gcv=m.gl||null;watch(m.fx);watch(m.cosmos);watch(m.stars);watch(gcv,true);fx=m.fx;fc=fx&&fx.getContext("2d");cv=m.cosmos;st=m.stars;cx=cv&&cv.getContext("2d");sx=st&&st.getContext("2d");apply(m.k||{});if(K.bg==="aurora")auSize();still();return}apply(m)}
+  function on(m){if(!m)return;if(m.heal){healed();return}if(m.t==="init"){gcv=m.gl||null;watch(m.fx);watch(m.cosmos);watch(m.stars);watch(gcv,true);fx=m.fx;fc=fx&&fx.getContext("2d");cv=m.cosmos;st=m.stars;cx=cv&&cv.getContext("2d");sx=st&&st.getContext("2d");apply(m.k||{});if(K.bg==="aurora")auSize();still();return}apply(m)}
   if(!inline)G.onmessage=function(e){try{on(e.data)}catch(_){}};
   return on}
 
@@ -3899,6 +3902,8 @@ function initFx(){
     run:!document.hidden&&!PERF.idle&&!R.classList.contains("away")&&!(["aurora","cyber","blackwall","holo"].indexOf(FX.bg)>=0&&S.view==="browser")}}
   function sync(extra){var k=cfg();if(extra)for(var x in extra)k[x]=extra[x];var key=JSON.stringify(k);if(key===last&&!extra)return;last=key;k.t="cfg";send(k)}
   FX.kick=function(){sync()};
+  /* 1.9.0: Regis tells us when the graphics process restarted; redraw everything (the Milky Way and other pre-drawn layers were lost) */
+  if(APP&&APP.onGpuReset)APP.onGpuReset(function(){send({t:"cfg",heal:true})});
   FX.cosmos=function(rebuild){sync(rebuild?{rebuild:true,col:col()}:null)};
   FX.resize=function(){sync()};
   PERF.wake.push(function(){sync()});
@@ -6139,7 +6144,7 @@ document.addEventListener("click",async function(ev){
     case "of-new":case "of-web":case "of-open":case "of-show":case "of-scan":case "of-folder":await ofAct(act,b);break;
     case "bw-exp":case "bw-extm":case "bw-extadd":case "ext-manage":case "ext-store":case "ext-on":case "ext-opt":case "ext-rm":case "ext-crx":case "ext-dir":await extAct(act,b);break;
     case "preset":applyPreset(b.dataset.v);break;
-    case "cm-app":case "cm-addopen":case "cm-add":case "cm-mute":case "cm-muteall":case "cm-pop":case "cm-reload":case "cm-menu":case "cm-bgt":case "cm-rm":case "cm-phonelink":await cmAct(act,b);break;
+    case "cmx-addpl":case "cmx-plopen":case "cmx-app":case "cmx-addopen":case "cmx-add":case "cmx-mute":case "cmx-muteall":case "cmx-pop":case "cmx-reload":case "cmx-menu":case "cmx-bgt":case "cmx-rm":case "cmx-phonelink":await cmAct(act,b);break;
     case "lk-cat":lookCat(b.dataset.cat);break;
     case "nav-toggle":navToggle();break;
     case "ofd-app":case "ofd-filter":case "ofd-doc":case "ofd-keys":case "ofd-new":case "ofd-start":case "ofd-pick":case "ofd-open":case "ofd-close":case "ofd-adopt":case "ofd-pop":await ofdAct(act,b);break;
@@ -7465,7 +7470,7 @@ var CMP=[{k:"discord",n:"Discord",u:"https://discord.com/app",c:"#5865F2"},{k:"s
 function cmOk(){return !!(APP&&APP.comm)}
 function cmApps(){return (CM.st&&CM.st.apps)||[]}
 function cmCur(){var a=cmApps(),id=CM.st&&CM.st.active;return a.find(function(x){return x.id===id})||a[0]||null}
-function cmTile(a,cls){var c=a.color||((CMP.find(function(p){return p.u===a.url})||{}).c)||"#6b4fd8";return '<i class="cm-t'+(cls?" "+cls:"")+'" style="--c:'+esc(c)+'">'+(a.icon&&/^data:image\//.test(a.icon)?'<img src="'+esc(a.icon)+'" alt="">':esc((a.name||"?").charAt(0).toUpperCase()))+'</i>'}
+function cmTile(a,cls){var c=a.color||((CMP.find(function(p){return p.u===a.url})||{}).c)||"#6b4fd8";return '<i class="cmx-t'+(cls?" "+cls:"")+'" style="--c:'+esc(c)+'">'+(a.icon&&/^data:image\//.test(a.icon)?'<img src="'+esc(a.icon)+'" alt="">':esc((a.name||"?").charAt(0).toUpperCase()))+'</i>'}
 function cmUn(n){return n>0?(n>99?"99+":String(n)):n<0?"•":""}
 function cmTotal(){var t=0,dot=false;cmApps().forEach(function(a){if(a.unread>0)t+=a.unread;else if(a.unread<0)dot=true});return t||(dot?-1:0)}
 function cmInit(){if(CM.wired||!cmOk())return;CM.wired=true;
@@ -7473,49 +7478,63 @@ function cmInit(){if(CM.wired||!cmOk())return;CM.wired=true;
   if(APP.comm.onOpen)APP.comm.onOpen(function(id){if(id)CM.want=id;setView("comm",true)});
   APP.comm.state().then(function(s){CM.st=s;cmRender();cmNav()}).catch(function(){});
   /* Regis menus and dialogs go on top: the chat views step aside while one is open */
-  if(window.MutationObserver){var ov=new MutationObserver(function(){APP.comm.overlay(bwOverlay()).catch(function(){})});["#modal","#look","#alert-pop","#more-pop","#bw-bmpop","#bw-sug"].forEach(function(q){var e=$(q);if(e)ov.observe(e,{attributes:true,attributeFilter:["hidden"]})})}
-  if(window.ResizeObserver){var st=$("#cm-stage");if(st)new ResizeObserver(function(){cmBounds()}).observe(st)}}
+  if(APP.comm.onPl)APP.comm.onPl(function(p){CM.pl=p;cmRender()});
+  if(window.MutationObserver){var ov=new MutationObserver(function(){APP.comm.overlay(bwOverlay()).catch(function(){});cmPl()});["#modal","#look","#alert-pop","#more-pop","#bw-bmpop","#bw-sug"].forEach(function(q){var e=$(q);if(e)ov.observe(e,{attributes:true,attributeFilter:["hidden"]})})}
+  if(window.ResizeObserver){var st=$("#cmx-stage");if(st)new ResizeObserver(function(){cmBounds()}).observe(st)}}
 function cmNav(){var b=document.getElementById("nav-btn");if(b)b.classList.toggle("unread",cmTotal()!==0)}
-function cmBounds(){var st=$("#cm-stage");if(!st||!cmOk()||S.view!=="comm")return;var r=st.getBoundingClientRect();APP.comm.bounds({x:r.left,y:r.top,width:r.width,height:r.height}).catch(function(){})}
+function cmBounds(){var st=$("#cmx-stage");if(!st||!cmOk()||S.view!=="comm")return;var r=st.getBoundingClientRect(),rc={x:r.left,y:r.top,width:r.width,height:r.height};APP.comm.bounds(rc).catch(function(){});cmPl(rc)}
+/* 1.9.0 iMessage: the Phone Link app is docked over the Comm page while iMessage is the open app */
+function cmPl(rc){if(!cmOk()||!APP.comm.native)return;var cur=cmCur(),on=S.view==="comm"&&!!cur&&cur.native==="phonelink"&&!bwOverlay()&&!document.hidden;if(!rc){var st=$("#cmx-stage");if(st){var r=st.getBoundingClientRect();rc={x:r.left,y:r.top,width:r.width,height:r.height}}}
+  var key=on+"|"+(rc?[rc.x,rc.y,rc.width,rc.height].map(Math.round).join(","):"");if(key===CM.plKey)return;CM.plKey=key;APP.comm.native(on,rc).catch(function(e){if(on)toast((e&&e.message)||"Couldn’t open Phone Link.","bad")})}
 function cmEnter(){var el=$("#comm");if(!el)return;el.hidden=false;cmInit();if(!cmOk()){cmRender();return}
   var id=CM.want||null;CM.want=null;APP.comm.show(true,id).then(function(s){CM.st=s;cmRender();requestAnimationFrame(cmBounds)}).catch(function(){})}
-function cmLeave(){if(cmOk())return APP.comm.show(false).catch(function(){})}
-function cmRender(){var side=$("#cm-side"),bar=$("#cm-bar"),ph=$("#cm-ph");if(!side||!bar||!ph)return;cmNav();
-  if(!cmOk()){side.innerHTML="";bar.innerHTML="";ph.innerHTML='<div class="cm-empty"><h3>Comm</h3><p class="note">Discord, Slack, WhatsApp and other chats live here in the Regis desktop app.</p></div>';return}
+function cmLeave(){if(cmOk()){CM.plKey="";if(APP.comm.native)APP.comm.native(false).catch(function(){});return APP.comm.show(false).catch(function(){})}}
+function cmRender(){var side=$("#cmx-side"),bar=$("#cmx-bar"),ph=$("#cmx-ph");if(!side||!bar||!ph)return;cmNav();
+  if(!cmOk()){side.innerHTML="";bar.innerHTML="";ph.innerHTML='<div class="cmx-empty"><h3>Comm</h3><p class="note">Discord, Slack, WhatsApp and other chats live here in the Regis desktop app.</p></div>';return}
   var L=cmApps(),cur=cmCur(),st=CM.st||{};
-  side.innerHTML=L.map(function(a){var on=cur&&cur.id===a.id;return '<button class="bw-ic cm-a" type="button" data-act="cm-app" data-id="'+esc(a.id)+'" aria-current="'+(on?"page":"false")+'" title="'+esc(a.name)+(a.muted?" (muted)":"")+'">'+cmTile(a)+(a.unread?'<em>'+cmUn(a.unread)+'</em>':'')+(a.muted?'<s class="cm-mu" aria-hidden="true"></s>':'')+'</button>'}).join("")+
-    '<button class="bw-ic cm-add" type="button" data-act="cm-addopen" title="Add a chat app" aria-label="Add a chat app">+</button><span class="grow"></span>'+
-    '<button class="bw-ic" type="button" data-act="cm-muteall" aria-pressed="'+!!st.muteAll+'" title="'+(st.muteAll?"Comm is muted: press to unmute":"Mute all of Comm (no pop-ups or sounds)")+'">'+(st.muteAll?CM_SV.off:CM_SV.on)+'</button>';
-  if(!cur){bar.innerHTML='<span class="cm-ttl">Comm</span>';ph.innerHTML=cmPicker(true);return}
-  bar.innerHTML=cmTile(cur,"sm")+'<span class="cm-ttl">'+esc(cur.name)+'</span>'+(cur.unread?'<em class="cm-un">'+cmUn(cur.unread)+(cur.unread>0?" unread":" new")+'</em>':'')+'<span class="grow"></span>'+
-    '<button class="btn sm ghost" type="button" data-act="cm-mute" data-id="'+esc(cur.id)+'" aria-pressed="'+!!cur.muted+'">'+(cur.muted?"Unmute":"Mute")+'</button>'+
-    '<button class="btn sm ghost" type="button" data-act="cm-pop" data-id="'+esc(cur.id)+'" title="Float this chat in a small window over every page">Pop out</button>'+
-    '<button class="btn sm ghost" type="button" data-act="cm-reload" data-id="'+esc(cur.id)+'" title="Reload">Reload</button>'+
-    '<button class="btn sm ghost" type="button" data-act="cm-menu" data-id="'+esc(cur.id)+'" aria-label="More for '+esc(cur.name)+'">⋯</button>';
-  ph.innerHTML='<div class="cm-hold">'+cmTile(cur,"lg")+'<b>'+esc(cur.name)+'</b><small>'+(bwOverlay()?"Hidden while a Regis menu is open.":cur.loading?"Loading…":"")+'</small></div>'}
+  side.innerHTML=L.map(function(a){var on=cur&&cur.id===a.id;return '<button class="bw-ic cmx-a" type="button" data-act="cmx-app" data-id="'+esc(a.id)+'" aria-current="'+(on?"page":"false")+'" title="'+esc(a.name)+(a.muted?" (muted)":"")+'">'+cmTile(a)+(a.unread?'<em>'+cmUn(a.unread)+'</em>':'')+(a.muted?'<s class="cmx-mu" aria-hidden="true"></s>':'')+'</button>'}).join("")+
+    '<button class="bw-ic cmx-add" type="button" data-act="cmx-addopen" title="Add a chat app" aria-label="Add a chat app">+</button><span class="grow"></span>'+
+    '<button class="bw-ic" type="button" data-act="cmx-muteall" aria-pressed="'+!!st.muteAll+'" title="'+(st.muteAll?"Comm is muted: press to unmute":"Mute all of Comm (no pop-ups or sounds)")+'">'+(st.muteAll?CM_SV.off:CM_SV.on)+'</button>';
+  if(!cur){bar.innerHTML='<span class="cmx-ttl">Comm</span>';ph.innerHTML=cmPicker(true);return}
+  if(cur.native==="phonelink"){var pl=CM.pl||{};
+    bar.innerHTML=cmTile(cur,"sm")+'<span class="cmx-ttl">iMessage</span><span class="cmx-sub">through Phone Link</span><span class="grow"></span><button class="btn sm ghost" type="button" data-act="cmx-plopen" title="Open Phone Link in its own window">Open on its own</button><button class="btn sm ghost" type="button" data-act="cmx-menu" data-id="'+esc(cur.id)+'" aria-label="More">⋯</button>';
+    ph.innerHTML='<div class="cmx-empty cmx-plh"><div class="cmx-hero">'+cmTile(cur,"lg")+'<div><h3>iMessage</h3><p class="note">'+(pl.docked?"Phone Link is showing here.":pl.waiting?"Opening Phone Link…":"Phone Link opens here.")+'</p></div></div>'+
+      '<ol class="cmx-steps"><li>The first time, Phone Link asks which phone you use: pick <b>iPhone</b> and scan the code with your iPhone’s camera, then follow the steps (it pairs over Bluetooth).</li>'+
+      '<li>On the iPhone, open <b>Settings › Bluetooth</b>, tap ⓘ next to this PC, and turn on <b>Show Notifications</b>, <b>Sync Contacts</b> and <b>Share System Notifications</b>.</li>'+
+      '<li>Your messages then appear here. Phone Link keeps running, so new ones still pop up when you’re on another page.</li></ol>'+
+      '<p class="note">Phone Link can send and receive texts and iMessages, but it can’t show group chats or pictures sent over iMessage; that’s a limit of Phone Link on iPhone.</p></div>';
+    return}
+  bar.innerHTML=cmTile(cur,"sm")+'<span class="cmx-ttl">'+esc(cur.name)+'</span>'+(cur.unread?'<em class="cmx-un">'+cmUn(cur.unread)+(cur.unread>0?" unread":" new")+'</em>':'')+'<span class="grow"></span>'+
+    '<button class="btn sm ghost" type="button" data-act="cmx-mute" data-id="'+esc(cur.id)+'" aria-pressed="'+!!cur.muted+'">'+(cur.muted?"Unmute":"Mute")+'</button>'+
+    '<button class="btn sm ghost" type="button" data-act="cmx-pop" data-id="'+esc(cur.id)+'" title="Float this chat in a small window over every page">Pop out</button>'+
+    '<button class="btn sm ghost" type="button" data-act="cmx-reload" data-id="'+esc(cur.id)+'" title="Reload">Reload</button>'+
+    '<button class="btn sm ghost" type="button" data-act="cmx-menu" data-id="'+esc(cur.id)+'" aria-label="More for '+esc(cur.name)+'">⋯</button>';
+  ph.innerHTML='<div class="cmx-hold">'+cmTile(cur,"lg")+'<b>'+esc(cur.name)+'</b><small>'+(bwOverlay()?"Hidden while a Regis menu is open.":cur.loading?"Loading…":"")+'</small></div>'}
 var CM_SV={on:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2v-4a4.5 4.5 0 0 0-9 0v4zM10 20a2 2 0 0 0 4 0"/></svg>',off:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17h12l-1.5-2v-4a4.5 4.5 0 0 0-9 0v4zM10 20a2 2 0 0 0 4 0M4 4l16 16"/></svg>'};
 function cmPicker(first){var have=cmApps().map(function(a){return a.url});
-  return '<div class="cm-empty">'+(first?'<h3>Your chats, inside Regis</h3><p class="note">Pick the apps you use. Each one keeps its own sign-in, keeps running in the background for notifications, and can be muted or popped out over any page.</p>':'')+
-    '<div class="cm-grid">'+CMP.map(function(p){var on=have.indexOf(p.u)>=0;return '<button class="cm-pick" type="button" data-act="cm-add" data-k="'+p.k+'"'+(on?" disabled":"")+'>'+cmTile({name:p.n,color:p.c})+'<b>'+esc(p.n)+'</b><small>'+(on?"Added":"Add")+'</small></button>'}).join("")+'</div>'+
-    '<form class="cm-custom" data-cm-form="1" autocomplete="off"><input id="cm-cn" placeholder="Name" maxlength="30" aria-label="App name"><input id="cm-cu" placeholder="https://… any web chat" aria-label="Web address" spellcheck="false"><button class="btn" type="submit">Add</button></form>'+
-    '<div class="cm-imsg"><b>iMessage</b><p class="note">Apple doesn’t offer iMessage on the web or on Windows, so it can’t run inside Regis. On Windows 11, Microsoft Phone Link can send and receive iMessages from your iPhone.</p><button class="btn sm ghost" type="button" data-act="cm-phonelink">Open Phone Link</button></div></div>'}
+  return '<div class="cmx-empty">'+(first?'<h3>Your chats, inside Regis</h3><p class="note">Pick the apps you use. Each one keeps its own sign-in, keeps running in the background for notifications, and can be muted or popped out over any page.</p>':'')+
+    '<div class="cmx-grid">'+CMP.map(function(p){var on=have.indexOf(p.u)>=0;return '<button class="cmx-pick" type="button" data-act="cmx-add" data-k="'+p.k+'"'+(on?" disabled":"")+'>'+cmTile({name:p.n,color:p.c})+'<b>'+esc(p.n)+'</b><small>'+(on?"Added":"Add")+'</small></button>'}).join("")+'</div>'+
+    '<form class="cmx-custom" data-cmx-form="1" autocomplete="off"><input id="cmx-cn" placeholder="Name" maxlength="30" aria-label="App name"><input id="cmx-cu" placeholder="https://… any web chat" aria-label="Web address" spellcheck="false"><button class="btn" type="submit">Add</button></form>'+
+    '<div class="cmx-imsg"><b>iMessage</b><p class="note">Apple doesn’t put iMessage on the web or on Windows, so Regis shows it through Microsoft’s Phone Link app, which talks to your iPhone over Bluetooth.</p>'+(cmApps().some(function(a){return a.native==="phonelink"})?'<span class="note">Already added.</span>':'<button class="btn sm" type="button" data-act="cmx-addpl">Add iMessage (Phone Link)</button>')+'</div></div>'}
 async function cmAct(a,b){if(!cmOk())return;var C=APP.comm,id=b.dataset.id;
   try{
-    if(a==="cm-app"){C.show(S.view==="comm",id).then(function(s){CM.st=s;cmRender();requestAnimationFrame(cmBounds)});return}
-    if(a==="cm-addopen"){openModal("Add a chat app",cmPicker(false));return}
-    if(a==="cm-add"){var p=CMP.find(function(x){return x.k===b.dataset.k});if(!p)return;var m=$("#modal");if(m&&!m.hidden)closeModal();await C.add({key:p.k,name:p.n,url:p.u,color:p.c});toast("Added "+p.n+". Sign in once and Regis remembers it.","good");return}
-    if(a==="cm-mute"||a==="cm-muteall"){CM.st=await C.state();}
-    if(a==="cm-mute"){var cur=cmApps().find(function(x){return x.id===id});if(cur){await C.mute(id,!cur.muted);CM.st=await C.state();cmRender()}return}
-    if(a==="cm-muteall"){var was=!!(CM.st&&CM.st.muteAll);await C.mute("*",!was);CM.st=await C.state();cmRender();toast(!was?"Comm muted: no pop-ups or sounds.":"Comm unmuted.","good");return}
-    if(a==="cm-pop"){await C.float(id);toast("Chat popped out. Drag it anywhere; it stays on top of every page.","good");return}
-    if(a==="cm-reload"){await C.reload(id);return}
-    if(a==="cm-menu"){var c2=cmApps().find(function(x){return x.id===id});if(!c2)return;var r=b.getBoundingClientRect();
-      bwPopAt(r.right-240,r.bottom+6,'<button role="menuitem" type="button" data-act="cm-bgt" data-id="'+esc(id)+'"><span>'+(c2.bg!==false?"✓ ":"")+'Keep running for notifications</span></button><hr><button role="menuitem" type="button" data-act="cm-rm" data-id="'+esc(id)+'"><span>Remove '+esc(c2.name)+'…</span></button>',"cm");return}
-    if(a==="cm-bgt"){bwBmClose();var c3=cmApps().find(function(x){return x.id===id});if(c3)await C.bg(id,c3.bg===false);return}
-    if(a==="cm-rm"){bwBmClose();var c4=cmApps().find(function(x){return x.id===id});if(!c4)return;if(!confirm("Remove "+c4.name+" from Comm? You'll be signed out of it here."))return;await C.remove(id,true);toast(c4.name+" removed.","good");return}
-    if(a==="cm-phonelink"){await C.phoneLink();return}
+    if(a==="cmx-app"){C.show(S.view==="comm",id).then(function(s){CM.st=s;cmRender();CM.plKey="";requestAnimationFrame(cmBounds)});return}
+    if(a==="cmx-addpl"){var m0=$("#modal");if(m0&&!m0.hidden)closeModal();await C.add({native:"phonelink"});CM.plKey="";setTimeout(cmBounds,200);return}
+    if(a==="cmx-plopen"){await C.plOpen();return}
+    if(a==="cmx-addopen"){openModal("Add a chat app",cmPicker(false));return}
+    if(a==="cmx-add"){var p=CMP.find(function(x){return x.k===b.dataset.k});if(!p)return;var m=$("#modal");if(m&&!m.hidden)closeModal();await C.add({key:p.k,name:p.n,url:p.u,color:p.c});toast("Added "+p.n+". Sign in once and Regis remembers it.","good");return}
+    if(a==="cmx-mute"||a==="cmx-muteall"){CM.st=await C.state();}
+    if(a==="cmx-mute"){var cur=cmApps().find(function(x){return x.id===id});if(cur){await C.mute(id,!cur.muted);CM.st=await C.state();cmRender()}return}
+    if(a==="cmx-muteall"){var was=!!(CM.st&&CM.st.muteAll);await C.mute("*",!was);CM.st=await C.state();cmRender();toast(!was?"Comm muted: no pop-ups or sounds.":"Comm unmuted.","good");return}
+    if(a==="cmx-pop"){await C.float(id);toast("Chat popped out. Drag it anywhere; it stays on top of every page.","good");return}
+    if(a==="cmx-reload"){await C.reload(id);return}
+    if(a==="cmx-menu"){var c2=cmApps().find(function(x){return x.id===id});if(!c2)return;var r=b.getBoundingClientRect();
+      bwPopAt(r.right-240,r.bottom+6,'<button role="menuitem" type="button" data-act="cmx-bgt" data-id="'+esc(id)+'"><span>'+(c2.bg!==false?"✓ ":"")+'Keep running for notifications</span></button><hr><button role="menuitem" type="button" data-act="cmx-rm" data-id="'+esc(id)+'"><span>Remove '+esc(c2.name)+'…</span></button>',"cm");return}
+    if(a==="cmx-bgt"){bwBmClose();var c3=cmApps().find(function(x){return x.id===id});if(c3)await C.bg(id,c3.bg===false);return}
+    if(a==="cmx-rm"){bwBmClose();var c4=cmApps().find(function(x){return x.id===id});if(!c4)return;if(!confirm("Remove "+c4.name+" from Comm? You'll be signed out of it here."))return;await C.remove(id,true);toast(c4.name+" removed.","good");return}
+    if(a==="cmx-phonelink"){await C.phoneLink();return}
   }catch(e){toast((e&&e.message)||"That didn’t work.","bad")}}
-document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches||!f.matches("[data-cm-form]"))return;e.preventDefault();if(!cmOk())return;var n=($("#cm-cn")||{}).value||"",u=(($("#cm-cu")||{}).value||"").trim();if(u&&!/^https?:\/\//i.test(u))u="https://"+u;
+document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches||!f.matches("[data-cmx-form]"))return;e.preventDefault();if(!cmOk())return;var n=($("#cmx-cn")||{}).value||"",u=(($("#cmx-cu")||{}).value||"").trim();if(u&&!/^https?:\/\//i.test(u))u="https://"+u;
   APP.comm.add({name:n.trim(),url:u}).then(function(){var m=$("#modal");if(m&&!m.hidden)closeModal();toast("Added.","good")}).catch(function(err){toast((err&&err.message)||"Couldn’t add that.","bad")})});
 setTimeout(function(){try{cmInit()}catch(_){}},1800);
 
@@ -7528,7 +7547,7 @@ setTimeout(function(){if(APP&&APP.linkMode)APP.linkMode(linkHere()).catch(functi
 /* 1.8.3 full screen: the button and F11 both use the desktop window's true full screen (no Windows title bar); the page follows its state */
 if(APP&&APP.onFullscreen)APP.onFullscreen(function(v){setFs(!!v)});
 if(APP&&APP.fsState)APP.fsState().then(function(v){setFs(!!v)}).catch(function(){});
-var SHELL_NEED="1.8.9";
+var SHELL_NEED="1.9.0";
 function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
   var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;

@@ -35,12 +35,17 @@ public static class RegisDock {
   static readonly Dictionary<long, long[]> saved = new Dictionary<long, long[]>();
   static readonly HashSet<long> hid = new HashSet<long>();   // docked windows Regis hid itself (the app hides others when their file closes)
   public static string Kind(string cls) { return cls == "XLMAIN" ? "excel" : cls == "OpusApp" ? "word" : cls == "PPTFrameClass" ? "powerpoint" : null; }
+  /* 1.9.0: Phone Link (iMessage from an iPhone) is the only other app this helper will touch: its WinUI window in PhoneExperienceHost */
+  public static string KindOf(IntPtr h) {
+    var c = new StringBuilder(64); GetClassName(h, c, 64); var k = Kind(c.ToString()); if (k != null) return k;
+    if (c.ToString() != "WinUIDesktopWin32WindowClass") return null; uint pid; GetWindowThreadProcessId(h, out pid);
+    try { return System.Diagnostics.Process.GetProcessById((int)pid).ProcessName == "PhoneExperienceHost" ? "phonelink" : null; } catch { return null; } }
   public static string List() {
     var sb = new StringBuilder("["); bool first = true;
     /* a docked window that is hidden but not by Regis: the app closed its file and kept the window for later. Let it go. */
     foreach (var k in new List<long>(saved.Keys)) { var w = new IntPtr(k); if (!IsWindow(w)) { saved.Remove(k); hid.Remove(k); } else if (!IsWindowVisible(w) && !hid.Contains(k)) Forget(k); }
     EnumWindows((h, l) => {
-      var c = new StringBuilder(64); GetClassName(h, c, 64); var k = Kind(c.ToString());
+      var k = KindOf(h);
       if (k != null && (IsWindowVisible(h) || saved.ContainsKey(h.ToInt64()))) {
         var t = new StringBuilder(512); GetWindowText(h, t, 512); uint pid; GetWindowThreadProcessId(h, out pid);
         if (!first) sb.Append(','); first = false;
@@ -53,7 +58,7 @@ public static class RegisDock {
     return sb.Append("]").ToString();
   }
   static string Esc(string s) { var b = new StringBuilder(); foreach (var ch in s) { if (ch == '"' || ch == '\\') b.Append('\\').Append(ch); else if (ch < 32) b.Append(' '); else b.Append(ch); } return b.ToString(); }
-  static bool IsOffice(IntPtr h) { var c = new StringBuilder(64); GetClassName(h, c, 64); return IsWindow(h) && Kind(c.ToString()) != null; }
+  static bool IsOffice(IntPtr h) { return IsWindow(h) && KindOf(h) != null; }
   /* dock: no frame, owned by Regis (stays above it, minimises with it, no own taskbar button) */
   public static bool Dock(long hw, long owner) {
     var h = new IntPtr(hw); if (!IsOffice(h)) return false;
@@ -98,7 +103,7 @@ public static class RegisDock {
   /* windows left without a frame by a crash (our exact signature: Office class, tool window, no caption): give the frame back */
   public static int Rescue() {
     int n = 0; var found = new List<IntPtr>();
-    EnumWindows((h, l) => { var c = new StringBuilder(64); GetClassName(h, c, 64); if (Kind(c.ToString()) != null && !saved.ContainsKey(h.ToInt64())) {
+    EnumWindows((h, l) => { if (KindOf(h) != null && !saved.ContainsKey(h.ToInt64())) {
         long st = GetLong(h, GWL_STYLE).ToInt64(), ex = GetLong(h, GWL_EXSTYLE).ToInt64();
         if ((ex & WS_EX_TOOLWINDOW) != 0 && (st & WS_CAPTION) == 0) found.Add(h); } return true; }, IntPtr.Zero);
     foreach (var h in found) {
