@@ -113,6 +113,9 @@ function createWindow() {
 
 /* keep audio smooth: do not let Chromium slow the page down when the window is behind others or minimised to the tray */
 for (const sw of ['disable-renderer-backgrounding', 'disable-backgrounding-occluded-windows', 'disable-background-timer-throttling']) app.commandLine.appendSwitch(sw);
+/* 1.9.5: after a few graphics-process crashes Chromium stops using the graphics card for the rest of the session (WebGL off: the
+   Firewall / Waterwall backgrounds went blank). The owner's Intel driver crashes it several times an evening; keep restarting it. */
+app.commandLine.appendSwitch('disable-gpu-process-crash-limit');
 app.setAppUserModelId('app.regis.desktop'); // Windows: groups the taskbar icon and lets notifications show as Regis
 let DRM = false;
 /* when the audio engine's signature file last changed (re-signing clears the page's "Regis can't play" note) */
@@ -191,7 +194,7 @@ app.whenReady().then(async () => {
   const guild = new Guild({ anthropic: claude, local: ollama, prefs: aiPrefs, table: { load: () => store.getMeta('guild', []), save: (rows) => store.setMeta('guild', rows) } });
   ipcMain.handle('guild:agents', wrap(() => agentList()));
   ipcMain.handle('guild:history', wrap((id) => guild.history(String(id || ''))));
-  ipcMain.handle('guild:send', wrap((id, text, extra) => guild.send(String(id || ''), text, extra && typeof extra === 'object' ? { tasks: extra.tasks, file: extra.file } : {})));
+  ipcMain.handle('guild:send', wrap((id, text, extra) => guild.send(String(id || ''), text, extra && typeof extra === 'object' ? { tasks: extra.tasks, file: extra.file, addins: extra.addins } : {})));
   ipcMain.handle('guild:clear', wrap((id) => guild.clear(String(id || ''))));
   ipcMain.handle('app:status', wrap(() => ({
     googleConfigured: !!(store.getMeta('gClientId', '') && store.getSecret('gSecret')), googleConnected: !!store.getSecret('gRefresh'),
@@ -321,6 +324,13 @@ app.whenReady().then(async () => {
   ipcMain.handle('browser:show', wrap((v, snap) => bw.show(!!v, snap !== false)));
   ipcMain.on('bw:cred', (e, d) => { try { bw.cred(e.sender, d); } catch (_) {} });
   ipcMain.on('bw:shieldOn', (e) => { e.returnValue = !!bw.shield; });
+  /* 1.9.5: "/" on a web page (outside a text box) jumps to Regis's address bar; the Web Store gets an "Add to Regis" button */
+  const isTab = (wc) => bw.tabs.some((t) => t.view && t.view.webContents === wc);
+  ipcMain.on('bw:slash', (e) => { try { if (!isTab(e.sender)) return; const t = bw.tabs.find((x) => x.view && x.view.webContents === e.sender); try { if (win && !win.isDestroyed()) win.webContents.focus(); } catch (_) {} bw.key('addr', t && t.id); } catch (_) {} });
+  ipcMain.on('bw:extInstall', async (e, url) => { const wc = e.sender; const back = (ok, msg) => { try { if (!wc.isDestroyed()) wc.send('bw:extDone', { ok, msg }); } catch (_) {} };
+    try { if (!isTab(wc)) return; const u = new URL(String(url || '')); if (u.protocol !== 'https:' || !/^(chromewebstore\.google\.com|chrome\.google\.com)$/.test(u.hostname)) return back(false, 'Not a Web Store page.');
+      const r = await exts.installStore(u.toString()); back(true, 'Added to Regis' + (r && r.name ? ': ' + r.name : '') + '.'); }
+    catch (err) { back(false, (err && err.message) || 'Could not add it.'); } });
   ipcMain.handle('browser:fill', wrap((id, user, pass) => bw.fill(+id, user, pass)));
   ipcMain.handle('browser:shield', wrap((on) => { store.setMeta('bwShield', on ? '1' : '0'); return bw.setShield(!!on); }));
   ipcMain.handle('browser:move', wrap((id, to) => bw.move(+id, +to)));

@@ -84,6 +84,22 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.5 Team dashboards, the office, and fixes
+
+- **Team dashboards:** opening Exusiai, Midas, Luna or Obsidian now shows a Dashboard (the chat is one tab over).
+  - **KPIs** that fit each team. Midas: units in the run, landed cost, price, gross margin (worked out for you) and caffeine per serving, which turns red over 50 mg. Click a number to change it.
+  - **Queue:** add tasks, press Run (or Run the queue) and the team lead works through them one at a time. Finished tasks show the start of the result; Open jumps to the chat.
+  - **Add-ins:** extra instructions or reference notes a team always keeps in mind (brand voice, price list, style guide). Type them or load a Markdown/text file; tick to switch on or off.
+  - Suggested-task cards in a chat have a second button, Queue for the team.
+- **The office:** a room at the top of each dashboard where the four team leads walk around as chibi characters (original drawings). Whoever is working walks to their desk, the screen lights up and a typing bubble appears. **Edit office** lets you add, drag and remove furniture and pick the wall and floor colours.
+- **Team icons:** each team's button in the rail is now its lead's face.
+- **Backgrounds no longer vanish.** The cause is found: the graphics process on this laptop crashes several times an evening while browsing, and after a few crashes the browser engine stopped using the graphics card, which blanked the Firewall and Waterwall backgrounds. Regis now keeps the graphics process restarting, and has a plain fallback wall if the graphics card is refused anyway.
+- **Calm wall is now Waterwall**, and both walls have a colour picker (Appearance > Background).
+- **"/" in the Browser** now works when the keyboard is inside a web page (outside a text box): it jumps to the address bar.
+- **Chrome Web Store:** extension pages get an **Add to Regis** button (the store's own button only works in Chrome).
+- **Greeting shimmer** really shows now: the default look had a second off-switch.
+- Updating: the desktop app changed, so run *Install Regis* once.
+
 ## 1.9.4 Local AI (Ollama)
 
 - **Local AI:** Regis can use AI models that run on your own computer through Ollama (a free app from ollama.com). Nothing leaves the computer and there is no per-use cost.

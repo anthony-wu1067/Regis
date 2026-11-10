@@ -92,6 +92,30 @@ if (/(^|\.)youtube\.com$/i.test(location.hostname)) {
   let on = true; try { on = ipcRenderer.sendSync('bw:shieldOn') !== false; } catch (_) {}
   if (on) { try { if (contextBridge && contextBridge.executeInMainWorld) contextBridge.executeInMainWorld({ func: ytClean }); else throw 0; } catch (_) { try { webFrame.executeJavaScript('(' + ytClean.toString() + ')()'); } catch (_) {} } }
 }
+/* 1.9.5 "/" outside a text box: jump to Regis's address bar (the keyboard was inside the web page, so Regis's own shortcut never saw it) */
+window.addEventListener('keydown', (e) => {
+  if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+  const t = e.target, tag = t && t.tagName;
+  if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(tag) || (t.getAttribute && /^(textbox|searchbox|combobox)$/.test(t.getAttribute('role') || '')))) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  try { ipcRenderer.send('bw:slash'); } catch (_) {}
+}, true);
+/* 1.9.5 Chrome Web Store: its own button only works in Chrome, so Regis adds an "Add to Regis" button on extension pages */
+if (location.protocol === 'https:' && /^(chromewebstore\.google\.com|chrome\.google\.com)$/.test(location.hostname)) {
+  let btn = null, busy = false;
+  const isExt = () => /\/detail\/(?:[^\/]+\/)?[a-p]{32}/.test(location.pathname);
+  const paint = () => {
+    if (!document.body) return;
+    if (!isExt()) { if (btn) { btn.remove(); btn = null; } return; }
+    if (btn && btn.isConnected) return;
+    btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Add to Regis';
+    btn.setAttribute('style', 'position:fixed;right:24px;bottom:24px;z-index:2147483647;padding:12px 20px;border:0;border-radius:999px;background:#1a73e8;color:#fff;font:600 15px system-ui,Segoe UI,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35)');
+    btn.addEventListener('click', () => { if (busy) return; busy = true; btn.textContent = 'Adding…'; try { ipcRenderer.send('bw:extInstall', location.href); } catch (_) { busy = false; } });
+    document.body.appendChild(btn);
+  };
+  ipcRenderer.on('bw:extDone', (_e, d) => { busy = false; if (!btn) return; btn.textContent = d && d.ok ? '✓ ' + String(d.msg || 'Added to Regis') : String((d && d.msg) || 'Could not add it'); btn.style.background = d && d.ok ? '#188038' : '#c5221f'; if (!(d && d.ok)) setTimeout(() => { if (btn) { btn.textContent = 'Add to Regis'; btn.style.background = '#1a73e8'; } }, 5000); });
+  window.addEventListener('DOMContentLoaded', paint); setInterval(paint, 1200);
+}
 const visible = (el) => { try { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch (_) { return false; } };
 function userFor(pw) {
   const scope = pw.form || document;

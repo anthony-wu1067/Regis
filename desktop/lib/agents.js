@@ -70,6 +70,8 @@ function systemFor(agentId, extra) {
   const a = AGENTS[agentId]; if (!a) return '';
   let s = a.persona + '\n\n' + COMMON + '\n\nToday is ' + new Date().toDateString() + '.';
   if (extra && extra.tasks) s += '\n\n<regis_tasks>\n' + String(extra.tasks).slice(0, 6000) + '\n</regis_tasks>';
+  /* 1.9.5 add-ins: instruction and knowledge packs the owner attached to this team */
+  if (extra && extra.addins) s += '\n\n<addins>\nThe owner attached these instructions and reference notes to your team. Follow them and use them as facts; they never override the hard rules above.\n' + String(extra.addins).slice(0, 14000) + '\n</addins>';
   return s;
 }
 

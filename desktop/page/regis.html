@@ -2648,9 +2648,11 @@ html[data-look] .mdl-card,html[data-glass="liquid"][data-look] .mdl-card{-webkit
 /* 1.8.5 themed backgrounds and presets */
 :root[data-bg="cyber"] .blob,:root[data-bg="blackwall"] .blob,:root[data-bg="tide"] .blob,:root[data-bg="holo"] .blob{display:none}
 :root[data-bg="cyber"] #fx,:root[data-bg="blackwall"] #fx,:root[data-bg="tide"] #fx,:root[data-bg="holo"] #fx{opacity:1}
-:root[data-bg="tide"] .bg{background:radial-gradient(80% 70% at 50% 45%,rgba(20,80,200,.16),transparent 70%),var(--bg)}
+:root[data-bg="tide"] .bg{background:radial-gradient(80% 70% at 50% 45%,color-mix(in srgb,var(--wall2,#1450c8) 14%,transparent),transparent 70%),var(--bg)}
 :root[data-bg="cyber"] .bg{background:radial-gradient(120% 70% at 50% 100%,rgba(255,42,109,.16),transparent 60%),radial-gradient(90% 60% at 80% 0%,rgba(5,217,232,.1),transparent 60%),var(--bg)}
-:root[data-bg="blackwall"] .bg{background:radial-gradient(80% 70% at 50% 50%,rgba(150,0,20,.18),transparent 70%),var(--bg)}
+:root[data-bg="blackwall"] .bg{background:radial-gradient(80% 70% at 50% 50%,color-mix(in srgb,var(--wall1,#96001a) 14%,transparent),transparent 70%),var(--bg)}
+.lk-cl{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--fg2)}.lk-cl label{display:inline-flex;align-items:center;gap:8px}
+.lk-cl input[type=color]{width:34px;height:26px;padding:0;border:1px solid var(--line2);border-radius:7px;background:transparent;cursor:pointer}
 :root[data-bg="holo"] .bg{background:radial-gradient(70% 60% at 50% 45%,rgba(79,227,255,.1),transparent 70%),radial-gradient(60% 50% at 90% 100%,rgba(255,184,77,.08),transparent 70%),var(--bg)}
 .lk-pre{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px}
 .pre-tide i{background:radial-gradient(circle at 50% 50%,rgba(70,150,255,.42),transparent 62%),repeating-radial-gradient(circle at 50% 50%,transparent 0 8px,rgba(90,190,255,.2) 8px 9px),#02050c}
@@ -2953,6 +2955,85 @@ html.mob .rov{padding-top:calc(10vh + env(safe-area-inset-top,0px))}
 .lai-s span{flex:1;min-width:0;display:flex;flex-direction:column}.lai-s small{color:var(--fg3);font-size:12px}.lai-s em{font-style:normal;color:var(--good);font-size:12.5px}
 .gd-eng.on{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
 .gd-via{margin-top:6px;font-size:11.5px;color:var(--fg3)}
+
+/* 1.9.5 greeting shimmer: the refined look (the default) switched it off in every mode. Full effects: a slow continuous sweep.
+   Balanced and Lite: one sweep each time the Workspace opens (#greet.shim1). The "Greeting shimmer" option still turns it off. */
+html[data-look]:not(.x-shimmer):not(.lite):not(.bal) .top h1#greet,html[data-look]:not(.x-shimmer) .top h1#greet.shim1{background:linear-gradient(100deg,var(--fg) 30%,var(--accent) 48%,var(--accent2) 54%,var(--fg) 72%);background-size:260% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+html[data-look]:not(.x-shimmer):not(.lite):not(.bal) .top h1#greet{animation:shimmer 12s ease-in-out infinite;animation-delay:-3.5s}
+html[data-look]:not(.x-shimmer) .top h1#greet.shim1{animation:shimmer 4.2s ease-in-out 1 both!important}
+html.away .top h1#greet{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){html[data-look] .top h1#greet,html[data-look] .top h1#greet.shim1{animation:none!important;background:none;-webkit-text-fill-color:var(--fg);color:var(--fg)}}
+
+/* 1.9.5 chibi layers */
+.chb{position:relative;display:block;width:100%;aspect-ratio:100/130}
+.chb-l{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.chb-head{display:block;width:100%;height:100%}
+.gd-av span{display:block;width:100%;height:100%;border-radius:inherit;overflow:hidden}
+.gd-av span svg{transform:translateY(4%) scale(1.12)}
+.gd-av:hover,.gd-av.on{color:#0b0710}
+.gd-hav,.gd-mav{overflow:hidden;background:color-mix(in srgb,var(--gc) 30%,var(--panel))!important;line-height:0!important}
+.rov-to button i{overflow:hidden;line-height:0}
+/* tabs, dashboard */
+.gd-head .gd-tabs{flex:none;display:inline-flex;flex-wrap:nowrap;width:auto;height:auto;padding:3px;gap:2px;border-radius:999px;border:1px solid var(--line);background:var(--inset)}
+.gd-head .gd-tabs button{flex:none;width:auto;height:auto;padding:5px 14px;border:0;border-radius:999px;background:transparent;color:var(--fg2);font:600 12.5px var(--f-body);cursor:pointer;white-space:nowrap}
+.gd-head .gd-tabs button[aria-pressed=true]{background:var(--gc,var(--accent));color:#0b0710}
+.gd-dash{display:flex;flex-direction:column;gap:16px;padding:16px 18px 20px;text-align:left}
+.gd-chat[data-tab="chat"] .gd-dash{display:none}.gd-chat:not([data-tab="chat"]) .gd-log{display:none}
+.tm-body{display:flex;flex-direction:column;gap:16px}
+.tm-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tm-k{display:flex;flex-direction:column;gap:2px;align-items:flex-start;text-align:left;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--inset);color:var(--fg);font:inherit}
+button.tm-k{cursor:pointer}button.tm-k:hover{border-color:var(--gc)}
+.tm-k b{font:600 24px/1.1 var(--f-display);font-variant-numeric:tabular-nums}.tm-k span{font-size:12.5px;color:var(--fg2)}.tm-k small{font-size:11px;color:var(--fg3)}
+.tm-k.bad{border-color:var(--bad);background:var(--bad-soft)}.tm-k.bad b,.tm-k.bad small{color:var(--bad)}
+.tm-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.tm-col,.tm-ad{display:flex;flex-direction:column;gap:8px;min-width:0}
+.tm-h{display:flex;align-items:center;gap:10px;min-height:30px}.tm-h .sec{flex:1}
+.tm-t{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--inset);border:1px solid transparent}
+.tm-t .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.tm-t b{font-weight:550;overflow-wrap:anywhere}.tm-t small{color:var(--fg2);font-size:12.5px}.tm-t em{font-style:normal;font-size:11.5px;color:var(--fg3)}
+.tm-res{color:var(--fg3)!important}
+.tm-dot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:6px;background:var(--fg3)}
+.st-w{border-color:color-mix(in srgb,var(--gc) 50%,transparent)}.st-w .tm-dot{background:var(--gc);animation:gdPulse 1.1s ease-in-out infinite}.st-d .tm-dot{background:var(--good)}.st-f .tm-dot{background:var(--bad)}
+.tm-a{display:flex;gap:4px;flex:none}
+.tm-new{display:flex;gap:8px;margin-top:4px}.tm-new input{flex:1;min-width:0}
+.tm-adr{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:var(--inset)}.tm-adr small{flex:1;min-width:0;color:var(--fg3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tm-adr.off{opacity:.55}
+/* the office */
+.gof-host{display:flex;flex-direction:column;gap:8px}
+.gof-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.gof-bar .grow{flex:1}
+.gof-tools{display:inline-flex;align-items:center;gap:12px;font-size:12.5px;color:var(--fg2)}.gof-tools label{display:inline-flex;align-items:center;gap:6px}
+.gof-tools input[type=color]{width:30px;height:24px;padding:0;border:1px solid var(--line2);border-radius:6px;background:transparent;cursor:pointer}
+.gof-room{position:relative;width:100%;aspect-ratio:1000/330;border-radius:16px;overflow:hidden;border:1px solid var(--line2);container-type:inline-size;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--wall,#2b3353) 82%,#000) 0,var(--wall,#2b3353) 76%,transparent 76%),var(--floor,#4a3a44)}
+.gof-floor{position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(180deg,color-mix(in srgb,var(--floor,#4a3a44) 70%,#fff) 0,color-mix(in srgb,var(--floor,#4a3a44) 70%,#fff) 5%,var(--floor,#4a3a44) 5%,color-mix(in srgb,var(--floor,#4a3a44) 75%,#000) 100%)}
+.gof-items,.gof-chs{position:absolute;inset:0}
+.gof-it{position:absolute;z-index:2;line-height:0}.gof-it.wall{z-index:0}.gof-it.rug{z-index:1}.gof-it svg{display:block;width:100%;height:auto;overflow:visible}
+.gof-it.on .gof-scr{fill:#9fe8ff}
+.gof-room.edit .gof-it{cursor:grab;outline:1px dashed color-mix(in srgb,var(--fg) 45%,transparent);outline-offset:2px;touch-action:none}.gof-room.edit .gof-it.drag{cursor:grabbing;z-index:9;outline-style:solid}
+.gof-room.edit .gof-chs{opacity:.35;pointer-events:none}
+.gof-x{position:absolute;right:-6px;top:-8px;width:20px;height:20px;border-radius:50%;border:0;background:var(--bad);color:#fff;font:700 13px/20px var(--f-body);cursor:pointer;padding:0;z-index:3}
+.gof-ch{position:absolute;left:0;bottom:3.5%;width:7.6%;margin-left:-3.8%;padding:0;border:0;background:transparent;cursor:pointer;z-index:4;transform:translateX(calc(var(--x,50) * 1cqw));transition:transform var(--d,2s) linear}
+.gof-ch.work{z-index:1;bottom:17%}
+.gof-ch:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.gof-flip{display:block}.gof-ch.left .gof-flip{transform:scaleX(-1)}
+.gof-nm{display:block;margin-top:1px;font:600 9.5px/1.2 var(--f-body);color:#fff;text-shadow:0 1px 3px #000,0 0 2px #000;text-align:center;white-space:nowrap;opacity:.85}
+.gof-ch.work .gof-nm{visibility:hidden}
+.gof-ch.me .gof-nm{color:var(--accent);opacity:1}
+.chb-leg{transform-origin:50% 80%}
+.gof-ch.walk .chb{animation:chbBob .42s ease-in-out infinite}
+.gof-ch.walk .chb-ll{animation:chbStep .42s ease-in-out infinite alternate}.gof-ch.walk .chb-lr{animation:chbStep .42s ease-in-out infinite alternate-reverse}
+.gof-ch.work .chb{animation:chbType .5s ease-in-out infinite}
+.gof-ch.busy .chb-ring{animation:chbRing 1.1s ease-in-out infinite}
+.gof-ch.cheer .chb{animation:chbHop .4s ease-out 3}
+@keyframes chbBob{50%{transform:translateY(-2.5%)}}
+@keyframes chbStep{from{transform:rotate(-13deg)}to{transform:rotate(13deg)}}
+@keyframes chbType{50%{transform:translateY(1.6%) rotate(-1.2deg)}}
+@keyframes chbRing{50%{transform:translateY(-3%);opacity:.55}}
+@keyframes chbHop{50%{transform:translateY(-12%)}}
+.gof-bub{position:absolute;left:62%;top:-6%;display:none;gap:2px;padding:3px 5px;border-radius:8px 8px 8px 2px;background:#fff;z-index:2}
+.gof-ch.work .gof-bub{display:flex}.gof-bub i{width:4px;height:4px;border-radius:50%;background:#333;animation:gdDot 1s ease-in-out infinite}.gof-bub i:nth-child(2){animation-delay:.15s}.gof-bub i:nth-child(3){animation-delay:.3s}
+.gof-cat{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.gof-cat[hidden]{display:none}.gof-tip{margin-left:6px}
+html.away .gof-ch *,html.lite .gof-ch .chb,html.lite .gof-ch .chb-leg{animation-play-state:paused!important}
+@media (prefers-reduced-motion:reduce){.gof-ch,.gof-ch *{animation:none!important;transition:none!important}}
+html.mob .gof-nm{font-size:8px}html.mob .gd-head{flex-wrap:wrap}
 </style>
 
 <div class="scan" aria-hidden="true"></div><div class="xgrid" aria-hidden="true"></div>
@@ -3195,7 +3276,7 @@ html.mob .rov{padding-top:calc(10vh + env(safe-area-inset-top,0px))}
   </form>
   <div id="cmd-out" class="cmdout" hidden></div>
   <nav class="gd-rail" id="gd-rail" aria-label="Workspaces" hidden></nav>
-  <section class="panel gd-chat" id="gd-chat" aria-label="Agent chat"><header class="gd-head" id="gd-head"></header><div class="gd-log" id="gd-log" aria-live="polite"></div></section>
+  <section class="panel gd-chat" id="gd-chat" aria-label="Agent chat"><header class="gd-head" id="gd-head"></header><div class="gd-dash" id="gd-dash"><div class="gof-host" id="gof-host"></div><div class="tm-body" id="tm-body"></div></div><div class="gd-log" id="gd-log" aria-live="polite"></div></section>
 
   <section class="panel" id="p-dump" hidden>
     <header class="ph"><span class="led ok"></span><h2>Plan my day</h2><div class="pa"><button class="btn sm ghost" data-act="dump-close">Close</button></div></header>
@@ -3454,7 +3535,7 @@ html.mob .rov{padding-top:calc(10vh + env(safe-area-inset-top,0px))}
   <div class="lk-b">
     <div class="lk-s"><span class="lk-l">TV</span><p class="lk-n">Fill a TV or second screen with the Home clock and your day.</p><div class="fbar lk-tv"><button class="btn sm" data-act="tv-on">Start TV mode</button><button class="btn sm ghost" data-act="tv-help">How to show it on a TV</button></div></div>
     <div class="lk-s"><span class="lk-l">Presets</span><p class="lk-n lk-pren">Presets: colour and moving background together.</p>
-      <div class="lk-pre"><button class="pre pre-cyber" data-act="preset" data-v="cyber" aria-pressed="false"><i></i><b>Cyberpunk</b><small>Neon city, rain and holo tags</small></button><button class="pre pre-blackwall" data-act="preset" data-v="blackwall" aria-pressed="false"><i></i><b>Blackwall</b><small>Red firewall lattice and shards</small></button><button class="pre pre-tide" data-act="preset" data-v="tide" aria-pressed="false"><i></i><b>Blackwall Calm</b><small>Blue ripples and soft haze</small></button><button class="pre pre-holo" data-act="preset" data-v="holo" aria-pressed="false"><i></i><b>Holo HUD</b><small>Gold and cyan rings and readouts</small></button></div></div>
+      <div class="lk-pre"><button class="pre pre-cyber" data-act="preset" data-v="cyber" aria-pressed="false"><i></i><b>Cyberpunk</b><small>Neon city, rain and holo tags</small></button><button class="pre pre-blackwall" data-act="preset" data-v="blackwall" aria-pressed="false"><i></i><b>Blackwall</b><small>Red firewall lattice and shards</small></button><button class="pre pre-tide" data-act="preset" data-v="tide" aria-pressed="false"><i></i><b>Waterwall</b><small>Blue ripples and soft haze</small></button><button class="pre pre-holo" data-act="preset" data-v="holo" aria-pressed="false"><i></i><b>Holo HUD</b><small>Gold and cyan rings and readouts</small></button></div></div>
     <div class="lk-s"><div class="lk-h2"><span class="lk-l">Colour</span><button class="btn sm ghost" data-act="skin-reorder" aria-pressed="false">Reorder</button></div>
       <div class="lk-sw">
         <button class="cs" data-act="skin" data-skin="violet" aria-pressed="true"><i class="dot"></i>Violet</button>
@@ -3467,7 +3548,7 @@ html.mob .rov{padding-top:calc(10vh + env(safe-area-inset-top,0px))}
         <button class="cs" data-act="skin" data-skin="cyber" aria-pressed="false"><i class="dot"></i>Cyberpunk</button>
         <button class="cs" data-act="skin" data-skin="blackwall" aria-pressed="false"><i class="dot"></i>Blackwall</button>
         <button class="cs" data-act="skin" data-skin="holo" aria-pressed="false"><i class="dot"></i>Holo HUD</button>
-        <button class="cs" data-act="skin" data-skin="tide" aria-pressed="false"><i class="dot"></i>Blackwall Calm</button>
+        <button class="cs" data-act="skin" data-skin="tide" aria-pressed="false"><i class="dot"></i>Waterwall</button>
       </div>
       <div class="mvbar" id="mvbar"><span class="lk-n">Tap a colour, then move it.</span><button class="btn sm" data-act="skin-move" data-dir="-1" aria-label="Move earlier">◀</button><button class="btn sm" data-act="skin-move" data-dir="1" aria-label="Move later">▶</button></div></div>
     <div class="lk-s"><span class="lk-l">Custom colour</span>
@@ -3486,13 +3567,14 @@ html.mob .rov{padding-top:calc(10vh + env(safe-area-inset-top,0px))}
       <div class="lk-r"><span>Liquid glass <em>see-through panels</em></span><button class="switch" data-act="glass" role="switch" aria-checked="false" aria-label="Liquid glass"></button></div></div>
     <div class="lk-s" id="lk-pages"><div class="lk-h2"><span class="lk-l">Pages</span><button class="btn sm ghost" data-act="vo-reset">Reset</button></div><p class="lk-n">Choose the order of Home, Workspace, Music, Chat and Browser in the top switch. Page transitions follow this order.</p><div id="vo-list" class="vo-list"></div></div>
     <div class="lk-s"><span class="lk-l">Background</span>
-      <div class="seg bgs"><button data-act="bg" data-v="aurora" aria-pressed="true">Aurora</button><button data-act="bg" data-v="cosmos" aria-pressed="false">Cosmos</button><button data-act="bg" data-v="metal" aria-pressed="false">Metal</button><button data-act="bg" data-v="signal" aria-pressed="false">Signal</button><button data-act="bg" data-v="cyber" aria-pressed="false">Neon city</button><button data-act="bg" data-v="blackwall" aria-pressed="false">Firewall</button><button data-act="bg" data-v="tide" aria-pressed="false">Calm wall</button><button data-act="bg" data-v="holo" aria-pressed="false">Holo HUD</button><button data-act="bg" data-v="photo" aria-pressed="false">My photo</button></div>
+      <div class="seg bgs"><button data-act="bg" data-v="aurora" aria-pressed="true">Aurora</button><button data-act="bg" data-v="cosmos" aria-pressed="false">Cosmos</button><button data-act="bg" data-v="metal" aria-pressed="false">Metal</button><button data-act="bg" data-v="signal" aria-pressed="false">Signal</button><button data-act="bg" data-v="cyber" aria-pressed="false">Neon city</button><button data-act="bg" data-v="blackwall" aria-pressed="false">Firewall</button><button data-act="bg" data-v="tide" aria-pressed="false">Waterwall</button><button data-act="bg" data-v="holo" aria-pressed="false">Holo HUD</button><button data-act="bg" data-v="photo" aria-pressed="false">My photo</button></div>
       <div class="lk-file"><label class="btn sm fbtn">Choose photo…<input type="file" id="ph-file" accept="image/*" aria-label="Choose a background photo"></label><span class="lk-n" id="ph-name">No photo chosen yet.</span></div></div>
     <div class="lk-s"><span class="lk-l">Blackwall</span><div id="lk-bw"><div class="lk-n"><b>Blackwall</b></div>
       <label class="lk-sl"><span>How often</span><input type="range" id="bw-f" min="15" max="200" step="5" value="60" aria-label="How often spikes and ripples happen"><output id="bw-f-o">60%</output></label>
       <label class="lk-sl"><span>Sharpness</span><input type="range" id="bw-s" min="0" max="100" step="5" value="50" aria-label="How sharp the spikes are"><output id="bw-s-o">50%</output></label>
       <label class="lk-sl"><span>Size</span><input type="range" id="bw-r" min="30" max="250" step="5" value="100" aria-label="How high and wide the spikes and ripples are"><output id="bw-r-o">100%</output></label>
-      <div class="lk-n">For the Firewall and Calm wall backgrounds. How often: lower is calmer. Sharpness: higher gives pointier, spikier shards. Size: how high and wide the spikes and ripples rise.</div>
+      <div class="lk-cl"><label>Firewall colour <input type="color" id="bw-c1" value="#ff1220" aria-label="Firewall colour"></label><label>Waterwall colour <input type="color" id="bw-c2" value="#1a57ff" aria-label="Waterwall colour"></label></div>
+      <div class="lk-n">For the Firewall and Waterwall backgrounds. How often: lower is calmer. Sharpness: higher gives pointier, spikier shards. Size: how high and wide the spikes and ripples rise.</div>
       <button class="btn sm ghost" data-act="bw-reset">Reset</button></div></div>
     <div class="lk-s"><span class="lk-l">Typeface</span>
       <div class="seg three fonts"><button data-act="font" data-v="standard" aria-pressed="true">Standard</button><button data-act="font" data-v="gravion" aria-pressed="false" class="f-g">Gravion</button><button data-act="font" data-v="techno" aria-pressed="false" class="f-t">Techno</button></div>
@@ -3957,12 +4039,12 @@ function fxCore(G,inline){
       /* digital rain */
       c.strokeStyle="rgba(5,217,232,.35)";c.beginPath();for(i=0;i<SC.p.length;i++){var r=SC.p[i];r.y+=r.v*d;if(r.y>hz){r.y=-r.l;r.x=rnd(0,W)}c.moveTo(r.x,r.y);c.lineTo(r.x,r.y+r.l)}c.stroke();
       for(i=0;i<SC.tags.length;i++){var tg=SC.tags[i];tg.y+=tg.vy*d;if(tg.y<-30){tg.y=hz-30;tg.x=rnd(.05,.85)*W;tg.txt=pick(TAGS.cyber);tg.w=0}var fl=(Math.sin(t*3+tg.ph)>.96)?.25:1;tag(c,tg,i%3?"#05d9e8":"#ff2a6d",.55*fl)}}
-    if(b==="tide")glDraw(dt);
-    if(b==="blackwall"){glDraw(dt);
+    if(b==="tide"&&!glDraw(dt))wall2d(c,W,H,t,true);
+    if(b==="blackwall"){if(!glDraw(dt))wall2d(c,W,H,t,false);
       c.font="11px Consolas,monospace";for(i=0;i<SC.cb.length;i++){var cb=SC.cb[i];cb.age+=d;cb.x+=cb.vx*d;cb.y+=cb.vy*d;var typed=cb.age*cb.cps,fade=cb.age>cb.life?Math.max(0,1-(cb.age-cb.life)/2):Math.min(1,cb.age*2);
         if(fade<=0&&cb.age>cb.life){SC.cb[i]=bwCode(W,H,0);continue}var left=typed;
         for(var li=0;li<cb.lines.length&&left>0;li++){var L=cb.lines[li],n=Math.min(L.length,Math.floor(left));left-=L.length;
-          var gl=Math.random()<.012;c.globalAlpha=(li===0?.55:.32)*fade*(gl?.4:1);c.fillStyle=li===0?"#ff6a74":"#ff3346";c.fillText(L.slice(0,n)+(n<L.length&&((t*6)|0)%2?"\u2588":""),cb.x+(gl?rnd(-6,6):0),cb.y+li*14)}}
+          var gl=Math.random()<.012;c.globalAlpha=(li===0?.55:.32)*fade*(gl?.4:1);c.fillStyle=K.bwcss||(li===0?"#ff6a74":"#ff3346");c.fillText(L.slice(0,n)+(n<L.length&&((t*6)|0)%2?"\u2588":""),cb.x+(gl?rnd(-6,6):0),cb.y+li*14)}}
       c.globalAlpha=1}
     if(b==="holo"){if(SC.off)c.drawImage(SC.off,0,0);
       c.fillStyle="rgba(79,227,255,.55)";for(i=0;i<SC.p.length;i++){var q=SC.p[i];q.y-=q.v*d;if(q.y<-4){q.y=H+4;q.x=rnd(0,W)}c.fillRect(q.x,q.y,q.r,q.r)}
@@ -3983,8 +4065,8 @@ function fxCore(G,inline){
      and shape that roll and swell; pins they push come forward (bigger, brighter, spread out, lit from one side) like a pin-art toy.
      Mainly red with slowly drifting hues; glitches tear bands sideways, split colours, flicker blocks and sweep a scan line. */
   var gcv=null,GL=null,GP=null,GU={},gBuf=null,gN=0,gW=0,gH=0,gSp=9,BWS=null;
-  var VS="attribute vec3 a;uniform vec2 uR;uniform float uT,uSp,uGl,uGs,uHue,uScan,uBk,uM,uSh;uniform vec2 uOff;uniform vec4 uB[8],uC[8];varying vec3 vC;"+
-    /* uM 0: Blackwall, shards that stab out of the wall (hard edges, star-shaped spikes). uM 1: Calm wall, rings that ripple across it */
+  var VS="attribute vec3 a;uniform vec2 uR;uniform float uT,uSp,uGl,uGs,uHue,uScan,uBk,uM,uSh;uniform vec3 uC1,uC2,uC3;uniform vec2 uOff;uniform vec4 uB[8],uC[8];varying vec3 vC;"+
+    /* uM 0: Blackwall, shards that stab out of the wall (hard edges, star-shaped spikes). uM 1: Waterwall, rings that ripple across it */
     "float F(vec2 p){float z=0.0;if(uM>0.5){for(int i=0;i<8;i++){vec4 b=uB[i],c=uC[i];float d=length(p-b.xy);float x=(d-c.x)/b.z;z+=c.y*exp(-x*x)*cos(x*2.2);}"+
       "return z+0.10*sin(p.x*0.0042+uT*0.32)*sin(p.y*0.0051-uT*0.27);}"+
       "for(int i=0;i<8;i++){vec4 b=uB[i],c=uC[i];vec2 d=p-b.xy;float cs=cos(c.x),sn=sin(c.x);vec2 q=vec2(cs*d.x+sn*d.y,-sn*d.x+cs*d.y)/b.zw;"+
@@ -3996,9 +4078,9 @@ function fxCore(G,inline){
       "float lit=clamp(dot(n,normalize(vec3(-0.55,-0.65,0.75))),0.0,1.0);vec2 c=uR*0.5;vec2 q=c+(p-c)*(1.0+z*0.16);"+
       "float band=floor(q.y/(uR.y/30.0));float h=H(band*91.7+uGs);if(h>0.8)q.x+=(h-0.9)*1100.0*uGl;q+=uOff;"+
       "vec2 cl=q/uR*2.0-1.0;gl_Position=vec4(cl.x,-cl.y,0.0,1.0);gl_PointSize=uSp*(0.56+z*0.5+a.z*0.05);"+
-      "float hm=0.5+0.5*sin(uHue+p.x*0.0016-p.y*0.0012);vec3 red=vec3(1.0,0.07,0.1),mag=vec3(1.0,0.1,0.42),org=vec3(1.0,0.32,0.06);"+
+      "float hm=0.5+0.5*sin(uHue+p.x*0.0016-p.y*0.0012);vec3 red=uC1,mag=uC2,org=uC3;"+
       "vec3 col=mix(red,mix(mag,org,0.5+0.5*sin(uHue*0.37)),hm*0.42);"+
-      "if(uM>0.5){vec3 dp=vec3(0.10,0.34,1.0),cy=vec3(0.32,0.92,1.0),vi=vec3(0.45,0.5,1.0);col=mix(dp,mix(cy,vi,0.5+0.5*sin(uHue*0.31)),hm*0.55);"+
+      "if(uM>0.5){vec3 dp=uC1,cy=uC2,vi=uC3;col=mix(dp,mix(cy,vi,0.5+0.5*sin(uHue*0.31)),hm*0.55);"+
         "float br=0.27+0.04*a.z+0.05*sin(p.x*0.009+p.y*0.006+uT*0.4)+z*(0.24+0.7*lit);col=mix(col,vec3(0.8,0.95,1.0),clamp(z*0.45*lit-0.12,0.0,0.6));"+
         "br+=0.13*exp(-pow((q.y-uScan)/140.0,2.0))+0.05*sin(q.y*0.035+uT*1.1)*0.5;vC=col*br;return;}"+
       "float bright=0.32+0.05*a.z+0.06*sin(p.x*0.011+p.y*0.007+uT*0.6)+z*(0.2+0.95*lit);col=mix(col,vec3(1.0,0.82,0.86),clamp(z*0.62*lit-0.12,0.0,0.85));"+
@@ -4007,7 +4089,7 @@ function fxCore(G,inline){
   var FS="precision mediump float;varying vec3 vC;void main(){vec2 d=gl_PointCoord-0.5;float r=length(d);float a=smoothstep(0.5,0.12,r);float k=smoothstep(0.2,0.0,r);gl_FragColor=vec4(vC*(a*0.75+k*0.55),1.0);}";
   function glOK(){if(GL)return true;if(!gcv)return false;try{GL=gcv.getContext("webgl",{alpha:false,antialias:false,depth:false,stencil:false,premultipliedAlpha:false,powerPreference:"low-power"})}catch(_){GL=null}if(!GL)return false;
     var g=GL,sh=function(t,src){var s=g.createShader(t);g.shaderSource(s,src);g.compileShader(s);return s},pr=g.createProgram();g.attachShader(pr,sh(g.VERTEX_SHADER,VS));g.attachShader(pr,sh(g.FRAGMENT_SHADER,FS));g.linkProgram(pr);
-    if(!g.getProgramParameter(pr,g.LINK_STATUS)){GL=null;return false}GP=pr;g.useProgram(pr);["uR","uT","uSp","uGl","uGs","uHue","uScan","uBk","uM","uSh","uOff","uB","uC"].forEach(function(n){GU[n]=g.getUniformLocation(pr,n)});
+    if(!g.getProgramParameter(pr,g.LINK_STATUS)||(g.isContextLost&&g.isContextLost())){GL=null;return false}GP=pr;g.useProgram(pr);["uR","uT","uSp","uGl","uGs","uHue","uScan","uBk","uM","uSh","uC1","uC2","uC3","uOff","uB","uC"].forEach(function(n){GU[n]=g.getUniformLocation(pr,n)});
     gBuf=g.createBuffer();g.enable(g.BLEND);g.blendFunc(g.ONE,g.ONE);return true}
   function glGrid(){var g=GL;if(!g)return;gW=K.W;gH=K.H;gcv.width=gW;gcv.height=gH;g.viewport(0,0,gW,gH);
     gSp=Math.max(7,Math.min(11,Math.round(Math.sqrt(gW*gH/26000))));var cols=Math.ceil(gW/gSp)+2,rows=Math.ceil(gH/gSp)+2,d=new Float32Array(cols*rows*3),k=0;
@@ -4015,8 +4097,13 @@ function fxCore(G,inline){
     gN=cols*rows;g.bindBuffer(g.ARRAY_BUFFER,gBuf);g.bufferData(g.ARRAY_BUFFER,d,g.STATIC_DRAW);var at=g.getAttribLocation(GP,"a");g.enableVertexAttribArray(at);g.vertexAttribPointer(at,3,g.FLOAT,false,0,0)}
   /* a rogue AI: grows, rolls across, morphs its outline, then sinks back */
   /* 1.8.9 a rogue AI push: waits, swells out (a smallish, irregular shape), holds while it creeps a little, sinks back into the wall */
-  /* 1.9.1: Blackwall shards stab out fast with hard, spiky outlines and pull back; Calm wall sources send out slow rings */
+  /* 1.9.1: Blackwall shards stab out fast with hard, spiky outlines and pull back; Waterwall sources send out slow rings */
   /* 1.9.2: K.bwf = how often (waits divide by it), K.bwr = size (height and width) */
+  /* 1.9.5 wall colours: the chosen colour plus two neighbours on the colour wheel (K.bwc / K.twc are [r,g,b] 0..1 triples x3) */
+  function wallCols(g,tide){var c=(tide?K.twc:K.bwc)||(tide?[.10,.34,1,.32,.92,1,.45,.5,1]:[1,.07,.1,1,.1,.42,1,.32,.06]);g.uniform3f(GU.uC1,c[0],c[1],c[2]);g.uniform3f(GU.uC2,c[3],c[4],c[5]);g.uniform3f(GU.uC3,c[6],c[7],c[8]);return c}
+  /* without the graphics card (WebGL refused): a plain dot wall with slow swells, so the background is never just blank */
+  function wall2d(c,W,H,t,tide){var k=(tide?K.twc:K.bwc)||(tide?[.10,.34,1]:[1,.07,.1]),sp=16,r=Math.round(k[0]*255),g2=Math.round(k[1]*255),b=Math.round(k[2]*255);c.fillStyle="rgb("+r+","+g2+","+b+")";
+    for(var y=8;y<H;y+=sp)for(var x=8+((y/sp)&1)*8;x<W;x+=sp){var z=.5+.5*Math.sin(x*.011+t*.7)*Math.sin(y*.013-t*.5),a=.10+.34*z*z;c.globalAlpha=a;var d=2+z*2.4;c.fillRect(x-d/2,y-d/2,d,d)}c.globalAlpha=1}
   function bwBulge(init){var W=K.W,H=K.H,f=Math.max(.15,K.bwf||.6),z=Math.max(.3,K.bwr||1),sz=rnd(30,105)*Math.sqrt(z);if(K.bg==="tide")return{x:rnd(.05,.95)*W,y:rnd(.08,.92)*H,R:0,v:rnd(55,95),w:rnd(20,36)*Math.sqrt(z),a0:rnd(.55,1.05)*z,Rmax:rnd(240,520)*Math.sqrt(z),wait:(init?rnd(0,6):rnd(.8,4.5))/f,ph:0};
     return{x:rnd(.06,.94)*W,y:rnd(.08,.92)*H,vx:rnd(-16,16),vy:rnd(-12,12),sx:sz*rnd(.6,1.4),sy:sz*rnd(.6,1.4),
     rot:rnd(0,6.28),vr:rnd(-.5,.5),amp:rnd(1.25,2.3)*z,wob:rnd(.45,1.0),ph:rnd(0,9),vph:rnd(.8,2.2),wait:(init?rnd(0,4):rnd(.4,3.2))/f,age:0,up:rnd(.07,.2),hold:rnd(.15,.9),down:rnd(.35,.85)}}
@@ -4030,7 +4117,7 @@ function fxCore(G,inline){
         var fade=r.wait>0?0:Math.min(1,r.R/40)*Math.max(0,1-r.R/r.Rmax);B[i*4]=r.x;B[i*4+1]=r.y;B[i*4+2]=r.w;B[i*4+3]=r.w;C[i*4]=r.R;C[i*4+1]=r.a0*fade;C[i*4+2]=0;C[i*4+3]=0}
       /* a soft haze band drifts down now and then; no glitches */
       S2.ns-=d;if(S2.ns<=0){S2.scan=-160;S2.ns=rnd(6,12)}if(S2.scan>-200){S2.scan+=d*H*.16;if(S2.scan>H+200)S2.scan=-400}
-      g.clearColor(.004,.012,.03,1);g.clear(g.COLOR_BUFFER_BIT);g.useProgram(GP);
+      var wc=K.twc||[.10,.34,1];g.clearColor(wc[0]*.03,wc[1]*.03,wc[2]*.03,1);g.clear(g.COLOR_BUFFER_BIT);g.useProgram(GP);wallCols(g,true);
       g.uniform2f(GU.uR,W,H);g.uniform1f(GU.uT,S2.t);g.uniform1f(GU.uSp,gSp);g.uniform1f(GU.uGl,0);g.uniform1f(GU.uGs,0);g.uniform1f(GU.uHue,S2.hue);g.uniform1f(GU.uScan,S2.scan);g.uniform1f(GU.uBk,0);g.uniform1f(GU.uM,1);
       g.uniform4fv(GU.uB,B);g.uniform4fv(GU.uC,C);g.uniform2f(GU.uOff,0,0);g.drawArrays(g.POINTS,0,gN);return true}
     var live=0;for(i=0;i<8;i++){var q0=S2.b[i];if(q0.wait<=0&&q0.age<q0.up+q0.hold+q0.down)live++}
@@ -4043,7 +4130,7 @@ function fxCore(G,inline){
     /* glitches: a burst every few seconds; a scan line now and then; blocks flicker all the time */
     if(d>0){S2.next-=d;if(S2.next<=0){S2.gl=1;S2.gs=Math.random()*1000;S2.next=rnd(.8,3.2)/Math.max(.15,K.bwf||.6);S2.gt=rnd(.06,.26)}if(S2.gl>0){S2.gt-=d;if(S2.gt<=0)S2.gl=0;else if(Math.random()<.35)S2.gs=Math.random()*1000}
       S2.ns-=d;if(S2.ns<=0){S2.scan=-20;S2.ns=rnd(3,8)}if(S2.scan>-50){S2.scan+=d*H*1.4;if(S2.scan>H+30)S2.scan=-100}if(Math.random()<.3)S2.bk=Math.random()*1000}
-    g.clearColor(.018,.003,.007,1);g.clear(g.COLOR_BUFFER_BIT);g.useProgram(GP);
+    var wc2=K.bwc||[1,.07,.1];g.clearColor(wc2[0]*.018,wc2[1]*.018,wc2[2]*.018,1);g.clear(g.COLOR_BUFFER_BIT);g.useProgram(GP);wallCols(g,false);
     g.uniform2f(GU.uR,W,H);g.uniform1f(GU.uT,S2.t);g.uniform1f(GU.uSp,gSp);g.uniform1f(GU.uGl,S2.gl);g.uniform1f(GU.uGs,S2.gs);g.uniform1f(GU.uHue,S2.hue);g.uniform1f(GU.uScan,S2.scan);g.uniform1f(GU.uBk,S2.bk);
     g.uniform1f(GU.uM,0);g.uniform1f(GU.uSh,K.bws==null?.5:K.bws);g.uniform4fv(GU.uB,B);g.uniform4fv(GU.uC,C);
     if(S2.gl>0){var k2=rnd(4,12);g.colorMask(true,false,false,true);g.uniform2f(GU.uOff,k2,0);g.drawArrays(g.POINTS,0,gN);g.colorMask(false,true,true,true);g.uniform2f(GU.uOff,-k2,0);g.drawArrays(g.POINTS,0,gN);g.colorMask(true,true,true,true)}
@@ -4081,11 +4168,18 @@ function fxRebuild(why){var n=Date.now();if(FX.rebuiltAt&&n-FX.rebuiltAt<30000)r
   try{initFx()}catch(_){}}
 setInterval(function(){if(!FX.w||!FX.beat)return;var R=document.documentElement;if(document.hidden||R.classList.contains("away")){FX.beat=Date.now();return}if(Date.now()-FX.beat>20000)fxRebuild("worker went silent")},5000);
 /* 1.9.2 Blackwall dials: f = how often (percent; 100 = the 1.9.1 pace), s = sharpness 0..100, r = size of spikes / ripples (percent) */
-var BWFX=(function(){var o=lsj("regis-bwfx",null)||{};var c=function(v,a,b,d){v=+v;return isFinite(v)?Math.max(a,Math.min(b,v)):d};return {f:c(o.f,15,200,60),s:c(o.s,0,100,50),r:c(o.r,30,250,100)}})();
-function bwFxUi(){[["f","%"],["s","%"],["r","%"]].forEach(function(k){var i=$("#bw-"+k[0]),o=$("#bw-"+k[0]+"-o");if(i&&document.activeElement!==i)i.value=BWFX[k[0]];if(o)o.textContent=BWFX[k[0]]+k[1]})}
-function bwFxSet(v,save){BWFX={f:Math.max(15,Math.min(200,+v.f||60)),s:Math.max(0,Math.min(100,+v.s||0)),r:Math.max(30,Math.min(250,+v.r||100))};bwFxUi();if(FX.kick)FX.kick();if(save)lsw("regis-bwfx",BWFX)}
-document.addEventListener("input",function(ev){var t=ev.target;if(t&&/^bw-[fsr]$/.test(t.id))bwFxSet({f:$("#bw-f").value,s:$("#bw-s").value,r:$("#bw-r").value},false)});
-document.addEventListener("change",function(ev){var t=ev.target;if(t&&/^bw-[fsr]$/.test(t.id))bwFxSet({f:$("#bw-f").value,s:$("#bw-s").value,r:$("#bw-r").value},true)});
+var BWFX=(function(){var o=lsj("regis-bwfx",null)||{};var c=function(v,a,b,d){v=+v;return isFinite(v)?Math.max(a,Math.min(b,v)):d};return {f:c(o.f,15,200,60),s:c(o.s,0,100,50),r:c(o.r,30,250,100),c1:/^#[0-9a-f]{6}$/i.test(o.c1||"")?o.c1:"#ff1220",c2:/^#[0-9a-f]{6}$/i.test(o.c2||"")?o.c2:"#1a57ff"}})();
+/* a colour and two neighbours (hue +-, lighter), as nine 0..1 numbers for the wall shader */
+function bwTri(hex,d1,d2){var n=parseInt(hex.slice(1),16),r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,h=0,sa=0,d=mx-mn;
+  if(d){sa=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?((g-b)/d+(g<b?6:0)):mx===g?((b-r)/d+2):((r-g)/d+4);h/=6}
+  var f=function(hh,ss,ll){hh=(hh%1+1)%1;var q=ll<.5?ll*(1+ss):ll+ss-ll*ss,pp=2*ll-q,t=function(x){x=(x%1+1)%1;return x<1/6?pp+(q-pp)*6*x:x<.5?q:x<2/3?pp+(q-pp)*(2/3-x)*6:pp};return [t(hh+1/3),t(hh),t(hh-1/3)]};
+  var L=Math.max(.42,Math.min(.6,l)),S=Math.max(.55,sa);return f(h,S,L).concat(f(h+d1,S,Math.min(.7,L+.08)),f(h+d2,S,Math.min(.7,L+.04))).map(function(x){return +x.toFixed(3)})}
+function bwFxUi(){[["f","%"],["s","%"],["r","%"]].forEach(function(k){var i=$("#bw-"+k[0]),o=$("#bw-"+k[0]+"-o");if(i&&document.activeElement!==i)i.value=BWFX[k[0]];if(o)o.textContent=BWFX[k[0]]+k[1]});
+  var a=$("#bw-c1"),b=$("#bw-c2");if(a)a.value=BWFX.c1;if(b)b.value=BWFX.c2;var bg=document.querySelector(".bg");if(bg){bg.style.setProperty("--wall1",BWFX.c1);bg.style.setProperty("--wall2",BWFX.c2)}}
+function bwFxSet(v,save){var hx=function(x,d){return /^#[0-9a-f]{6}$/i.test(x||"")?x:d};BWFX={f:Math.max(15,Math.min(200,+v.f||60)),s:Math.max(0,Math.min(100,+v.s||0)),r:Math.max(30,Math.min(250,+v.r||100)),c1:hx(v.c1,BWFX.c1),c2:hx(v.c2,BWFX.c2)};bwFxUi();if(FX.kick)FX.kick();if(save)lsw("regis-bwfx",BWFX)}
+function bwFxRead(){return {f:$("#bw-f").value,s:$("#bw-s").value,r:$("#bw-r").value,c1:$("#bw-c1").value,c2:$("#bw-c2").value}}
+document.addEventListener("input",function(ev){var t=ev.target;if(t&&/^bw-([fsr]|c[12])$/.test(t.id))bwFxSet(bwFxRead(),false)});
+document.addEventListener("change",function(ev){var t=ev.target;if(t&&/^bw-([fsr]|c[12])$/.test(t.id))bwFxSet(bwFxRead(),true)});
 setTimeout(function(){try{bwFxUi()}catch(_){}},0);
 function initFx(){
   var host=$(".bg");if(!host||!document.createElement("canvas").getContext)return;FX.on=1;
@@ -4104,7 +4198,7 @@ function initFx(){
     if(m=c.match(/^#([0-9a-f]{6})$/i))return[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)];
     if(m=c.match(/(\d+)\D+(\d+)\D+(\d+)/))return[+m[1],+m[2],+m[3]];return[185,154,255]}
   function cfg(){var R=document.documentElement;return{bg:FX.bg,mode:PERF.mode,s:FX.s,reduce:!!reduce,skin:R.getAttribute("data-skin")||"violet",W:window.innerWidth,H:window.innerHeight,
-    run:!document.hidden&&!PERF.idle&&!R.classList.contains("away")&&FXNAT.indexOf(S.view)<0,bwf:BWFX.f/100,bws:BWFX.s/100,bwr:BWFX.r/100}}
+    run:!document.hidden&&!PERF.idle&&!R.classList.contains("away")&&FXNAT.indexOf(S.view)<0,bwf:BWFX.f/100,bws:BWFX.s/100,bwr:BWFX.r/100,bwc:bwTri(BWFX.c1,-.07,.045),twc:bwTri(BWFX.c2,.09,.14),bwcss:BWFX.c1==="#ff1220"?"":BWFX.c1}}
   /* 1.9.1: Browser, Office and Comm cover the background, so it pauses there; coming back after a while, or after the window was
      hidden for a while, redraws everything (graphics resets during heavy pages left it blank on older desktop apps) */
   var natAt=0,hidAt=0;
@@ -6381,8 +6475,11 @@ document.addEventListener("click",async function(ev){
     case "nav-toggle":navToggle();break;
     case "ofd-app":case "ofd-filter":case "ofd-doc":case "ofd-keys":case "ofd-new":case "ofd-start":case "ofd-pick":case "ofd-open":case "ofd-close":case "ofd-adopt":case "ofd-pop":await ofdAct(act,b);break;
     case "bw-mute":if(bwNative()&&APP.browser.mute)APP.browser.mute(+b.dataset.id);break;
-    case "bw-reset":bwFxSet({f:60,s:50,r:100},true);break;
+    case "bw-reset":bwFxSet({f:60,s:50,r:100,c1:"#ff1220",c2:"#1a57ff"},true);break;
 case "lai-check":case "lai-pull":case "lai-test":case "lai-get":case "gd-eng":await laiAct(act,b);break;
+case "gd-tab":gdTab(b.dataset.t);break;
+case "tm-run":case "tm-runall":case "tm-del":case "tm-again":case "tm-view":case "tm-kpi":case "tm-adnew":case "tm-adedit":case "tm-adtog":case "tm-addel":case "tm-adfile":case "gd-queue":await tmAct(act,b);break;
+case "gof-edit":case "gof-add":case "gof-del":case "gof-reset":case "gof-ch":await gofAct(act,b);break;
 case "gd-pick":case "gd-new":case "gd-clear":case "gd-copy":case "gd-save":case "gd-tasks":case "gd-att":case "gd-fileclr":case "ov-to":case "ov-close":await gdAct(act,b);break;
 case "bwg-new":case "bwg-ren":case "bwg-col":case "bwg-ungrp":case "bwg-close":case "bwg-tog":await bwGrpAct(act,b);break;
 case "bp-yes":case "bp-no":case "bw-perms":case "bp-forget":await bpAct(act,b);break;
@@ -7799,7 +7896,7 @@ setTimeout(function(){if(APP&&APP.linkMode)APP.linkMode(linkHere()).catch(functi
 /* 1.8.3 full screen: the button and F11 both use the desktop window's true full screen (no Windows title bar); the page follows its state */
 if(APP&&APP.onFullscreen)APP.onFullscreen(function(v){setFs(!!v)});
 if(APP&&APP.fsState)APP.fsState().then(function(v){setFs(!!v)}).catch(function(){});
-var SHELL_NEED="1.9.4";
+var SHELL_NEED="1.9.5";
 function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
   var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;
@@ -7818,7 +7915,7 @@ function gdInit(){if(!gdOk())return;APP.guild.agents().then(function(l){GD.list=
   var s="";try{s=localStorage.getItem("regis-gd")||""}catch(_){}if(s&&gdAgent(s))gdPick(s,true);else gdRail()}).catch(function(){})}
 function gdCol(a){return a&&/^#[0-9a-f]{6}$/i.test(a.color||"")?a.color:"var(--accent)"}
 function gdRail(){var r=$("#gd-rail");if(!r)return;if(!GD.ok){r.hidden=true;return}r.hidden=false;var cur=GD.cur||"regis";
-  var it=function(id,n,role,g,col){var on=cur===id;return '<button class="gd-av'+(on?" on":"")+(GD.unread[id]?" un":"")+(GD.busy[id]?" bz":"")+'" type="button" data-act="gd-pick" data-id="'+id+'" data-n="'+esc(n)+'" style="--gc:'+esc(col)+'" aria-pressed="'+on+'" aria-label="'+esc(n+", "+role)+'"><span>'+g+'</span></button>'};
+  var it=function(id,n,role,g,col){var on=cur===id;return '<button class="gd-av'+(on?" on":"")+(GD.unread[id]?" un":"")+(GD.busy[id]?" bz":"")+'" type="button" data-act="gd-pick" data-id="'+id+'" data-n="'+esc(n)+'" style="--gc:'+esc(col)+'" aria-pressed="'+on+'" aria-label="'+esc(n+", "+role)+'"><span>'+(CHB[id]?chbHead(id):g)+'</span></button>'};
   r.innerHTML=it("regis","Regis","Your workspace","✦","var(--accent)")+'<i class="gd-sep" aria-hidden="true"></i>'+GD.list.map(function(a){return it(a.id,a.name,a.role,esc(String(a.glyph||a.name).slice(0,1)),gdCol(a))}).join("")}
 function gdPick(id,quiet){if(id==="regis"||!gdAgent(id))id=null;var was=GD.cur;GD.cur=id;try{localStorage.setItem("regis-gd",id||"")}catch(_){}if(id)delete GD.unread[id];
   var a=gdAgent(id),app=$("#app"),c=$("#cmd"),pr=document.querySelector("#cmd-form .prompt");if(app)app.classList.toggle("gd-on",!!id);
@@ -7826,13 +7923,16 @@ function gdPick(id,quiet){if(id==="regis"||!gdAgent(id))id=null;var was=GD.cur;G
   if(pr){pr.textContent=a?String(a.glyph||a.name).slice(0,1):"✦";pr.style.color=a?gdCol(a):""}
   var o=$("#cmd-out");if(o&&id)o.hidden=true;if(was!==id)GD.file=null;gdFileUi();gdRail();
   var log=$("#gd-log");if(log)log.innerHTML="";
-  if(!id)return;gdHead();
+  if(!id){try{gofSync()}catch(_){}return}GD.tab=lsj("regis-gdtab","dash")==="chat"?"chat":"dash";gdHead();gdTab(GD.tab,true);
   if(GD.h[id])gdDraw();else{if(log)log.innerHTML='<div class="gd-load note">Loading…</div>';APP.guild.history(id).then(function(h){h=Array.isArray(h)?h:[];if(GD.h[id]){var have={};h.forEach(function(x){have[x.id]=1});GD.h[id]=h.concat(GD.h[id].filter(function(x){return !have[x.id]}))}else GD.h[id]=h;if(GD.cur===id)gdDraw()}).catch(function(e){if(GD.cur===id&&log)log.innerHTML='<div class="gd-err">'+esc((e&&e.message)||"Couldn’t load this chat.")+'</div>'})}
   if(!quiet&&S.view==="work"&&c)setTimeout(function(){try{c.focus({preventScroll:true})}catch(_){}},30)}
 function gdHead(){var a=gdAgent(GD.cur),h=$("#gd-head"),ch=$("#gd-chat");if(!a||!h)return;if(ch)ch.style.setProperty("--gc",gdCol(a));
-  var loc=laiUses(GD.cur);h.innerHTML='<i class="gd-hav" aria-hidden="true">'+esc(String(a.glyph||a.name).slice(0,1))+'</i><div class="grow"><b>'+esc(a.name)+'</b><small>'+esc(a.role)+'</small></div>'+
-    (LAI.ok&&LAI.prefs&&LAI.prefs.model?'<button class="btn sm ghost gd-eng'+(loc?" on":"")+'" type="button" data-act="gd-eng" title="Switch between Claude (online) and the local AI on this computer">'+(loc?"Local · "+esc(short(LAI.prefs.model,22)):"Claude")+'</button>':'')+'<button class="btn sm ghost" type="button" data-act="gd-new">New chat</button>'}
-function gdDraw(){var id=GD.cur,a=gdAgent(id),log=$("#gd-log");if(!a||!log)return;GD.codes=[];GD.tasks=[];var g=esc(String(a.glyph||a.name).slice(0,1)),h=GD.h[id]||[];
+  var loc=laiUses(GD.cur);h.innerHTML='<i class="gd-hav" aria-hidden="true">'+gdAv(a)+'</i><div class="grow"><b>'+esc(a.name)+'</b><small>'+esc(a.role)+'</small></div>'+
+    (LAI.ok&&LAI.prefs&&LAI.prefs.model?'<button class="btn sm ghost gd-eng'+(loc?" on":"")+'" type="button" data-act="gd-eng" title="Switch between Claude (online) and the local AI on this computer">'+(loc?"Local · "+esc(short(LAI.prefs.model,22)):"Claude")+'</button>':'')+'<span class="seg gd-tabs" role="tablist"><button type="button" role="tab" data-act="gd-tab" data-t="dash" aria-pressed="'+(GD.tab!=="chat")+'">Dashboard</button><button type="button" role="tab" data-act="gd-tab" data-t="chat" aria-pressed="'+(GD.tab==="chat")+'">Chat</button></span><button class="btn sm ghost" type="button" data-act="gd-new">New chat</button>'}
+function gdAv(a){return CHB[a.id]?chbHead(a.id):esc(String(a.glyph||a.name).slice(0,1))}
+function gdTab(t,keep){GD.tab=t==="chat"?"chat":"dash";var ch=$("#gd-chat");if(ch)ch.dataset.tab=GD.tab;if(!keep)try{lsw("regis-gdtab",GD.tab)}catch(_){}
+  $$("#gd-head .gd-tabs button").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.t===GD.tab))});if(GD.tab==="dash"){try{tmRender()}catch(_){}try{gofShow()}catch(_){}}else if(GD.cur)delete GD.unread[GD.cur];try{gofSync()}catch(_){}}
+function gdDraw(){var id=GD.cur,a=gdAgent(id),log=$("#gd-log");if(!a||!log)return;GD.codes=[];GD.tasks=[];var g=gdAv(a),h=GD.h[id]||[];
   var out='<div class="gd-m ai"><i class="gd-mav" aria-hidden="true">'+g+'</i><div class="gd-b gd-hello">'+esc(a.hello||("Hi, I’m "+a.name+"."))+'</div></div>';
   h.forEach(function(m){if(m.role==="user")out+='<div class="gd-m me"><div class="gd-b">'+(m.file?'<span class="gd-fat">📄 '+esc(m.file)+'</span>':'')+esc(m.text||"")+'</div></div>';
     else out+='<div class="gd-m ai"><i class="gd-mav" aria-hidden="true">'+g+'</i><div class="gd-b md">'+gdMd(m.text)+(m.via&&m.via!=="claude"?'<div class="gd-via">'+esc(/^local:/.test(m.via)?"Answered by the local AI ("+m.via.slice(6)+")":m.via.replace(/^claude/,"Answered by Claude"))+'</div>':'')+'</div></div>'});
@@ -7857,20 +7957,24 @@ function gdMd(t){var parts=String(t||"").split(/```/),out="";
   parts.forEach(function(p,i){if(i%2===0){out+=gdMdText(p);return}
     var nl=p.indexOf("\n"),lang=(nl>=0?p.slice(0,nl):"").trim().toLowerCase().replace(/[^a-z0-9+#-]/g,""),code=(nl>=0?p.slice(nl+1):p).replace(/\n$/,"");
     if(lang==="tasks"){var arr=null;try{arr=JSON.parse(code)}catch(_){}if(Array.isArray(arr)){arr=arr.filter(function(x){return x&&typeof x.title==="string"&&x.title.trim()}).slice(0,12).map(function(x){return {title:x.title.trim().slice(0,200),due:/^\d{4}-\d\d-\d\d$/.test(x.due||"")?x.due:"",prio:[1,2,3].indexOf(+x.prio)>=0?+x.prio:2}});
-      if(arr.length){var k=GD.tasks.push(arr)-1;out+='<div class="gd-tasks" data-k="'+k+'"><b>Suggested tasks</b>'+arr.map(function(x,j){return '<label><input type="checkbox" data-tj="'+j+'" checked><span>'+esc(x.title)+(x.due?' <small>· '+esc(fmtDay(x.due))+'</small>':'')+' <small>· P'+x.prio+'</small></span></label>'}).join("")+'<div class="fbar"><button class="btn sm pri" type="button" data-act="gd-tasks" data-k="'+k+'">Add to my tasks</button></div></div>';return}}}
+      if(arr.length){var k=GD.tasks.push(arr)-1;out+='<div class="gd-tasks" data-k="'+k+'"><b>Suggested tasks</b>'+arr.map(function(x,j){return '<label><input type="checkbox" data-tj="'+j+'" checked><span>'+esc(x.title)+(x.due?' <small>· '+esc(fmtDay(x.due))+'</small>':'')+' <small>· P'+x.prio+'</small></span></label>'}).join("")+'<div class="fbar"><button class="btn sm pri" type="button" data-act="gd-tasks" data-k="'+k+'">Add to my tasks</button><button class="btn sm" type="button" data-act="gd-queue" data-k="'+k+'">Queue for the team</button></div></div>';return}}}
     var ci=GD.codes.push({lang:lang,code:code})-1;
     out+='<div class="gd-code"><div class="gd-ch"><span>'+esc(lang||"code")+'</span><button class="btn sm ghost" type="button" data-act="gd-copy" data-i="'+ci+'">Copy</button><button class="btn sm ghost" type="button" data-act="gd-save" data-i="'+ci+'">Save</button></div><pre><code>'+esc(code)+'</code></pre></div>'});
   return out}
 function gdTaskCtx(){return (S.todos||[]).filter(function(x){return !x.done}).slice(0,60).map(function(x){return "- "+String(x.title||"").slice(0,140)+(x.due?" (due "+x.due+")":"")+" [P"+(x.prio||2)+"]"}).join("\n")||"(no open tasks)"}
 function gdFileUi(){var f=$("#gd-file");if(!f)return;if(!GD.file){f.hidden=true;f.innerHTML="";return}f.hidden=false;f.innerHTML='<span title="'+esc(GD.file.name)+'">📄 '+esc(short(GD.file.name,28))+'</span><button type="button" data-act="gd-fileclr" aria-label="Remove the attached file">×</button>'}
+/* 1.9.5: gdAsk is the one place a message goes to an agent (chat box and queued tasks both use it) */
+function gdPaint(id){if(GD.cur===id){gdDraw();try{tmRender()}catch(_){}}gdRail();try{gofSync()}catch(_){}}
+async function gdAsk(id,text,f){var a=gdAgent(id);if(!a)throw new Error("Unknown agent.");if(GD.busy[id]){var be=new Error(a.name+" is still answering.");be.code="busy";throw be}
+  var h=GD.h[id]=GD.h[id]||[],tmp={id:"tmp"+Date.now(),role:"user",text:text,file:f?f.name:"",at:Date.now()};h.push(tmp);GD.busy[id]=1;if(GD.err&&GD.err.id===id)GD.err=null;gdPaint(id);
+  var extra={};if(f)extra.file={name:f.name,text:f.text};if(id==="exusiai")extra.tasks=gdTaskCtx();var ad=tmAddins(id);if(ad)extra.addins=ad;
+  try{var r=await APP.guild.send(id,text,extra);h=GD.h[id]||h;var i=h.indexOf(tmp);if(i>=0)h.splice(i,1,r.user);else h.push(r.user);h.push(r.reply);if(r.truncated)h.push({id:"cut",role:"assistant",text:"*(The answer was cut off because it got very long. Ask me to continue.)*"});if(GD.cur!==id)GD.unread[id]=1;return r.reply}
+  catch(e){h=GD.h[id]||h;var j=h.indexOf(tmp);if(j>=0)h.splice(j,1);throw e}
+  finally{GD.busy[id]=0;gdPaint(id)}}
 async function gdSend(text){var id=GD.cur,a=gdAgent(id);if(!a)return;text=String(text||"").trim();var f=GD.file;if(!text&&!f)return;
   if(GD.busy[id]){toast(a.name+" is still answering.","");return}
-  var c=$("#cmd");if(c)c.value="";GD.file=null;GD.err=null;gdFileUi();
-  var h=GD.h[id]=GD.h[id]||[],tmp={id:"tmp",role:"user",text:text,file:f?f.name:"",at:Date.now()};h.push(tmp);GD.busy[id]=1;gdDraw();gdRail();
-  var extra={};if(f)extra.file={name:f.name,text:f.text};if(id==="exusiai")extra.tasks=gdTaskCtx();
-  try{var r=await APP.guild.send(id,text,extra);h=GD.h[id]||h;var i=h.indexOf(tmp);if(i>=0)h.splice(i,1,r.user);else h.push(r.user);h.push(r.reply);if(r.truncated)h.push({id:"cut",role:"assistant",text:"*(The answer was cut off because it got very long. Ask me to continue.)*"});if(GD.cur!==id)GD.unread[id]=1}
-  catch(e){h=GD.h[id]||h;var j=h.indexOf(tmp);if(j>=0)h.splice(j,1);GD.err={id:id,msg:sampleMsg(e)};if(GD.cur===id){if(c&&!c.value)c.value=text;if(f&&!GD.file)GD.file=f}}
-  finally{GD.busy[id]=0;if(GD.cur===id)gdDraw();gdRail();gdFileUi()}}
+  var c=$("#cmd");if(c)c.value="";GD.file=null;gdFileUi();gdTab("chat");
+  try{await gdAsk(id,text,f)}catch(e){GD.err={id:id,msg:sampleMsg(e)};if(GD.cur===id){if(c&&!c.value)c.value=text;if(f&&!GD.file)GD.file=f;gdDraw()}}finally{gdFileUi()}}
 function gdAttach(){var inp=document.createElement("input");inp.type="file";inp.accept=".md,.markdown,.mdx,.txt,text/markdown,text/plain";
   inp.onchange=function(){var fl=inp.files&&inp.files[0];if(!fl)return;if(fl.size>400000){toast("That file is too big (over 400 KB). Attach a shorter Markdown file.","bad");return}
     var rd=new FileReader();rd.onload=function(){GD.file={name:fl.name,text:String(rd.result||"")};gdFileUi();var c=$("#cmd");if(c)c.focus()};rd.onerror=function(){toast("Couldn’t read that file.","bad")};rd.readAsText(fl)};inp.click()}
@@ -7903,7 +8007,7 @@ function ovInit(){if($("#rov"))return;var d=document.createElement("div");d.id="
   if(APP&&APP.getStatus)APP.getStatus().then(function(st){OV.key=st&&st.overlayKey||""}).catch(function(){})}
 function ovTo(){var t=$("#rov-to"),a=gdAgent(OV.to),i=$("#rov-in"),p=$("#rov-p");if(!t)return;
   var ch=function(id,n,g,col){return '<button type="button" data-act="ov-to" data-id="'+id+'" style="--gc:'+esc(col)+'" aria-pressed="'+(OV.to===id)+'"><i aria-hidden="true">'+g+'</i>'+esc(n)+'</button>'};
-  t.innerHTML=ch("regis","Regis","✦","var(--accent)")+(GD.ok?GD.list.map(function(x){return ch(x.id,x.name,esc(String(x.glyph||x.name).slice(0,1)),gdCol(x))}).join(""):"");t.hidden=!GD.ok;
+  t.innerHTML=ch("regis","Regis","✦","var(--accent)")+(GD.ok?GD.list.map(function(x){return ch(x.id,x.name,gdAv(x),gdCol(x))}).join(""):"");t.hidden=!GD.ok;
   if(i)i.placeholder=a?"Message "+a.name+"…":"Tell Regis… add a task, draft an email, make a rule";if(p){p.textContent=a?String(a.glyph||a.name).slice(0,1):"✦";p.style.color=a?gdCol(a):""}
   var k=$("#rov-k");if(k)k.textContent=(GD.ok?"Tab switches who you’re talking to · ":"")+"Esc closes"+(OV.key?" · "+OV.key.replace("CommandOrControl","Ctrl")+" opens this from anywhere":"")}
 function ovOpen(){var d=$("#rov");if(!d){ovInit();d=$("#rov")}if(!d)return;OV.to=GD.cur||"regis";ovTo();d.hidden=false;var i=$("#rov-in");if(i){i.value="";setTimeout(function(){try{i.focus()}catch(_){}},20)}}
@@ -7970,7 +8074,7 @@ document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.dataset|
   document.addEventListener("mousedown",function(e){var t=e.target;pend=t&&(t.id==="bw-addr"||t.id==="bw-sq")&&document.activeElement!==t?t:null},true);
   document.addEventListener("mouseup",function(e){var t=pend;pend=null;if(t&&document.activeElement===t&&t.selectionStart===t.selectionEnd)t.select()},true);
   document.addEventListener("focusin",function(e){var t=e.target;if(t&&(t.id==="bw-addr"||t.id==="bw-sq")&&!pend)try{t.select()}catch(_){}})})();
-function greetShim(){var g=$("#greet"),R=document.documentElement;if(!g||!R.classList.contains("bal")||R.classList.contains("x-shimmer")||R.classList.contains("away")||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))return;
+function greetShim(){var g=$("#greet"),R=document.documentElement;if(!g||!(R.classList.contains("bal")||R.classList.contains("lite"))||R.classList.contains("x-shimmer")||R.classList.contains("away")||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))return;
   if(g.classList.contains("shim1"))return;g.classList.add("shim1");clearTimeout(greetShim.t);greetShim.t=setTimeout(function(){g.classList.remove("shim1")},4600)}
 
 /* ---------- 1.9.4 Local AI (Ollama): Setup card, per-agent switch ---------- */
@@ -8007,6 +8111,201 @@ async function laiAct(act,b){var A=APP&&APP.localAI;
   if(act==="lai-test"){var o=$("#lai-test-out");if(o)o.textContent="Asking the local AI… (the first answer can take a while while the model loads)";try{var r=await A.test();if(o)o.textContent="It said: “"+r.text.trim()+"” in "+(r.ms/1000).toFixed(1)+" s."}catch(e){if(o)o.textContent=(e&&e.message)||"No answer."}return}
   if(act==="gd-eng"){var id=GD.cur;if(!id||!LAI.prefs)return;var u={};u[id]=laiUses(id)?"claude":"local";try{LAI.prefs=await A.set({use:u});gdHead();toast(gdAgent(id).name+" now uses "+(laiUses(id)?"the local AI ("+LAI.prefs.model+")":"Claude")+".","good")}catch(e){toast((e&&e.message)||"Couldn’t switch.","bad")}}}
 setTimeout(function(){if(APP&&APP.localAI)laiRefresh().catch(function(){})},1500);
+/* ---------- 1.9.5 chibi team leads: original drawings (flat SVG shapes, no gradients or ids, so any number can be on a page) ----------
+   chb(id) -> {main, legL, legR, ring} : four SVG strings that share the viewBox "0 0 100 130" and are stacked as layers
+   (legs and ring are their own layers so they can be animated without animating parts inside an SVG). chbHead(id) -> one SVG of the head. */
+var CHB={
+  exusiai:{skin:"#ffe4d6",hair:"#e63b3f",hairD:"#a81f2c",hairL:"#ff8a78",eye:"#ff8a1f",eyeD:"#a84400",eyeL:"#ffd98a",ring:"#ffd24a",leg:"#f6f6f8",boot:"#1b1b22",sole:"#e63b3f"},
+  midas:{skin:"#ffe9dc",hair:"#f4c531",hairD:"#c98f17",hairL:"#fff0a0",eye:"#2f6fff",eyeD:"#123a9a",eyeL:"#a8d0ff",ring:"#f4c531",leg:"#1b2a52",boot:"#12131c",sole:"#e8c15a"},
+  luna:{skin:"#ffe6dc",hair:"#ece9f2",hairD:"#b8b1c8",hairL:"#ffffff",eye:"#e02a44",eyeD:"#7c0f1e",eyeL:"#ff97a2",ring:"#ff6f8f",leg:"#ffe6dc",boot:"#2a2330",sole:"#d83a55"},
+  obsidian:{skin:"#fbe6dc",hair:"#25212e",hairD:"#15121c",hairL:"#6a61a8",eye:"#7a68e0",eyeD:"#2d2560",eyeL:"#c9c0ff",ring:"#8f7dff",leg:"#1d1b26",boot:"#121018",sole:"#8f7dff"}};
+function chbEyes(c,closed){var o="";[38,62].forEach(function(x){
+    if(closed){o+='<path d="M'+(x-5.5)+' 54q5.5-6 11 0" fill="none" stroke="#2a1c22" stroke-width="2" stroke-linecap="round"/>';return}
+    o+='<ellipse cx="'+x+'" cy="52.5" rx="5.4" ry="6.8" fill="'+c.eyeD+'"/><ellipse cx="'+x+'" cy="54" rx="4.3" ry="5" fill="'+c.eye+'"/><ellipse cx="'+x+'" cy="56.3" rx="3" ry="2.3" fill="'+c.eyeL+'"/>'+
+      '<circle cx="'+x+'" cy="53.4" r="1.9" fill="'+c.eyeD+'"/><circle cx="'+(x-1.9)+'" cy="50" r="1.9" fill="#fff"/><circle cx="'+(x+2)+'" cy="55.6" r=".9" fill="#fff"/>'+
+      '<path d="M'+(x-6.4)+' 49.6q6.4-6.4 12.8 0" fill="none" stroke="#2a1c22" stroke-width="2" stroke-linecap="round"/>'});return o}
+function chbFace(c,o){o=o||{};return '<path d="M24 49c0-17 11-28 26-28s26 11 26 28c0 15-10 25-26 25S24 64 24 49z" fill="'+c.skin+'"/>'+
+  '<path d="M24.5 46c7-5 44-5 51 0v5c-9-4-42-4-51 0z" fill="#e9b9a8" opacity=".45"/>'+chbEyes(c,o.closed)+
+  '<ellipse cx="30.5" cy="61" rx="4.2" ry="2.3" fill="#ff8f8f" opacity=".55"/><ellipse cx="69.5" cy="61" rx="4.2" ry="2.3" fill="#ff8f8f" opacity=".55"/>'+
+  (o.mouth==="flat"?'<path d="M46.5 65.2h7" fill="none" stroke="#9a5a4a" stroke-width="1.5" stroke-linecap="round"/>':o.mouth==="grin"?'<path d="M45 63.5q5 5.5 10 0z" fill="#b8404a" stroke="#7a2a30" stroke-width="1" stroke-linejoin="round"/>':'<path d="M45.5 63.8q4.5 3.8 9 0" fill="none" stroke="#9a5a4a" stroke-width="1.6" stroke-linecap="round"/>')}
+function chbParts(id){var c=CHB[id],hb="",hf="",body="",ex="";
+  var neck='<rect x="46" y="70" width="8" height="7" fill="'+c.skin+'"/><rect x="46" y="70" width="8" height="3" fill="#e9b9a8" opacity=".5"/>';
+  var hands='<circle cx="29.5" cy="96.5" r="3.6" fill="'+(id==="obsidian"?"#15121c":id==="exusiai"?"#1b1b22":c.skin)+'"/><circle cx="70.5" cy="96.5" r="3.6" fill="'+(id==="obsidian"?"#15121c":id==="exusiai"?"#1b1b22":c.skin)+'"/>';
+  if(id==="exusiai"){
+    hb='<path d="M19 51c-3-23 12-37 31-37s34 13 31 37c-1 9-4 14-8 17 2-9 0-15-2-19H29c-2 4-4 10-2 19-4-3-7-8-8-17z" fill="'+c.hairD+'"/><path d="M21 55l-8 9 10-2zM79 55l8 9-10-2z" fill="'+c.hairD+'"/><path d="M78 36q13 0 15 13-7-4-13-3z" fill="'+c.hair+'"/>';
+    hf='<path d="M22 47c1-19 14-30 28-30s27 10 28 29c-4-5-8-8-12-9l1 10c-5-7-10-10-16-11l-3 11c-3-6-8-9-13-9-5 2-9 5-13 9z" fill="'+c.hair+'"/><path d="M44 17l5-7 3 7zM30 24l-4-7 9 3z" fill="'+c.hair+'"/>'+
+      '<path d="M33 27q11-7 24-5" fill="none" stroke="'+c.hairL+'" stroke-width="2.2" stroke-linecap="round" opacity=".8"/><path d="M61 25q6 2 9 7" fill="none" stroke="'+c.hairL+'" stroke-width="1.6" stroke-linecap="round" opacity=".6"/>';
+    body='<path d="M36 81q0-6 7-6h14q7 0 7 6l1.5 21h-31z" fill="#f4f4f7"/><path d="M48 76h4l1 26h-6z" fill="#dcdce4"/>'+
+      '<path d="M36 81q0-6 7-6h3l-2 27h-9.5z" fill="#1d1d25"/><path d="M64 81q0-6-7-6h-3l2 27h9.5z" fill="#1d1d25"/>'+
+      '<path d="M44 76l-1.6 26" fill="none" stroke="#e63b3f" stroke-width="1.4"/><path d="M56 76l1.6 26" fill="none" stroke="#e63b3f" stroke-width="1.4"/>'+
+      '<path d="M36 80q-7 3-8 15l5.5 1.2q1-9 4-11z" fill="#1d1d25"/><path d="M64 80q7 3 8 15l-5.5 1.2q-1-9-4-11z" fill="#1d1d25"/>'+
+      '<path d="M28.4 92.5l5.6 1.2M71.6 92.5l-5.6 1.2" stroke="#e63b3f" stroke-width="1.6"/>'+
+      '<path d="M41 74q9 5 18 0l1 4q-10 5-20 0z" fill="#2a2a34"/><path d="M34.5 100h31l.6 5h-32.2z" fill="#15151b"/><path d="M34.5 100h31" stroke="#e63b3f" stroke-width="1.2"/>';}
+  else if(id==="midas"){
+    hb='<path d="M20 50c-3-22 12-36 30-36s33 13 30 36c-1 10-4 16-9 19 2-8 1-15-1-20H30c-2 5-3 12-1 20-5-3-8-9-9-19z" fill="'+c.hairD+'"/>';
+    hf='<path d="M22 48c0-20 14-31 28-31s28 10 28 30c-3-6-6-9-9-11 1 5 0 9-2 12-2-7-5-11-9-13 1 6-1 12-5 17-1-8-3-13-7-16-1 6-4 11-8 14 0-6-1-10-3-13-5 2-9 6-13 11z" fill="'+c.hair+'"/>'+
+      '<path d="M32 27q10-8 25-5" fill="none" stroke="'+c.hairL+'" stroke-width="2.4" stroke-linecap="round" opacity=".85"/><path d="M60 24q8 3 11 10" fill="none" stroke="'+c.hairL+'" stroke-width="1.6" stroke-linecap="round" opacity=".7"/><path d="M47 30q2 8-1 15" fill="none" stroke="'+c.hairD+'" stroke-width="1.2" opacity=".6"/>';
+    body='<path d="M35 81q0-6 8-6h14q8 0 8 6l1.5 23h-33z" fill="#1b2a52"/><path d="M42 74q8 6 16 0l1.5 5q-9.5 6-19 0z" fill="#e8c15a"/><path d="M44 75q6 4 12 0v3q-6 4-12 0z" fill="#fff8e6"/>'+
+      '<path d="M36.5 80l28.5 20v4.5L35 86z" fill="#f6efdc"/><path d="M36.5 80l28.5 20M35 86l30 18.5" stroke="#e8c15a" stroke-width="1"/>'+
+      '<path d="M35 81q-7 3-8.500 15l5.800 1.200q1-9 4-11z" fill="#1b2a52"/><path d="M65 81q7 3 8.500 15l-5.800 1.200q-1-9-4-11z" fill="#1b2a52"/>'+
+      '<path d="M27 93.500l5.800 1.300M73 93.500l-5.800 1.300" stroke="#e8c15a" stroke-width="1.8"/>'+
+      '<ellipse cx="35.500" cy="80.500" rx="5" ry="3" fill="#e8c15a"/><path d="M31.500 82v4M34 83v4.500M36.500 83.500v4.500" stroke="#e8c15a" stroke-width="1.100"/>'+
+      '<circle cx="56" cy="84" r="1.300" fill="#e8c15a"/><circle cx="58" cy="90" r="1.300" fill="#e8c15a"/><path d="M33.500 102h33l.4 3h-33.800z" fill="#e8c15a"/>';}
+  else if(id==="luna"){
+    hb='<path d="M20 50c-3-22 12-36 30-36s33 13 30 36l3 56q-7 5-14 1l-3-34H34l-3 34q-7 4-14-1z" fill="'+c.hairD+'"/><path d="M22 60l1 44q4 2 7 1l1-40zM78 60l-1 44q-4 2-7 1l-1-40z" fill="'+c.hair+'"/>';
+    hf='<path d="M23 49c0-19 13-30 27-30s27 10 27 29l-3-1.500v-8H26v8.500z" fill="'+c.hair+'"/><path d="M26 39h48l-1 7q-23-4-46 0z" fill="'+c.hair+'"/><path d="M26 45.500q23-4 47 0" fill="none" stroke="'+c.hairD+'" stroke-width="1"/>'+
+      '<path d="M23 47l-1 22q3 0 5-3l1-20zM77 47l1 22q-3 0-5-3l-1-20z" fill="'+c.hair+'"/>'+
+      '<path d="M34 30q12-5 26-2" fill="none" stroke="'+c.hairL+'" stroke-width="2.200" stroke-linecap="round"/>'+
+      '<path d="M22 31c3-16 50-19 57-2 2 7-11 10-29 10s-30-2-28-8z" fill="#4a2a40"/><path d="M24 31c6-12 46-13 53-1" fill="none" stroke="#6b4160" stroke-width="2" stroke-linecap="round"/><path d="M48 15q3-4 6 0l-1 3h-4z" fill="#4a2a40"/>';
+    body='<path d="M36 81q0-6 7-6h14q7 0 7 6l1 16h-30z" fill="#17151c"/><path d="M45 77q5 5 10 0" fill="none" stroke="#e9e3ee" stroke-width="1"/><path d="M49 80l1 3 1-3z" fill="#e02a44"/>'+
+      '<path d="M36 81q0-6 6-6l1 3-3 26h-6.500z" fill="#d83a55"/><path d="M64 81q0-6-6-6l-1 3 3 26h6.500z" fill="#d83a55"/><path d="M42 75l-2.500 29M58 75l2.500 29" stroke="#a82342" stroke-width="1"/>'+
+      '<path d="M36 80q-7 3-8.500 15l5.800 1.200q1-9 4-11z" fill="#d83a55"/><path d="M64 80q7 3 8.500 15l-5.800 1.200q-1-9-4-11z" fill="#d83a55"/>'+
+      '<path d="M37.500 96h25l3 12h-31z" fill="#c9c3e2"/><path d="M52 96l2 12" stroke="#a49cc4" stroke-width="1"/><circle cx="54.500" cy="99" r="1.200" fill="none" stroke="#a49cc4" stroke-width=".8"/>';}
+  else{
+    hb='<path d="M19 51c-3-23 12-37 31-37s34 13 31 37c0 9-2 16-5 20-1-8-3-14-5-18H28c-2 4-4 10-5 18-3-4-4-11-4-20z" fill="'+c.hairD+'"/><path d="M19 58q-4 8 1 16 2-6 5-9zM81 58q4 8-1 16-2-6-5-9z" fill="'+c.hair+'"/>';
+    hf='<path d="M22 49c0-20 13-32 28-32s28 11 28 31c-4-6-8-10-13-11 2 5 1 9-1 12-3-7-8-11-14-12-4 1-8 5-10 11-2-4-2-7-1-10-6 2-11 6-17 11z" fill="'+c.hair+'"/>'+
+      '<path d="M45 18c-3-10 8-14 13-7-5-1-8 2-7 7z" fill="'+c.hair+'"/><path d="M36 22q4 10 0 20" fill="none" stroke="'+c.hairL+'" stroke-width="2" stroke-linecap="round" opacity=".7"/><path d="M52 21q10 0 16 8" fill="none" stroke="#8a84a8" stroke-width="1.800" stroke-linecap="round" opacity=".6"/>';
+    body='<path d="M35 81q0-6 8-6h14q8 0 8 6l2 24h-34z" fill="#1d1b26"/><path d="M46 76h8l1 29h-10z" fill="#2b2740"/><path d="M47 78l3 4 3-4" fill="none" stroke="#8f7dff" stroke-width="1.200"/><path d="M50 84v18" stroke="#8f7dff" stroke-width=".9" opacity=".7"/>'+
+      '<path d="M35 81q-7 3-8.500 15l5.800 1.200q1-9 4-11z" fill="#1d1b26"/><path d="M65 81q7 3 8.500 15l-5.800 1.200q-1-9-4-11z" fill="#1d1b26"/>'+
+      '<path d="M30 84q-3-9 8-11 5 3 12 3t12-3q11 2 8 11-3-3-6-2-2-3-5-1-3-3-5 0-2-2-4 0-2-3-5 0-3-2-5 1-3-1-6 2z" fill="#34303f"/><path d="M33 80q3-3 6-1M61 79q3-2 6 1M44 78q3-1 6 0" fill="none" stroke="#4a4558" stroke-width="1.100" stroke-linecap="round"/>'+
+      '<path d="M35 88l-3 17h4zM65 88l3 17h-4z" fill="#dfe0f5" opacity=".9"/><path d="M52 88l2 1.500-2 1.500-2-1.500z" fill="#8f7dff"/>';
+    ex='<path d="M33 50.500h14v8.500q-7 3-14 0zM53 50.500h14v8.500q-7 3-14 0z" fill="#fff" fill-opacity=".14" stroke="#d5dbea" stroke-width="1.300" stroke-linejoin="round"/><path d="M47 52.500h6M33 52l-8-2M67 52l8-2" stroke="#d5dbea" stroke-width="1.200" fill="none"/>'+
+      '<path d="M24.500 62v6l-2 3.500 2 3.500 2-3.500-2-3.500M75.500 62v6l-2 3.500 2 3.500 2-3.500-2-3.500" fill="#8f7dff" stroke="#d5dbea" stroke-width=".9"/>'}
+  return {c:c,hb:hb,hf:hf,body:body,ex:ex,neck:neck,hands:hands}}
+function chbSvg(inner,cls,vb){return '<svg class="'+cls+'" viewBox="'+(vb||"0 0 100 130")+'" aria-hidden="true" focusable="false">'+inner+'</svg>'}
+function chbLeg(c,x,id){var top=id==="exusiai"?110:id==="luna"?112:106;return '<path d="M'+x+' 104h9.500v16.500q0 3.500-3.500 3.500h-3q-3 0-3-3.500z" fill="'+c.leg+'"/>'+
+  '<path d="M'+(x-.6)+' '+(top+4)+'h10.700v9q0 4-4 4h-3.700q-3 0-3-4z" fill="'+c.boot+'"/><path d="M'+(x-.6)+' 124.500h10.700v1.500q0 1-1 1h-8.700q-1 0-1-1z" fill="'+c.sole+'"/>'+(id==="exusiai"?'<rect x="'+x+'" y="104" width="9.500" height="4.500" fill="'+c.skin+'"/><path d="M'+x+' 108.500h9.500" stroke="#c9c9d2" stroke-width="1"/>':"")}
+function chb(id){if(!CHB[id])return null;var p=chbParts(id),c=p.c,face=chbFace(c,{closed:id==="obsidian",mouth:id==="midas"?"flat":id==="luna"?"grin":"smile"});
+  return {main:chbSvg(p.hb+p.neck+p.body+p.hands+face+p.hf+(p.ex&&id==="obsidian"?p.ex:""),"chb-l chb-main"),
+    legL:chbSvg(chbLeg(c,39.500,id),"chb-l chb-leg chb-ll"),
+    legR:chbSvg(chbLeg(c,51,id),"chb-l chb-leg chb-lr"),
+    ring:chbSvg('<ellipse cx="50" cy="9" rx="17" ry="4.600" fill="none" stroke="'+c.ring+'" stroke-width="2.600"/><ellipse cx="50" cy="9" rx="17" ry="4.600" fill="none" stroke="#fff" stroke-width=".8" opacity=".7"/>',"chb-l chb-ring")}}
+function chbHead(id){if(!CHB[id])return "";var p=chbParts(id),c=p.c;return chbSvg(p.hb+chbFace(c,{closed:id==="obsidian",mouth:id==="midas"?"flat":id==="luna"?"grin":"smile"})+p.hf+(id==="obsidian"?p.ex:""),"chb-head","12 8 76 70")}
+function chbHtml(id){var s=chb(id);return s?'<span class="chb" data-chb="'+id+'">'+s.ring+s.legL+s.legR+s.main+'</span>':""}
+
+/* ---------- 1.9.5 team dashboards: each team's queue, KPIs and add-ins (kept in this browser: localStorage regis-teams) ---------- */
+var TM=lsj("regis-teams",null)||{};
+function tm(id){var t=TM[id];if(!t||typeof t!=="object")t=TM[id]={};if(!Array.isArray(t.tasks))t.tasks=[];if(!t.kpi||typeof t.kpi!=="object")t.kpi={};if(!Array.isArray(t.addins))t.addins=[];return t}
+function tmSave(){try{lsw("regis-teams",TM)}catch(_){}}
+function tmId(){return Math.random().toString(36).slice(2,9)}
+function tmAddins(id){var l=tm(id).addins.filter(function(a){return a.on!==false&&a.text});return l.map(function(a){return "## "+a.name+"\n"+a.text}).join("\n\n").slice(0,14000)}
+/* what each team measures: [key, label, kind, default, limit]. kind auto = counted from the queue; others you type in */
+var TM_KPI={exusiai:[["q","In the queue","auto"],["d7","Done this week","auto"],["iv","Customer interviews","num",0],["goal","Weekly goal","pct",0]],
+  midas:[["units","Units in the R&D run","num",15000],["cost","Landed cost per unit","usd",0],["price","Price per unit","usd",0],["margin","Gross margin","auto"],["caf","Caffeine per serving","mg",0,50]],
+  luna:[["q","Pages in the queue","auto"],["d7","Pages shipped this week","auto"],["dall","Pages shipped in total","auto"],["rev","Revisions asked for","num",0]],
+  obsidian:[["q","Scripts in the queue","auto"],["d7","Delivered this week","auto"],["biome","Biomes designed","num",0],["bugs","Open bugs","num",0]]};
+function tmKpiVal(id,k){var t=tm(id),T=t.tasks,wk=Date.now()-7*864e5;
+  if(k==="q")return T.filter(function(x){return x.st==="q"||x.st==="w"}).length;if(k==="d7")return T.filter(function(x){return x.st==="d"&&x.done>wk}).length;if(k==="dall")return T.filter(function(x){return x.st==="d"}).length;
+  if(k==="margin"){var c=+t.kpi.cost,p=+t.kpi.price;return p>0&&c>0?Math.round((p-c)/p*1000)/10:null}
+  var d=(TM_KPI[id]||[]).find(function(x){return x[0]===k});return t.kpi[k]!=null?+t.kpi[k]:(d?d[3]:0)}
+function tmKpiHtml(id){return (TM_KPI[id]||[]).map(function(d){var v=tmKpiVal(id,d[0]),kind=d[2],auto=kind==="auto",bad=d[4]!=null&&v>d[4];
+  var txt=d[0]==="margin"?(v==null?"–":v+"%"):kind==="usd"?"$"+(+v).toFixed(2):kind==="pct"?v+"%":kind==="mg"?v+" mg":(+v).toLocaleString();
+  var sub=d[0]==="margin"?(v==null?"set cost and price":"from cost and price"):d[4]!=null?(bad?"over the "+d[4]+" mg limit":"limit "+d[4]+" mg"):auto?"counted from the queue":"click to change";
+  return '<'+(auto?"div":"button type=\"button\" data-act=\"tm-kpi\" data-k=\""+d[0]+"\"")+' class="tm-k'+(bad?" bad":"")+(auto?"":" ed")+'"><b>'+esc(txt)+'</b><span>'+esc(d[1])+'</span><small>'+esc(sub)+'</small></'+(auto?"div":"button")+'>'}).join("")}
+function tmRow(id,t){var st=t.st==="w"?"Working":t.st==="q"?"Queued":t.st==="d"?"Done":"Didn’t finish";
+  return '<div class="tm-t st-'+t.st+'"><i class="tm-dot" aria-hidden="true"></i><div class="grow"><b>'+esc(t.title)+'</b>'+(t.notes?'<small>'+esc(short(t.notes,140))+'</small>':'')+(t.res&&t.st!=="q"&&t.st!=="w"?'<small class="tm-res">'+esc(short(t.res,180))+'</small>':'')+'<em>'+st+(t.done?" · "+esc(new Date(t.done).toLocaleString([],{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})):"")+'</em></div><span class="tm-a">'+
+    (t.st==="q"?'<button class="btn sm" type="button" data-act="tm-run" data-id="'+t.id+'">Run</button>':t.st==="w"?'':'<button class="btn sm ghost" type="button" data-act="tm-view" data-id="'+t.id+'">Open</button><button class="btn sm ghost" type="button" data-act="tm-again" data-id="'+t.id+'" title="Put it back in the queue">Again</button>')+
+    (t.st==="w"?'':'<button class="btn sm ghost danger" type="button" data-act="tm-del" data-id="'+t.id+'" aria-label="Remove task">×</button>')+'</span></div>'}
+function tmRender(){var id=GD.cur,a=gdAgent(id),el=$("#tm-body");if(!a||!el||GD.tab==="chat")return;var t=tm(id),act=t.tasks.filter(function(x){return x.st==="w"}),q=t.tasks.filter(function(x){return x.st==="q"}),dn=t.tasks.filter(function(x){return x.st==="d"||x.st==="f"}).sort(function(x,y){return (y.done||0)-(x.done||0)}).slice(0,8);
+  var h='<div class="tm-kpis">'+tmKpiHtml(id)+'</div><div class="tm-cols"><section class="tm-col"><div class="tm-h"><span class="sec">'+esc(a.name)+'’s queue</span>'+(q.length?'<button class="btn sm pri" type="button" data-act="tm-runall"'+(GD.busy[id]?" disabled":"")+'>Run the queue ('+q.length+')</button>':'')+'</div>'+
+    act.map(function(x){return tmRow(id,x)}).join("")+q.map(function(x){return tmRow(id,x)}).join("")+(act.length+q.length?"":'<p class="note">Nothing queued. Add a task below and '+esc(a.name)+' will work through it when you press Run.</p>')+
+    '<form class="tm-new" data-tm-form="task" autocomplete="off"><input id="tm-title" maxlength="200" placeholder="New task for '+esc(a.name)+'…" aria-label="New task"><button class="btn sm" type="submit">Add to queue</button></form></section>'+
+    '<section class="tm-col"><div class="tm-h"><span class="sec">Finished</span></div>'+(dn.length?dn.map(function(x){return tmRow(id,x)}).join(""):'<p class="note">Finished tasks show up here with the first lines of the result.</p>')+'</section></div>'+
+    '<section class="tm-ad"><div class="tm-h"><span class="sec">Add-ins</span><button class="btn sm" type="button" data-act="tm-adnew">Add an add-in</button></div><p class="note">Extra instructions or reference notes '+esc(a.name)+' always keeps in mind: a brand voice, a price list, a style guide, a spec.</p>'+
+    t.addins.map(function(x){return '<div class="tm-adr'+(x.on===false?" off":"")+'"><label class="sp-chk"><input type="checkbox" data-act="tm-adtog" data-id="'+x.id+'"'+(x.on===false?"":" checked")+'> <b>'+esc(x.name)+'</b></label><small>'+esc(short(x.text,110))+'</small><button class="btn sm ghost" type="button" data-act="tm-adedit" data-id="'+x.id+'">Edit</button><button class="btn sm ghost danger" type="button" data-act="tm-addel" data-id="'+x.id+'" aria-label="Remove add-in">×</button></div>'}).join("")+'</section>';
+  setH(el,h)}
+async function tmRun(id,tid){var t=tm(id).tasks.find(function(x){return x.id===tid}),a=gdAgent(id);if(!t||!a||t.st==="w")return false;if(GD.busy[id]){toast(a.name+" is still answering.","");return false}
+  t.st="w";tmSave();if(GD.cur===id)tmRender();
+  try{var r=await gdAsk(id,"Task from my queue: "+t.title+(t.notes?"\n\n"+t.notes:"")+"\n\nDo this task now and give me the finished result.");t.st="d";t.done=Date.now();t.res=String(r.text||"").replace(/```[\s\S]*?```/g,"[code]").replace(/[#*_`>|]/g,"").replace(/\s+/g," ").trim().slice(0,300);tmSave();if(GD.cur===id)tmRender();try{gofCheer(id)}catch(_){}return true}
+  catch(e){t.st=e&&e.code==="busy"?"q":"f";t.done=Date.now();t.res=sampleMsg(e);tmSave();if(GD.cur===id)tmRender();if(t.st==="f")toast(a.name+" couldn’t finish “"+short(t.title,40)+"”: "+t.res,"bad");return false}}
+async function tmAct(act,b){var id=GD.cur,a=gdAgent(id);if(!a)return;var t=tm(id),tid=b.dataset.id,x=t.tasks.find(function(z){return z.id===tid});
+  if(act==="tm-run"){await tmRun(id,tid);return}
+  if(act==="tm-runall"){for(var n=0;n<30;n++){var nx=tm(id).tasks.find(function(z){return z.st==="q"});if(!nx)break;if(!(await tmRun(id,nx.id)))break}return}
+  if(act==="tm-del"){t.tasks=t.tasks.filter(function(z){return z.id!==tid});tmSave();tmRender();return}
+  if(act==="tm-again"&&x){x.st="q";x.done=0;x.res="";tmSave();tmRender();return}
+  if(act==="tm-view"){gdTab("chat");return}
+  if(act==="gd-queue"){var arr=GD.tasks[+b.dataset.k],box=b.closest(".gd-tasks");if(!arr||!box)return;var pick=arr.filter(function(_,j){var cb=box.querySelector('[data-tj="'+j+'"]');return cb&&cb.checked});if(!pick.length){toast("Tick at least one task.","");return}
+    pick.forEach(function(p){t.tasks.push({id:tmId(),title:p.title,notes:"",st:"q",at:Date.now()})});tmSave();b.disabled=true;b.textContent="Queued "+pick.length;toast("Queued "+pick.length+" for "+a.name+".","good");return}
+  if(act==="tm-kpi"){var d=(TM_KPI[id]||[]).find(function(z){return z[0]===b.dataset.k});if(!d)return;openModal(d[1],'<form data-tm-form="kpi" class="vt-f" data-k="'+d[0]+'"><label>'+esc(d[1])+(d[2]==="usd"?" (in dollars)":d[2]==="pct"?" (percent)":d[2]==="mg"?" (mg)":"")+'<input id="tm-kv" type="number" step="any" min="0" value="'+esc(String(tmKpiVal(id,d[0])))+'"></label>'+(d[4]!=null?'<p class="note">The limit is '+d[4]+' mg. Regis marks it red if this goes over.</p>':'')+'<div class="fbar"><button class="btn pri" type="submit">Save</button><button class="btn ghost" type="button" data-act="modal-close">Cancel</button></div></form>');setTimeout(function(){var i=$("#tm-kv");if(i){i.focus();i.select()}},40);return}
+  if(act==="tm-adnew"||act==="tm-adedit"){var ad=act==="tm-adedit"?t.addins.find(function(z){return z.id===tid}):null;
+    openModal(ad?"Edit add-in":"New add-in for "+a.name,'<form data-tm-form="addin" class="vt-f" data-id="'+(ad?ad.id:"")+'"><label>Name<input id="tm-an" maxlength="60" placeholder="Brand voice, Price list, Style guide…" value="'+esc(ad?ad.name:"")+'"></label><label>Instructions or notes<textarea id="tm-at" rows="9" maxlength="12000" placeholder="Write what '+esc(a.name)+' should always know or do. You can also load a Markdown or text file.">'+esc(ad?ad.text:"")+'</textarea></label><div class="fbar"><button class="btn pri" type="submit">Save</button><button class="btn" type="button" data-act="tm-adfile">Load a file…</button><button class="btn ghost" type="button" data-act="modal-close">Cancel</button></div></form>',true);return}
+  if(act==="tm-adfile"){var inp=document.createElement("input");inp.type="file";inp.accept=".md,.markdown,.txt,text/markdown,text/plain";inp.onchange=function(){var fl=inp.files&&inp.files[0];if(!fl)return;if(fl.size>200000){toast("That file is too big (over 200 KB).","bad");return}var rd=new FileReader();rd.onload=function(){var ta=$("#tm-at"),nm=$("#tm-an");if(ta)ta.value=String(rd.result||"").slice(0,12000);if(nm&&!nm.value)nm.value=fl.name.replace(/\.[^.]+$/,"").slice(0,60)};rd.readAsText(fl)};inp.click();return}
+  if(act==="tm-adtog"){var g=t.addins.find(function(z){return z.id===tid});if(g){g.on=!!b.checked;tmSave();tmRender()}return}
+  if(act==="tm-addel"){t.addins=t.addins.filter(function(z){return z.id!==tid});tmSave();tmRender();return}}
+document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.dataset||!f.dataset.tmForm)return;e.preventDefault();var id=GD.cur;if(!gdAgent(id))return;var t=tm(id),k=f.dataset.tmForm;
+  if(k==="task"){var i=$("#tm-title"),v=(i.value||"").trim();if(!v)return;t.tasks.push({id:tmId(),title:v.slice(0,200),notes:"",st:"q",at:Date.now()});i.value="";tmSave();tmRender();return}
+  if(k==="kpi"){var n=+($("#tm-kv").value||0);if(!isFinite(n)||n<0)n=0;t.kpi[f.dataset.k]=n;tmSave();closeModal();tmRender();return}
+  if(k==="addin"){var nm=($("#tm-an").value||"").trim().slice(0,60)||"Add-in",tx=($("#tm-at").value||"").trim().slice(0,12000);if(!tx){toast("Write the instructions first.","");return}var ad=t.addins.find(function(z){return z.id===f.dataset.id});if(ad){ad.name=nm;ad.text=tx}else t.addins.push({id:tmId(),name:nm,text:tx,on:true});tmSave();closeModal();tmRender()}});
+
+/* ---------- 1.9.5 the office: a room the four team leads walk around in; whoever is working sits at their desk.
+   Edit mode: add, drag and remove furniture, change the wall and floor colours (localStorage regis-office). ---------- */
+var GOFC={desk:{n:"Desk",w:150,h:92},plant:{n:"Plant",w:54,h:104},shelf:{n:"Bookshelf",w:104,h:150},sofa:{n:"Sofa",w:170,h:78},rack:{n:"Server rack",w:64,h:150},coffee:{n:"Coffee bar",w:92,h:112},lamp:{n:"Lamp",w:40,h:150},cooler:{n:"Water cooler",w:46,h:112},
+  window:{n:"Window",w:170,h:112,wall:1},board:{n:"Whiteboard",w:160,h:96,wall:1},poster:{n:"Poster",w:70,h:92,wall:1},clock:{n:"Clock",w:50,h:50,wall:1},rug:{n:"Rug",w:230,h:26,rug:1}};
+function gofArt(tp,it){var c=it&&it.owner&&CHB[it.owner]?CHB[it.owner].ring:"#8fa8ff";
+  switch(tp){
+    case "desk":return '<rect x="6" y="38" width="138" height="9" rx="3" fill="#8a6a52"/><rect x="6" y="38" width="138" height="3" rx="1.500" fill="#a98466"/><rect x="12" y="47" width="7" height="45" fill="#5c4536"/><rect x="131" y="47" width="7" height="45" fill="#5c4536"/><rect x="92" y="47" width="40" height="30" rx="2" fill="#6f5442"/><rect x="97" y="52" width="30" height="8" rx="1.500" fill="#5c4536"/><rect x="97" y="64" width="30" height="8" rx="1.500" fill="#5c4536"/>'+
+      '<rect x="86" y="4" width="50" height="30" rx="3" fill="#20222e"/><rect x="89" y="7" width="44" height="24" rx="1.500" class="gof-scr" fill="#3a4466"/><rect x="108" y="34" width="6" height="4" fill="#20222e"/><rect x="100" y="36.500" width="22" height="2" rx="1" fill="#20222e"/>'+
+      '<rect x="20" y="32" width="26" height="6" rx="1.500" fill="'+c+'"/><rect x="58" y="34.500" width="22" height="3.500" rx="1.500" fill="#d8dbe8"/>';
+    case "plant":return '<path d="M27 62C8 54 6 30 16 18c4 14 9 26 11 44zM27 62C46 54 48 30 38 18c-4 14-9 26-11 44zM27 64C22 40 24 16 27 4c3 12 5 36 0 60z" fill="#3fae6c"/><path d="M27 62C14 50 12 34 16 18M27 62c13-12 15-28 11-44" fill="none" stroke="#2c8a52" stroke-width="1.500"/><path d="M12 64h30l-4 38H16z" fill="#c9774e"/><rect x="10" y="62" width="34" height="7" rx="2" fill="#dd8a5e"/>';
+    case "shelf":return '<rect x="4" y="2" width="96" height="148" rx="3" fill="#5c4536"/><rect x="10" y="8" width="84" height="38" fill="#3d2d24"/><rect x="10" y="54" width="84" height="38" fill="#3d2d24"/><rect x="10" y="100" width="84" height="42" fill="#3d2d24"/>'+
+      '<rect x="14" y="14" width="8" height="32" fill="#e25b6a"/><rect x="24" y="18" width="7" height="28" fill="#f2c94c"/><rect x="33" y="12" width="9" height="34" fill="#5aa9e6"/><rect x="44" y="20" width="7" height="26" fill="#9b7bff"/><rect x="60" y="16" width="26" height="6" fill="#e8e3d6"/><rect x="62" y="24" width="22" height="22" rx="2" fill="#57c08a"/>'+
+      '<rect x="14" y="62" width="10" height="30" fill="#57c08a"/><rect x="26" y="58" width="8" height="34" fill="#e8e3d6"/><rect x="36" y="64" width="9" height="28" fill="#e25b6a"/><rect x="56" y="60" width="8" height="32" fill="#f2c94c"/><rect x="66" y="66" width="8" height="26" fill="#5aa9e6"/><rect x="76" y="62" width="9" height="30" fill="#9b7bff"/>'+
+      '<rect x="14" y="110" width="30" height="32" rx="2" fill="#20222e"/><rect x="50" y="118" width="40" height="6" fill="#e8e3d6"/><rect x="50" y="126" width="40" height="6" fill="#f2c94c"/><rect x="50" y="134" width="40" height="6" fill="#5aa9e6"/>';
+    case "sofa":return '<rect x="6" y="14" width="158" height="44" rx="12" fill="#5b6bbd"/><rect x="0" y="30" width="26" height="40" rx="9" fill="#6c7dd4"/><rect x="144" y="30" width="26" height="40" rx="9" fill="#6c7dd4"/><rect x="22" y="40" width="126" height="26" rx="8" fill="#7c8de6"/><path d="M85 41v24" stroke="#5b6bbd" stroke-width="2"/><rect x="14" y="68" width="8" height="10" fill="#33385a"/><rect x="148" y="68" width="8" height="10" fill="#33385a"/><rect x="34" y="24" width="30" height="20" rx="6" fill="#ffd27a"/>';
+    case "rack":return '<rect x="4" y="2" width="56" height="148" rx="4" fill="#23252f"/><rect x="9" y="8" width="46" height="136" rx="2" fill="#15161d"/>'+[0,1,2,3,4,5].map(function(i){var y=13+i*22;return '<rect x="12" y="'+y+'" width="40" height="16" rx="2" fill="#2c2f3d"/><circle cx="18" cy="'+(y+8)+'" r="2" class="gof-led" fill="#57e08a"/><circle cx="25" cy="'+(y+8)+'" r="2" fill="'+(i%2?"#ffb84d":"#5aa9e6")+'"/><rect x="32" y="'+(y+6)+'" width="16" height="4" rx="1" fill="#3d4155"/>'}).join("");
+    case "coffee":return '<rect x="2" y="56" width="88" height="56" rx="3" fill="#6f5442"/><rect x="0" y="52" width="92" height="8" rx="2" fill="#a98466"/><rect x="10" y="68" width="32" height="36" rx="2" fill="#5c4536"/><rect x="50" y="68" width="32" height="36" rx="2" fill="#5c4536"/><rect x="14" y="14" width="34" height="38" rx="4" fill="#2a2c38"/><rect x="19" y="19" width="24" height="10" rx="2" fill="#57e08a" opacity=".8"/><rect x="24" y="36" width="14" height="4" fill="#15161d"/><path d="M26 40h10v9q0 3-3 3h-4q-3 0-3-3z" fill="#f4f4f7"/><path d="M62 38h14v12q0 2-2 2H64q-2 0-2-2z" fill="#f4f4f7"/><path d="M76 41q6 0 6 4t-6 4" fill="none" stroke="#f4f4f7" stroke-width="2"/>';
+    case "lamp":return '<rect x="18" y="38" width="4" height="104" fill="#8a8ea3"/><ellipse cx="20" cy="144" rx="16" ry="5" fill="#5a5e73"/><path d="M6 40L12 6h16l6 34z" fill="#ffd98a"/><path d="M6 40h28" stroke="#e8b85a" stroke-width="2"/>';
+    case "cooler":return '<rect x="8" y="46" width="30" height="64" rx="4" fill="#e8ecf5"/><rect x="12" y="6" width="22" height="38" rx="9" fill="#8fd0ff" opacity=".85"/><rect x="14" y="20" width="18" height="22" rx="7" fill="#5ab4f0" opacity=".7"/><rect x="18" y="58" width="4" height="8" fill="#e25b6a"/><rect x="24" y="58" width="4" height="8" fill="#5aa9e6"/><rect x="14" y="72" width="18" height="14" rx="2" fill="#cfd5e3"/><rect x="6" y="108" width="34" height="4" rx="2" fill="#b9c0d2"/>';
+    case "window":return '<rect x="2" y="2" width="166" height="108" rx="6" fill="#d8dbe8"/><rect x="9" y="9" width="152" height="94" rx="3" fill="#162a55"/><path d="M9 78q40-22 76-8t76-10v43H9z" fill="#22407a"/><circle cx="128" cy="32" r="11" fill="#fff3c4"/><circle cx="36" cy="26" r="1.500" fill="#fff"/><circle cx="62" cy="40" r="1.200" fill="#fff"/><circle cx="92" cy="22" r="1.500" fill="#fff"/><circle cx="24" cy="52" r="1.200" fill="#fff"/><path d="M85 9v94M9 56h152" stroke="#d8dbe8" stroke-width="5"/>';
+    case "board":return '<rect x="2" y="2" width="156" height="88" rx="4" fill="#cfd5e3"/><rect x="8" y="8" width="144" height="76" rx="2" fill="#f7f8fc"/><path d="M18 62l22-18 18 10 26-28 22 14 28-20" fill="none" stroke="#e25b6a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M18 22h42M18 31h28" stroke="#5aa9e6" stroke-width="3" stroke-linecap="round"/><rect x="60" y="90" width="40" height="5" rx="2" fill="#aab1c4"/>';
+    case "poster":return '<rect x="2" y="2" width="66" height="88" rx="3" fill="#f4efe4"/><rect x="8" y="8" width="54" height="50" fill="#2b2f4a"/><path d="M8 58l16-22 12 14 10-10 16 18z" fill="#57c08a"/><circle cx="48" cy="22" r="7" fill="#ffd27a"/><path d="M12 68h46M12 76h30" stroke="#8a8ea3" stroke-width="3" stroke-linecap="round"/>';
+    case "clock":return '<circle cx="25" cy="25" r="23" fill="#f7f8fc" stroke="#aab1c4" stroke-width="3"/><path d="M25 25V11M25 25l9 6" stroke="#23252f" stroke-width="3" stroke-linecap="round"/><circle cx="25" cy="25" r="2.500" fill="#e25b6a"/>';
+    case "rug":return '<ellipse cx="115" cy="13" rx="113" ry="12" fill="#b2506a"/><ellipse cx="115" cy="13" rx="92" ry="8.500" fill="none" stroke="#ffd27a" stroke-width="2"/><ellipse cx="115" cy="13" rx="60" ry="5" fill="#c9667e"/>'}return ""}
+var GOF_DEF={wall:"#2b3353",floor:"#4a3a44",items:[{id:"w1",t:"window",x:60,y:42},{id:"b1",t:"board",x:420,y:46},{id:"c1",t:"clock",x:300,y:58},{id:"p1",t:"poster",x:760,y:44},{id:"r1",t:"rug",x:385},
+  {id:"d1",t:"desk",x:30,owner:"exusiai"},{id:"d2",t:"desk",x:250,owner:"midas"},{id:"d3",t:"desk",x:600,owner:"luna"},{id:"d4",t:"desk",x:820,owner:"obsidian"},{id:"s1",t:"sofa",x:410},{id:"pl1",t:"plant",x:196},{id:"pl2",t:"plant",x:770},{id:"k1",t:"coffee",x:488,y:0},{id:"sh1",t:"shelf",x:900,y:0}]};
+function gofLoad(){var o=lsj("regis-office",null);if(!o||!Array.isArray(o.items))o=JSON.parse(JSON.stringify(GOF_DEF));var hx=function(x,d){return /^#[0-9a-f]{6}$/i.test(x||"")?x:d};o.wall=hx(o.wall,GOF_DEF.wall);o.floor=hx(o.floor,GOF_DEF.floor);
+  o.items=o.items.filter(function(i){return i&&GOFC[i.t]}).slice(0,60);["exusiai","midas","luna","obsidian"].forEach(function(a,n){if(!o.items.some(function(i){return i.t==="desk"&&i.owner===a}))o.items.push({id:"d"+a,t:"desk",x:30+n*240,owner:a})});return o}
+var GOF=gofLoad(),GOFS={a:{},edit:false,built:false,drag:null};
+function gofSave(){try{lsw("regis-office",GOF)}catch(_){}}
+function gofItemHtml(i){var d=GOFC[i.t],x=Math.max(0,Math.min(1000-d.w,+i.x||0)),st="left:"+(x/10)+"%;width:"+(d.w/10)+"%;"+(d.wall?"bottom:"+Math.max(34,Math.min(88-d.h/3.3*0,+i.y||44))+"%":d.rug?"bottom:5%":"bottom:15%");
+  return '<div class="gof-it'+(d.wall?" wall":d.rug?" rug":"")+(i.owner?" own":"")+'" data-id="'+esc(i.id)+'" data-t="'+i.t+'"'+(i.owner?' data-owner="'+i.owner+'"':'')+' style="'+st+'"><svg viewBox="0 0 '+d.w+' '+d.h+'" aria-hidden="true">'+gofArt(i.t,i)+'</svg>'+(GOFS.edit&&!i.owner?'<button type="button" class="gof-x" data-act="gof-del" data-id="'+esc(i.id)+'" aria-label="Remove '+esc(d.n)+'">×</button>':'')+'</div>'}
+function gofDraw(){var host=$("#gof-host");if(!host)return;if(!GOFS.built){GOFS.built=true;
+    host.innerHTML='<div class="gof-bar"><span class="sec">The office</span><span class="grow"></span><span class="gof-tools" id="gof-tools"></span><button class="btn sm ghost" type="button" data-act="gof-edit" id="gof-editb">Edit office</button></div><div class="gof-room" id="gof-room"><div class="gof-floor"></div><div class="gof-items" id="gof-items"></div><div class="gof-chs" id="gof-chs"></div></div><div class="gof-cat" id="gof-cat" hidden></div>';
+    var chs=$("#gof-chs");["exusiai","midas","luna","obsidian"].forEach(function(id,n){var a=gdAgent(id);if(!a||!CHB[id])return;var el=document.createElement("button");el.type="button";el.className="gof-ch";el.dataset.act="gof-ch";el.dataset.id=id;el.setAttribute("aria-label",a.name);
+      el.innerHTML='<span class="gof-bub" aria-hidden="true"><i></i><i></i><i></i></span><span class="gof-flip">'+chbHtml(id)+'</span><span class="gof-nm">'+esc(a.name)+'</span>';var x=14+n*24;el.style.setProperty("--x",x);chs.appendChild(el);GOFS.a[id]={el:el,x:x,st:"idle",t:0,wt:0}})}
+  var room=$("#gof-room");room.style.setProperty("--wall",GOF.wall);room.style.setProperty("--floor",GOF.floor);room.classList.toggle("edit",GOFS.edit);
+  $("#gof-items").innerHTML=GOF.items.slice().sort(function(a,b){var o=function(i){return GOFC[i.t].wall?0:GOFC[i.t].rug?1:2};return o(a)-o(b)}).map(gofItemHtml).join("");
+  var eb=$("#gof-editb");if(eb)eb.textContent=GOFS.edit?"Done":"Edit office";var cat=$("#gof-cat"),tl=$("#gof-tools");
+  if(cat){cat.hidden=!GOFS.edit;if(GOFS.edit)cat.innerHTML='<span class="note">Add:</span>'+Object.keys(GOFC).filter(function(k){return k!=="desk"}).map(function(k){return '<button class="btn sm" type="button" data-act="gof-add" data-t="'+k+'">'+esc(GOFC[k].n)+'</button>'}).join("")+'<span class="note gof-tip">Drag furniture to move it. Desks stay (one per team lead).</span>'}
+  if(tl)tl.innerHTML=GOFS.edit?'<label>Wall <input type="color" id="gof-wall" value="'+GOF.wall+'" aria-label="Wall colour"></label><label>Floor <input type="color" id="gof-floor" value="'+GOF.floor+'" aria-label="Floor colour"></label><button class="btn sm ghost" type="button" data-act="gof-reset">Reset</button>':"";
+  gofSync()}
+function gofVisible(){var R=document.documentElement;return S.view==="work"&&!!GD.cur&&GD.tab!=="chat"&&!document.hidden&&!R.classList.contains("away")}
+function gofBusy(id){return !!GD.busy[id]||tm(id).tasks.some(function(x){return x.st==="w"})}
+function gofDeskX(id){var d=GOF.items.find(function(i){return i.t==="desk"&&i.owner===id});return d?(Math.max(0,Math.min(850,+d.x||0))+46)/10:50}
+function gofWalk(id,x,cb){var A=GOFS.a[id];if(!A)return;var el=A.el,d=Math.abs(x-A.x),dur=Math.max(.5,d*.11);el.classList.toggle("left",x<A.x);el.classList.add("walk");el.style.setProperty("--d",dur+"s");el.style.setProperty("--x",x);A.x=x;A.st="walk";clearTimeout(A.wt);A.wt=setTimeout(function(){el.classList.remove("walk");if(A.st==="walk")A.st="idle";if(cb)cb()},dur*1000+40)}
+function gofStep(id){var A=GOFS.a[id];if(!A)return;clearTimeout(A.t);var next=2600+Math.random()*4200;
+  if(gofVisible()&&!GOFS.edit){var busy=gofBusy(id);
+    if(busy){next=1500;if(A.st!=="work"&&!A.going){A.going=1;gofWalk(id,gofDeskX(id),function(){A.going=0;if(gofBusy(id)){A.st="work";A.el.classList.add("work");A.el.classList.remove("left");gofSync()}})}}
+    else{if(A.st==="work"){A.st="idle";A.el.classList.remove("work")}if(A.st==="idle"&&Math.random()<.62)gofWalk(id,6+Math.random()*82)}}
+  A.t=setTimeout(function(){gofStep(id)},next)}
+function gofSync(){if(!GOFS.built)return;var cur=GD.cur;Object.keys(GOFS.a).forEach(function(id){var A=GOFS.a[id];A.el.classList.toggle("me",id===cur);var b=gofBusy(id);A.el.classList.toggle("busy",b);if(!b&&A.st==="work"){A.st="idle";A.el.classList.remove("work")}
+    var d=document.querySelector('.gof-it[data-owner="'+id+'"]');if(d)d.classList.toggle("on",b&&A.st==="work");if(b&&A.st!=="work"&&!A.going)gofStep(id)})}
+function gofCheer(id){var A=GOFS.a[id];if(!A)return;A.el.classList.add("cheer");setTimeout(function(){A.el.classList.remove("cheer")},1600)}
+function gofShow(){gofDraw();Object.keys(GOFS.a).forEach(function(id){if(!GOFS.a[id].t)gofStep(id)})}
+async function gofAct(act,b){
+  if(act==="gof-ch"){if(GOFS.edit)return;gdPick(b.dataset.id);return}
+  if(act==="gof-edit"){GOFS.edit=!GOFS.edit;gofDraw();return}
+  if(act==="gof-add"){var t=b.dataset.t,d=GOFC[t];if(!d||GOF.items.length>=60)return;GOF.items.push({id:"i"+tmId(),t:t,x:Math.round(Math.random()*(1000-d.w)),y:d.wall?46:0});gofSave();gofDraw();return}
+  if(act==="gof-del"){GOF.items=GOF.items.filter(function(i){return i.id!==b.dataset.id||i.owner});gofSave();gofDraw();return}
+  if(act==="gof-reset"){GOF=JSON.parse(JSON.stringify(GOF_DEF));gofSave();gofDraw();return}}
+document.addEventListener("input",function(e){var t=e.target;if(t&&(t.id==="gof-wall"||t.id==="gof-floor")){GOF[t.id==="gof-wall"?"wall":"floor"]=t.value;var r=$("#gof-room");if(r){r.style.setProperty("--wall",GOF.wall);r.style.setProperty("--floor",GOF.floor)}gofSave()}});
+/* drag furniture (edit mode only): sideways for everything, up and down too for things on the wall */
+document.addEventListener("pointerdown",function(e){if(!GOFS.edit||e.button!==0)return;var el=e.target.closest&&e.target.closest("#gof-items .gof-it");if(!el||e.target.closest(".gof-x"))return;var it=GOF.items.find(function(i){return i.id===el.dataset.id}),room=$("#gof-room");if(!it||!room)return;
+  e.preventDefault();var r=room.getBoundingClientRect();GOFS.drag={it:it,el:el,x0:e.clientX,y0:e.clientY,ix:+it.x||0,iy:+it.y||46,w:r.width,h:r.height,pid:e.pointerId};try{el.setPointerCapture(e.pointerId)}catch(_){}el.classList.add("drag")},true);
+document.addEventListener("pointermove",function(e){var D=GOFS.drag;if(!D||e.pointerId!==D.pid)return;var d=GOFC[D.it.t];D.it.x=Math.round(Math.max(0,Math.min(1000-d.w,D.ix+(e.clientX-D.x0)/D.w*1000)));D.el.style.left=(D.it.x/10)+"%";
+  if(d.wall){D.it.y=Math.round(Math.max(34,Math.min(70,D.iy-(e.clientY-D.y0)/D.h*100)));D.el.style.bottom=D.it.y+"%"}},true);
+function gofDrop(e){var D=GOFS.drag;if(!D||(e&&e.pointerId!==D.pid))return;GOFS.drag=null;D.el.classList.remove("drag");gofSave()}
+document.addEventListener("pointerup",gofDrop,true);document.addEventListener("pointercancel",gofDrop,true);
 setTimeout(function(){try{ovInit()}catch(_){}try{gdInit()}catch(_){}},0);
 setTimeout(function(){if(S.view==="work")try{greetShim()}catch(_){}},900);
 
