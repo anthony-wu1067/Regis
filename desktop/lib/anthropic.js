@@ -29,7 +29,8 @@ class Anthropic {
     const u = j.usage || {};
     this.onUsage((u.input_tokens || 0) + (u.output_tokens || 0));
     const text = (j.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
-    return { text, truncated: j.stop_reason === 'max_tokens' };
+    /* 1.9.7: the ledger needs the two counts apart (cache writes and reads are billed as input here, which over-estimates slightly) */
+    return { text, truncated: j.stop_reason === 'max_tokens', model: j.model || model, usage: { input: (u.input_tokens || 0) + (u.cache_creation_input_tokens || 0) + (u.cache_read_input_tokens || 0), output: u.output_tokens || 0 } };
   }
   static parseJson(text) {
     let t = String(text).trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '');

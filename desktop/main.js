@@ -5,7 +5,8 @@ const http = require('http');
 const { Store } = require('./lib/store');
 const { Google, signIn } = require('./lib/google');
 const { Anthropic } = require('./lib/anthropic');
-const { Guild, agentList } = require('./lib/agents');
+const { agentList } = require('./lib/agents');
+const { teamKit } = require('./lib/teamkit');
 const { AlertFloat } = require('./lib/alert-float');
 const { Ollama, localBase } = require('./lib/ollama');
 let alertFloat = null;
@@ -131,7 +132,8 @@ app.whenReady().then(async () => {
   const updateUrl = () => store.getMeta('updateUrl', '') || '';
   const notifyPending = () => { const p = updater.pending(runningVersion); if (p && win && !win.isDestroyed()) win.webContents.send('update:ready', p.version); return p; };
   const runCheck = async () => { let r = await updater.check(updateUrl()); const p = notifyPending(); if (p) r = { status: 'staged', version: p.version }; return r; };
-  const claude = new Anthropic({ getKey: () => store.getSecret('anthropicKey'), onUsage: (t) => store.addUsage(t) });
+  /* 1.9.7: the real client. Nothing calls it directly: every Claude call goes through kit.claude, which counts it and enforces the hard caps. */
+  const claudeRaw = new Anthropic({ getKey: () => store.getSecret('anthropicKey'), onUsage: (t) => store.addUsage(t) });
 
   session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) => cb(perm === 'media' || perm === 'protected-media-identifier'));
   session.defaultSession.setPermissionCheckHandler((_wc, perm) => perm === 'media' || perm === 'protected-media-identifier');
@@ -186,16 +188,17 @@ app.whenReady().then(async () => {
       try { const r = await ollama.sample(input, { model: p.model, maxTokens: opts.maxTokens || 2048, json: !!opts.json }); return opts.json ? { value: Anthropic.parseJson(r.text) } : r; }
       catch (e) { if (!p.fallback) throw e; }
     }
-    if (opts.json) return { value: await claude.json(input, opts) };
-    return claude.sample(input, opts);
+    return kit.sample(input, opts);   /* 1.9.7: counted as team 'regis' and capped like every other Claude call */
   }));
   /* 1.9.1 Guild: AI workspaces. One table of chat rows (context_scope = agent id) in Regis's data file; each request only ever
      reads its own scope, and the agent's persona goes in as the system prompt (lib/agents.js) */
-  const guild = new Guild({ anthropic: claude, local: ollama, prefs: aiPrefs, table: { load: () => store.getMeta('guild', []), save: (rows) => store.setMeta('guild', rows) } });
+  const kit = teamKit({ anthropic: claudeRaw, local: ollama, prefs: aiPrefs, table: (k, d) => ({ load: () => store.getMeta(k, d), save: (v) => store.setMeta(k, v) }) }), guild = kit.guild;
   ipcMain.handle('guild:agents', wrap(() => agentList()));
   ipcMain.handle('guild:history', wrap((id) => guild.history(String(id || ''))));
   ipcMain.handle('guild:send', wrap((id, text, extra) => guild.send(String(id || ''), text, extra && typeof extra === 'object' ? { tasks: extra.tasks, file: extra.file, addins: extra.addins } : {})));
   ipcMain.handle('guild:clear', wrap((id) => guild.clear(String(id || ''))));
+  /* 1.9.7 Teams: the organisation under the four leads (specialists, tools, workflows, memory, policy), the queue's orchestrator and the Claude ledger */
+  ['get', 'policy', 'global', 'run', 'memAdd', 'memDel', 'ledger'].forEach((k) => ipcMain.handle('team:' + k, wrap((...a) => kit.api[k](...a))));
   ipcMain.handle('app:status', wrap(() => ({
     googleConfigured: !!(store.getMeta('gClientId', '') && store.getSecret('gSecret')), googleConnected: !!store.getSecret('gRefresh'),
     googleEmail: store.getMeta('gEmail', ''), anthropicKey: !!store.getSecret('anthropicKey'), usage: store.monthUsage(),

@@ -59,8 +59,11 @@
   setInterval(function () { if (!document.hidden) checkUpdate().catch(function () {}); }, 30 * 60 * 1000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) checkUpdate().catch(function () {}); });
   /* 1.9.1 Guild: the same AI workspaces as the desktop app; history in this browser's storage, one table with a context_scope per row */
-  var guild = L.Guild ? new L.Guild({ anthropic: claude, table: { load: function () { return get('regis-guild', []); }, save: function (r) { set('regis-guild', r); } } }) : null;
+  /* 1.9.7: the same team system as the desktop app (teams, ledger, caps, orchestrator). There is no local AI in a browser, so Claude is the only engine here; the caps still apply. */
+  var kit = L.teamKit ? L.teamKit({ anthropic: claude, table: function (k, d) { return { load: function () { return get('regis-' + (k === 'guild' ? 'guild' : 'tk-' + k), d); }, save: function (v) { set('regis-' + (k === 'guild' ? 'guild' : 'tk-' + k), v); } }; } }) : null;
+  var guild = kit ? kit.guild : null, P = function (f) { return function () { var a = arguments; return Promise.resolve().then(function () { return f.apply(null, a); }); }; };
   window.regisBridge = {
+    teams: kit ? { get: P(kit.api.get), policy: P(kit.api.policy), global: P(kit.api.global), run: P(kit.api.run), memAdd: P(kit.api.memAdd), memDel: P(kit.api.memDel), ledger: P(kit.api.ledger) } : null,
     guild: guild ? { agents: function () { return Promise.resolve(L.agentList()); }, history: function (id) { return Promise.resolve().then(function () { return guild.history(String(id || '')); }); },
       send: function (id, t, x) { return guild.send(String(id || ''), t, x || {}); }, clear: function (id) { return Promise.resolve().then(function () { return guild.clear(String(id || '')); }); } } : null,
     updateCheck: checkUpdate,
@@ -69,7 +72,7 @@
     dbLoad: function () { return Promise.resolve(get('regis-db', {})); },
     dbSave: function (db) { set('regis-db', db); return Promise.resolve(true); },
     tool: function (server, tool, input) { return server === 'Canvas' ? canvas.callTool(tool, input || {}) : google.callTool(server, tool, input || {}); },
-    sample: function (input, opts) { opts = opts || {}; if (opts.json) return claude.json(input, opts).then(function (v) { return { value: v }; }); return claude.sample(input, opts); },
+    sample: function (input, opts) { if (kit) return kit.sample(input, opts); opts = opts || {}; if (opts.json) return claude.json(input, opts).then(function (v) { return { value: v }; }); return claude.sample(input, opts); },
     getStatus: function () {
       return Promise.all([authReady, verReady]).then(function () {
         var s = sec(), u = get('regis-usage', {}), m = new Date().toISOString().slice(0, 7), ae = get('regis-autherr', '');

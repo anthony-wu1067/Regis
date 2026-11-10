@@ -84,6 +84,24 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.7 AI teams, Phase 1: real teams, local-first, and hard Claude limits
+
+The plan this follows is in `AI_TEAM_ARCHITECTURE.md`. This is Phase 1 only (the foundation).
+
+- **Each lead now heads a team.** Exusiai, Midas, Alicia and Obsidian each have a mission, two specialists, a team memory and a policy. Nothing you saved before is lost; the chat works exactly as it did.
+- **Queued tasks are routed by Regis, not by the AI.** When you press Run, fixed rules decide who does the work:
+  - routine work (summaries, sorting, drafts, simple sums) stays on the local AI and costs nothing;
+  - complex work (analysis, strategy, planning, building pages or scripts, very long tasks, tasks with a file) goes to Claude, if the team's settings allow it. When the local AI is available, the team's specialists first prepare notes locally and the lead finishes with one Claude call;
+  - if the local AI fails, Claude takes over once.
+  - Next to the task box you can pick Auto, Local AI or Claude for a single task. Each finished task says who did it, why, and roughly what it cost.
+- **Hard limits on Claude, enforced by Regis itself.** Defaults: 3 Claude calls per task, $2 a day per team, $5 a day for all of Regis. When a limit is reached, Claude is simply not called and you are told why. This covers every Claude call: team chats, queued tasks, and Regis's own commands (Plan my day, mail rules, the command bar). Change the limits on the team card; they cannot go above 12 calls, $50 per team and $100 overall.
+- **The team card** (on each team's Dashboard, under Add-ins): who is on the team, today's Claude spend, the routing rule (Local first / Local unless I ask / Local only / Prefer Claude / Claude only), the limits, and the team's memory, which you can add to or prune. Finished tasks leave a short note there, and the lead reads those notes before the next task.
+- **Things that changed on purpose:** a queued task no longer carries the whole chat history to the AI (cheaper; it gets the team memory instead). Regis's own Claude features can now be refused once the daily limit is reached.
+- **Costs are estimates** from token counts and a price list inside Regis. Call counts are exact.
+- **Update the desktop app once** (`Regis-app.zip`): this changes the app itself.
+- Not built yet (later phases): plugins, scheduled workflows, tools that send or change anything, creating your own teams.
+- Tested with a fake Claude and a fake local AI: 50 unit checks and a 34-check run in the real app, plus every existing suite. **Not tested with a real Ollama model**: how good a small local model's answers are on this laptop is for you to judge.
+
 ## 1.9.6 The base, your own characters, and browser fixes
 
 - **Your characters:** the four team leads now use the pictures you sent (Exusiai, Midas, Alicia, Obsidian). **Luna is renamed Alicia**; her chats, queue and add-ins carry over.

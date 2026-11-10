@@ -5,4 +5,5 @@ const { Google, buildAuthUrl, zonedToUtc, SCOPES } = require('../../desktop/lib/
 const { Anthropic } = require('../../desktop/lib/anthropic.js');
 const { Canvas, normHost } = require('../../desktop/lib/canvas.js');
 const { Guild, agentList } = require('../../desktop/lib/agents.js');
-globalThis.RegisLib = { Google, Anthropic, Canvas, Guild, agentList, normHost, buildAuthUrl, SCOPES, zonedToUtc };
+const { teamKit } = require('../../desktop/lib/teamkit.js');
+globalThis.RegisLib = { Google, Anthropic, Canvas, Guild, agentList, teamKit, normHost, buildAuthUrl, SCOPES, zonedToUtc };

@@ -114,15 +114,26 @@ class Guild {
       const messages = [];
       sendRows.forEach((r) => { const c = r.content || r.text || ''; const last = messages[messages.length - 1]; if (last && last.role === r.role) last.content += '\n\n' + c; else messages.push({ role: r.role, content: c }); });
       const sys = systemFor(agentId, extra), eng = this.engine(agentId), p = this.prefs() || {};
+      /* 1.9.7: chat keeps the engine you picked by hand; every Claude call is still counted and capped by the ledger (one chat message = one task) */
+      const meter = { teamId: agentId, taskId: 'chat-' + user.id };
       let res, via = eng === 'local' ? 'local:' + p.model : 'claude';
       if (eng === 'local') {
         try { res = await this.local.sample(messages, { system: sys, maxTokens: Math.min(a.maxTokens, 6000), model: p.model }); }
-        catch (e) { if (p.fallback === false) throw e; res = await this.ai.sample(messages, { agentId, system: sys, modelTier: a.tier, maxTokens: a.maxTokens }); via = 'claude (local AI failed: ' + String(e.message || e).slice(0, 120) + ')'; }
-      } else res = await this.ai.sample(messages, { agentId, system: sys, modelTier: a.tier, maxTokens: a.maxTokens });
+        catch (e) { if (p.fallback === false) throw e; res = await this.ai.sample(messages, { agentId, system: sys, modelTier: a.tier, maxTokens: a.maxTokens, meter }); via = 'claude (local AI failed: ' + String(e.message || e).slice(0, 120) + ')'; }
+      } else res = await this.ai.sample(messages, { agentId, system: sys, modelTier: a.tier, maxTokens: a.maxTokens, meter });
       const bot = { id: id(), context_scope: agentId, role: 'assistant', text: res.text, content: res.text, at: this.now(), via };
       const fresh = this._rows(); this._add(fresh, user); this._add(fresh, bot); this.table.save(fresh);
       return { user: { id: user.id, role: 'user', text: user.text, file: user.file, at: user.at }, reply: { id: bot.id, role: 'assistant', text: bot.text, at: bot.at, via }, truncated: !!res.truncated };
     } finally { this.busy[agentId] = false; }
+  }
+  /* 1.9.7: a queued task finished by the orchestrator is written into the same chat table, so the Chat tab shows it as before */
+  record(agentId, text, reply, via) {
+    if (!AGENTS[agentId]) throw Object.assign(new Error('Unknown agent'), { code: 'bad_agent' });
+    const id = () => Math.random().toString(36).slice(2, 10) + this.now().toString(36).slice(-4);
+    const user = { id: id(), context_scope: agentId, role: 'user', text: String(text || '').slice(0, 20000), file: '', content: String(text || '').slice(0, 20000), at: this.now() };
+    const bot = { id: id(), context_scope: agentId, role: 'assistant', text: String(reply || ''), content: String(reply || ''), at: this.now(), via: String(via || '') };
+    const rows = this._rows(); this._add(rows, user); this._add(rows, bot); this.table.save(rows);
+    return { user: { id: user.id, role: 'user', text: user.text, file: '', at: user.at }, reply: { id: bot.id, role: 'assistant', text: bot.text, at: bot.at, via: bot.via } };
   }
 }
 module.exports = { AGENTS, agentList, systemFor, Guild };
