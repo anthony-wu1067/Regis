@@ -2592,6 +2592,8 @@ html.mob #vscan{top:0}
 /* 1.8.8 Blackwall pin wall canvas (WebGL); the code text stays on #fx above it */
 #bwgl{display:none;position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 :root[data-bg="blackwall"] #bwgl,:root[data-bg="tide"] #bwgl{display:block}
+:root:not([data-bg="blackwall"]):not([data-bg="tide"]) #lk-bw{display:none}
+#lk-bw{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 html[data-view="comm"] .top .tools{display:none!important}
 html:not(.mob)[data-view="comm"] .wrap{padding-top:0}
 html:not(.mob)[data-view="comm"] .top{position:fixed;inset:0 0 auto 0;height:44px;z-index:8;display:flex;align-items:center;gap:10px;padding:0 12px;min-height:0;background:color-mix(in srgb,var(--bg) 88%,transparent);border:0}
@@ -3474,6 +3476,12 @@ html.mob .rov{padding-top:calc(10vh + env(safe-area-inset-top,0px))}
     <div class="lk-s"><span class="lk-l">Background</span>
       <div class="seg bgs"><button data-act="bg" data-v="aurora" aria-pressed="true">Aurora</button><button data-act="bg" data-v="cosmos" aria-pressed="false">Cosmos</button><button data-act="bg" data-v="metal" aria-pressed="false">Metal</button><button data-act="bg" data-v="signal" aria-pressed="false">Signal</button><button data-act="bg" data-v="cyber" aria-pressed="false">Neon city</button><button data-act="bg" data-v="blackwall" aria-pressed="false">Firewall</button><button data-act="bg" data-v="tide" aria-pressed="false">Calm wall</button><button data-act="bg" data-v="holo" aria-pressed="false">Holo HUD</button><button data-act="bg" data-v="photo" aria-pressed="false">My photo</button></div>
       <div class="lk-file"><label class="btn sm fbtn">Choose photo…<input type="file" id="ph-file" accept="image/*" aria-label="Choose a background photo"></label><span class="lk-n" id="ph-name">No photo chosen yet.</span></div></div>
+    <div class="lk-s"><span class="lk-l">Blackwall</span><div id="lk-bw"><div class="lk-n"><b>Blackwall</b></div>
+      <label class="lk-sl"><span>How often</span><input type="range" id="bw-f" min="15" max="200" step="5" value="60" aria-label="How often spikes and ripples happen"><output id="bw-f-o">60%</output></label>
+      <label class="lk-sl"><span>Sharpness</span><input type="range" id="bw-s" min="0" max="100" step="5" value="50" aria-label="How sharp the spikes are"><output id="bw-s-o">50%</output></label>
+      <label class="lk-sl"><span>Size</span><input type="range" id="bw-r" min="30" max="250" step="5" value="100" aria-label="How high and wide the spikes and ripples are"><output id="bw-r-o">100%</output></label>
+      <div class="lk-n">For the Firewall and Calm wall backgrounds. How often: lower is calmer. Sharpness: higher gives pointier, spikier shards. Size: how high and wide the spikes and ripples rise.</div>
+      <button class="btn sm ghost" data-act="bw-reset">Reset</button></div></div>
     <div class="lk-s"><span class="lk-l">Typeface</span>
       <div class="seg three fonts"><button data-act="font" data-v="standard" aria-pressed="true">Standard</button><button data-act="font" data-v="gravion" aria-pressed="false" class="f-g">Gravion</button><button data-act="font" data-v="techno" aria-pressed="false" class="f-t">Techno</button></div>
       <div class="lk-n" id="gf-name">Gravion uses the closest built-in match. If you own the real Gravion font file (.ttf, .otf or .woff), load it here and Regis will use it instead.</div>
@@ -3844,7 +3852,7 @@ function initScroll(){window.addEventListener("scroll",onScroll,{passive:true});
    (before, their 60 Hz loops kept the main thread recalculating styles all the time).
    fxCore runs in the worker, or on the page itself where OffscreenCanvas is missing. */
 function fxCore(G,inline){
-  var K={bg:"aurora",mode:"lite",run:false,s:1,reduce:false,col:[185,154,255],skin:"violet",W:0,H:0},cv=null,st=null,cx=null,sx=null,busy=false,lt=0,timer=0;
+  var K={bg:"aurora",mode:"lite",run:false,s:1,reduce:false,bwf:.6,bws:.5,bwr:1,col:[185,154,255],skin:"violet",W:0,H:0},cv=null,st=null,cx=null,sx=null,busy=false,lt=0,timer=0;
   var PAL={violet:{w:[176,80,124],c:[62,72,196],m:[234,208,216],b:[6,5,14]},ember:{w:[222,108,54],c:[128,72,60],m:[248,210,172],b:[10,6,5]},sage:{w:[70,140,210],c:[24,64,150],m:[200,232,255],b:[2,6,14]},rhodes:{w:[214,174,78],c:[48,94,172],m:[238,224,192],b:[5,7,13]},cyber:{w:[255,42,109],c:[5,217,232],m:[240,220,255],b:[7,6,15]},blackwall:{w:[255,43,61],c:[120,10,24],m:[255,210,210],b:[5,2,3]},tide:{w:[70,150,255],c:[20,60,150],m:[210,236,255],b:[2,5,12]},holo:{w:[255,184,77],c:[79,227,255],m:[220,245,255],b:[4,8,15]},linen:{w:[240,176,146],c:[150,172,232],m:[255,238,222],b:[255,255,255],light:true}};
   /* 1.9.1: a worker's animation frames can stop arriving for good after a graphics reset or while the page is covered; a timer stands in
      so the loop never stalls (each frame runs once, whichever comes first) */
@@ -3963,12 +3971,14 @@ function fxCore(G,inline){
      and shape that roll and swell; pins they push come forward (bigger, brighter, spread out, lit from one side) like a pin-art toy.
      Mainly red with slowly drifting hues; glitches tear bands sideways, split colours, flicker blocks and sweep a scan line. */
   var gcv=null,GL=null,GP=null,GU={},gBuf=null,gN=0,gW=0,gH=0,gSp=9,BWS=null;
-  var VS="attribute vec3 a;uniform vec2 uR;uniform float uT,uSp,uGl,uGs,uHue,uScan,uBk,uM;uniform vec2 uOff;uniform vec4 uB[8],uC[8];varying vec3 vC;"+
+  var VS="attribute vec3 a;uniform vec2 uR;uniform float uT,uSp,uGl,uGs,uHue,uScan,uBk,uM,uSh;uniform vec2 uOff;uniform vec4 uB[8],uC[8];varying vec3 vC;"+
     /* uM 0: Blackwall, shards that stab out of the wall (hard edges, star-shaped spikes). uM 1: Calm wall, rings that ripple across it */
     "float F(vec2 p){float z=0.0;if(uM>0.5){for(int i=0;i<8;i++){vec4 b=uB[i],c=uC[i];float d=length(p-b.xy);float x=(d-c.x)/b.z;z+=c.y*exp(-x*x)*cos(x*2.2);}"+
       "return z+0.10*sin(p.x*0.0042+uT*0.32)*sin(p.y*0.0051-uT*0.27);}"+
       "for(int i=0;i<8;i++){vec4 b=uB[i],c=uC[i];vec2 d=p-b.xy;float cs=cos(c.x),sn=sin(c.x);vec2 q=vec2(cs*d.x+sn*d.y,-sn*d.x+cs*d.y)/b.zw;"+
-      "float an=atan(q.y,q.x);float sp=abs(sin(an*3.0+c.w))*0.9+abs(sin(an*5.0-c.w*1.3))*0.55;float r2=dot(q,q)*(1.0+c.z*(sp-0.7));z+=c.y*exp(-pow(r2,1.7));}return z;}"+
+      "float an=atan(q.y,q.x);float sp=abs(sin(an*3.0+c.w))*0.9+abs(sin(an*5.0-c.w*1.3))*0.55+abs(sin(an*8.0+c.w*0.7))*0.45*uSh;"+
+      /* uSh 0..1: round swells -> hard-edged, star-pointed shards */
+      "float r2=dot(q,q)*(1.0+c.z*mix(0.25,1.9,uSh)*(sp-0.7));z+=c.y*exp(-pow(max(r2,0.0),mix(1.0,3.4,uSh)));}return z;}"+
     "float H(float n){return fract(sin(n)*43758.5453);}"+
     "void main(){vec2 p=a.xy;float z=F(p),e=uSp,zx=F(p+vec2(e,0.0))-z,zy=F(p+vec2(0.0,e))-z;vec3 n=normalize(vec3(-zx*5.0,-zy*5.0,1.0));"+
       "float lit=clamp(dot(n,normalize(vec3(-0.55,-0.65,0.75))),0.0,1.0);vec2 c=uR*0.5;vec2 q=c+(p-c)*(1.0+z*0.16);"+
@@ -3985,7 +3995,7 @@ function fxCore(G,inline){
   var FS="precision mediump float;varying vec3 vC;void main(){vec2 d=gl_PointCoord-0.5;float r=length(d);float a=smoothstep(0.5,0.12,r);float k=smoothstep(0.2,0.0,r);gl_FragColor=vec4(vC*(a*0.75+k*0.55),1.0);}";
   function glOK(){if(GL)return true;if(!gcv)return false;try{GL=gcv.getContext("webgl",{alpha:false,antialias:false,depth:false,stencil:false,premultipliedAlpha:false,powerPreference:"low-power"})}catch(_){GL=null}if(!GL)return false;
     var g=GL,sh=function(t,src){var s=g.createShader(t);g.shaderSource(s,src);g.compileShader(s);return s},pr=g.createProgram();g.attachShader(pr,sh(g.VERTEX_SHADER,VS));g.attachShader(pr,sh(g.FRAGMENT_SHADER,FS));g.linkProgram(pr);
-    if(!g.getProgramParameter(pr,g.LINK_STATUS)){GL=null;return false}GP=pr;g.useProgram(pr);["uR","uT","uSp","uGl","uGs","uHue","uScan","uBk","uM","uOff","uB","uC"].forEach(function(n){GU[n]=g.getUniformLocation(pr,n)});
+    if(!g.getProgramParameter(pr,g.LINK_STATUS)){GL=null;return false}GP=pr;g.useProgram(pr);["uR","uT","uSp","uGl","uGs","uHue","uScan","uBk","uM","uSh","uOff","uB","uC"].forEach(function(n){GU[n]=g.getUniformLocation(pr,n)});
     gBuf=g.createBuffer();g.enable(g.BLEND);g.blendFunc(g.ONE,g.ONE);return true}
   function glGrid(){var g=GL;if(!g)return;gW=K.W;gH=K.H;gcv.width=gW;gcv.height=gH;g.viewport(0,0,gW,gH);
     gSp=Math.max(7,Math.min(11,Math.round(Math.sqrt(gW*gH/26000))));var cols=Math.ceil(gW/gSp)+2,rows=Math.ceil(gH/gSp)+2,d=new Float32Array(cols*rows*3),k=0;
@@ -3994,16 +4004,17 @@ function fxCore(G,inline){
   /* a rogue AI: grows, rolls across, morphs its outline, then sinks back */
   /* 1.8.9 a rogue AI push: waits, swells out (a smallish, irregular shape), holds while it creeps a little, sinks back into the wall */
   /* 1.9.1: Blackwall shards stab out fast with hard, spiky outlines and pull back; Calm wall sources send out slow rings */
-  function bwBulge(init){var W=K.W,H=K.H,sz=rnd(30,105);if(K.bg==="tide")return{x:rnd(.05,.95)*W,y:rnd(.08,.92)*H,R:0,v:rnd(55,95),w:rnd(20,36),a0:rnd(.55,1.05),Rmax:rnd(240,520),wait:init?rnd(0,6):rnd(.8,4.5),ph:0};
+  /* 1.9.2: K.bwf = how often (waits divide by it), K.bwr = size (height and width) */
+  function bwBulge(init){var W=K.W,H=K.H,f=Math.max(.15,K.bwf||.6),z=Math.max(.3,K.bwr||1),sz=rnd(30,105)*Math.sqrt(z);if(K.bg==="tide")return{x:rnd(.05,.95)*W,y:rnd(.08,.92)*H,R:0,v:rnd(55,95),w:rnd(20,36)*Math.sqrt(z),a0:rnd(.55,1.05)*z,Rmax:rnd(240,520)*Math.sqrt(z),wait:(init?rnd(0,6):rnd(.8,4.5))/f,ph:0};
     return{x:rnd(.06,.94)*W,y:rnd(.08,.92)*H,vx:rnd(-16,16),vy:rnd(-12,12),sx:sz*rnd(.6,1.4),sy:sz*rnd(.6,1.4),
-    rot:rnd(0,6.28),vr:rnd(-.5,.5),amp:rnd(1.25,2.3),wob:rnd(.45,1.0),ph:rnd(0,9),vph:rnd(.8,2.2),wait:init?rnd(0,4):rnd(.4,3.2),age:0,up:rnd(.07,.2),hold:rnd(.15,.9),down:rnd(.35,.85)}}
+    rot:rnd(0,6.28),vr:rnd(-.5,.5),amp:rnd(1.25,2.3)*z,wob:rnd(.45,1.0),ph:rnd(0,9),vph:rnd(.8,2.2),wait:(init?rnd(0,4):rnd(.4,3.2))/f,age:0,up:rnd(.07,.2),hold:rnd(.15,.9),down:rnd(.35,.85)}}
   function glDraw(dt){if(!glOK())return false;if(gW!==K.W||gH!==K.H)glGrid();var g=GL,W=K.W,H=K.H,s=K.reduce?0:K.s,d=dt*s;
     var tide=K.bg==="tide";if(BWS&&BWS.tide!==tide)BWS=null;
     if(!BWS){BWS={b:[],t:0,gl:0,gs:0,next:rnd(1,3),scan:-100,ns:rnd(2,5),bk:0,hue:rnd(0,6),tide:tide};for(var i=0;i<8;i++)BWS.b.push(bwBulge(true))}
     var S2=BWS;S2.t+=d;S2.hue+=d*(tide?.07:.12);
     var B=new Float32Array(32),C=new Float32Array(32);
     if(tide){var on2=0;for(i=0;i<8;i++){var w0=S2.b[i];if(w0.wait<=0)on2++}
-      for(i=0;i<8;i++){var r=S2.b[i];if(r.wait>0){r.wait-=d;if(r.wait<=0&&on2>=4)r.wait=rnd(.6,2.5);else if(r.wait<=0)on2++}else{r.R+=r.v*d;if(r.R>r.Rmax)S2.b[i]=r=bwBulge(false)}
+      for(i=0;i<8;i++){var r=S2.b[i];if(r.wait>0){r.wait-=d;if(r.wait<=0&&on2>=Math.max(1,Math.round(4*Math.min(1,K.bwf||.6))))r.wait=rnd(.6,2.5)/Math.max(.15,K.bwf||.6);else if(r.wait<=0)on2++}else{r.R+=r.v*d;if(r.R>r.Rmax)S2.b[i]=r=bwBulge(false)}
         var fade=r.wait>0?0:Math.min(1,r.R/40)*Math.max(0,1-r.R/r.Rmax);B[i*4]=r.x;B[i*4+1]=r.y;B[i*4+2]=r.w;B[i*4+3]=r.w;C[i*4]=r.R;C[i*4+1]=r.a0*fade;C[i*4+2]=0;C[i*4+3]=0}
       /* a soft haze band drifts down now and then; no glitches */
       S2.ns-=d;if(S2.ns<=0){S2.scan=-160;S2.ns=rnd(6,12)}if(S2.scan>-200){S2.scan+=d*H*.16;if(S2.scan>H+200)S2.scan=-400}
@@ -4013,16 +4024,16 @@ function fxCore(G,inline){
     var live=0;for(i=0;i<8;i++){var q0=S2.b[i];if(q0.wait<=0&&q0.age<q0.up+q0.hold+q0.down)live++}
     for(i=0;i<8;i++){var o=S2.b[i];
       /* only a few push at once; the rest wait their turn */
-      if(o.wait>0){o.wait-=d;if(o.wait<=0&&live>=4)o.wait=rnd(.3,1.8);else if(o.wait<=0)live++}
+      if(o.wait>0){o.wait-=d;if(o.wait<=0&&live>=Math.max(1,Math.round(4*Math.min(1,K.bwf||.6))))o.wait=rnd(.3,1.8)/Math.max(.15,K.bwf||.6);else if(o.wait<=0)live++}
       else{o.age+=d;o.x+=o.vx*d;o.y+=o.vy*d;o.rot+=o.vr*d;o.ph+=o.vph*d;if(o.age>o.up+o.hold+o.down)S2.b[i]=o=bwBulge(false)}
       var e1=o.wait>0?0:o.age<o.up?(1-Math.cos(Math.PI*o.age/o.up))/2:o.age<o.up+o.hold?1:Math.max(0,(1+Math.cos(Math.PI*(o.age-o.up-o.hold)/o.down))/2),a2=o.amp*e1*(0.86+0.14*Math.sin(o.ph*2.3));
       B[i*4]=o.x;B[i*4+1]=o.y;B[i*4+2]=o.sx*(1+.12*Math.sin(o.ph));B[i*4+3]=o.sy*(1+.12*Math.cos(o.ph*.8));C[i*4]=o.rot;C[i*4+1]=a2;C[i*4+2]=o.wob;C[i*4+3]=o.ph}
     /* glitches: a burst every few seconds; a scan line now and then; blocks flicker all the time */
-    if(d>0){S2.next-=d;if(S2.next<=0){S2.gl=1;S2.gs=Math.random()*1000;S2.next=rnd(.8,3.2);S2.gt=rnd(.06,.26)}if(S2.gl>0){S2.gt-=d;if(S2.gt<=0)S2.gl=0;else if(Math.random()<.35)S2.gs=Math.random()*1000}
+    if(d>0){S2.next-=d;if(S2.next<=0){S2.gl=1;S2.gs=Math.random()*1000;S2.next=rnd(.8,3.2)/Math.max(.15,K.bwf||.6);S2.gt=rnd(.06,.26)}if(S2.gl>0){S2.gt-=d;if(S2.gt<=0)S2.gl=0;else if(Math.random()<.35)S2.gs=Math.random()*1000}
       S2.ns-=d;if(S2.ns<=0){S2.scan=-20;S2.ns=rnd(3,8)}if(S2.scan>-50){S2.scan+=d*H*1.4;if(S2.scan>H+30)S2.scan=-100}if(Math.random()<.3)S2.bk=Math.random()*1000}
     g.clearColor(.018,.003,.007,1);g.clear(g.COLOR_BUFFER_BIT);g.useProgram(GP);
     g.uniform2f(GU.uR,W,H);g.uniform1f(GU.uT,S2.t);g.uniform1f(GU.uSp,gSp);g.uniform1f(GU.uGl,S2.gl);g.uniform1f(GU.uGs,S2.gs);g.uniform1f(GU.uHue,S2.hue);g.uniform1f(GU.uScan,S2.scan);g.uniform1f(GU.uBk,S2.bk);
-    g.uniform1f(GU.uM,0);g.uniform4fv(GU.uB,B);g.uniform4fv(GU.uC,C);
+    g.uniform1f(GU.uM,0);g.uniform1f(GU.uSh,K.bws==null?.5:K.bws);g.uniform4fv(GU.uB,B);g.uniform4fv(GU.uC,C);
     if(S2.gl>0){var k2=rnd(4,12);g.colorMask(true,false,false,true);g.uniform2f(GU.uOff,k2,0);g.drawArrays(g.POINTS,0,gN);g.colorMask(false,true,true,true);g.uniform2f(GU.uOff,-k2,0);g.drawArrays(g.POINTS,0,gN);g.colorMask(true,true,true,true)}
     else{g.uniform2f(GU.uOff,0,0);g.drawArrays(g.POINTS,0,gN)}
     return true}
@@ -4046,6 +4057,13 @@ function fxCore(G,inline){
   return on}
 
 var FXNAT=["browser","office","comm"];
+/* 1.9.2 Blackwall dials: f = how often (percent; 100 = the 1.9.1 pace), s = sharpness 0..100, r = size of spikes / ripples (percent) */
+var BWFX=(function(){var o=lsj("regis-bwfx",null)||{};var c=function(v,a,b,d){v=+v;return isFinite(v)?Math.max(a,Math.min(b,v)):d};return {f:c(o.f,15,200,60),s:c(o.s,0,100,50),r:c(o.r,30,250,100)}})();
+function bwFxUi(){[["f","%"],["s","%"],["r","%"]].forEach(function(k){var i=$("#bw-"+k[0]),o=$("#bw-"+k[0]+"-o");if(i&&document.activeElement!==i)i.value=BWFX[k[0]];if(o)o.textContent=BWFX[k[0]]+k[1]})}
+function bwFxSet(v,save){BWFX={f:Math.max(15,Math.min(200,+v.f||60)),s:Math.max(0,Math.min(100,+v.s||0)),r:Math.max(30,Math.min(250,+v.r||100))};bwFxUi();if(FX.kick)FX.kick();if(save)lsw("regis-bwfx",BWFX)}
+document.addEventListener("input",function(ev){var t=ev.target;if(t&&/^bw-[fsr]$/.test(t.id))bwFxSet({f:$("#bw-f").value,s:$("#bw-s").value,r:$("#bw-r").value},false)});
+document.addEventListener("change",function(ev){var t=ev.target;if(t&&/^bw-[fsr]$/.test(t.id))bwFxSet({f:$("#bw-f").value,s:$("#bw-s").value,r:$("#bw-r").value},true)});
+setTimeout(function(){try{bwFxUi()}catch(_){}},0);
 function initFx(){
   var host=$(".bg");if(!host||!document.createElement("canvas").getContext)return;
   var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -4061,7 +4079,7 @@ function initFx(){
     if(m=c.match(/^#([0-9a-f]{6})$/i))return[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)];
     if(m=c.match(/(\d+)\D+(\d+)\D+(\d+)/))return[+m[1],+m[2],+m[3]];return[185,154,255]}
   function cfg(){var R=document.documentElement;return{bg:FX.bg,mode:PERF.mode,s:FX.s,reduce:!!reduce,skin:R.getAttribute("data-skin")||"violet",W:window.innerWidth,H:window.innerHeight,
-    run:!document.hidden&&!PERF.idle&&!R.classList.contains("away")&&FXNAT.indexOf(S.view)<0}}
+    run:!document.hidden&&!PERF.idle&&!R.classList.contains("away")&&FXNAT.indexOf(S.view)<0,bwf:BWFX.f/100,bws:BWFX.s/100,bwr:BWFX.r/100}}
   /* 1.9.1: Browser, Office and Comm cover the background, so it pauses there; coming back after a while, or after the window was
      hidden for a while, redraws everything (graphics resets during heavy pages left it blank on older desktop apps) */
   var natAt=0,hidAt=0;
@@ -5995,7 +6013,7 @@ function lookGroups(){var b=document.querySelector("#look .lk-b");if(!b||b.datas
   var secs=[].slice.call(b.querySelectorAll(":scope>.lk-s")),open=lookOpenGet(),groups={},order=[];
   function grp(name){if(groups[name])return groups[name];var d=document.createElement("details");d.className="lk-g";d.dataset.g=name;if(open.indexOf(name)>=0)d.open=true;
     var sm=document.createElement("summary");sm.innerHTML='<span>'+name+'</span><em class="lk-v" data-sum="'+name+'"></em>';var body=document.createElement("div");body.className="lk-gb";d.appendChild(sm);d.appendChild(body);groups[name]=body;order.push(d);return body}
-  var map={"TV":"TV","Presets":"Colour","Colour":"Colour","Custom colour":"Colour","Style":"Style & effects","Background":"Background","Typeface":"Typeface","Motion":"Motion speed","Sections":"Layout"};
+  var map={"TV":"TV","Presets":"Colour","Colour":"Colour","Custom colour":"Colour","Style":"Style & effects","Background":"Background","Typeface":"Typeface","Motion":"Motion speed","Blackwall":"Background","Sections":"Layout"};
   secs.forEach(function(sec){var lab=sec.querySelector(":scope>.lk-l"),h2=sec.querySelector(":scope>.lk-h2"),hl=h2&&h2.querySelector(".lk-l"),t=lab?lab.textContent.trim():hl?hl.textContent.trim():"Colour";
     var body=grp(map[t]||t);if(lab&&!h2)lab.remove();
     if(h2){var l2=h2.querySelector(".lk-l");if(l2)l2.remove()}
@@ -6338,7 +6356,8 @@ document.addEventListener("click",async function(ev){
     case "nav-toggle":navToggle();break;
     case "ofd-app":case "ofd-filter":case "ofd-doc":case "ofd-keys":case "ofd-new":case "ofd-start":case "ofd-pick":case "ofd-open":case "ofd-close":case "ofd-adopt":case "ofd-pop":await ofdAct(act,b);break;
     case "bw-mute":if(bwNative()&&APP.browser.mute)APP.browser.mute(+b.dataset.id);break;
-    case "gd-pick":case "gd-new":case "gd-clear":case "gd-copy":case "gd-save":case "gd-tasks":case "gd-att":case "gd-fileclr":case "ov-to":case "ov-close":await gdAct(act,b);break;
+    case "bw-reset":bwFxSet({f:60,s:50,r:100},true);break;
+case "gd-pick":case "gd-new":case "gd-clear":case "gd-copy":case "gd-save":case "gd-tasks":case "gd-att":case "gd-fileclr":case "ov-to":case "ov-close":await gdAct(act,b);break;
 case "bwg-new":case "bwg-ren":case "bwg-col":case "bwg-ungrp":case "bwg-close":case "bwg-tog":await bwGrpAct(act,b);break;
 case "bp-yes":case "bp-no":case "bw-perms":case "bp-forget":await bpAct(act,b);break;
 case "bwt-new":case "bwt-reload":case "bwt-dup":case "bwt-mute":case "bwt-bm":case "bwt-copy":case "bwt-grp":case "bwt-to":case "bwt-newg":case "bwt-ungrp":case "bwt-sleep":case "bwt-close":case "bwt-others":case "bwt-right":case "bwt-reopen":await bwTabAct(act,b);break;

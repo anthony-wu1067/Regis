@@ -84,6 +84,14 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.2 Blackwall dials
+
+- **Blackwall dials** (Appearance > Background, shown with the Firewall or Calm wall background):
+  - **How often:** spikes and ripples now come less often by default (60%). Lower is calmer, 200% is busier.
+  - **Sharpness:** 0 gives smooth swells; turning it up makes the shards harder-edged and more star-pointed.
+  - **Size:** how high and wide the spikes and ripples rise.
+- Updating: if Regis says your desktop app is older than the page, unzip *Regis-app.zip* over your Regis-app folder and run *Install Regis* once.
+
 ## 1.9.1 The Guild: AI workspaces, plus browser, alert and background fixes
 
 - **AI workspaces (the Guild).** The Workspace page has a rail on the left, like Discord: Regis (your normal workspace) and four agents, each with its own personality and its own chat history. Nothing from one agent's chat is ever sent with another's.
