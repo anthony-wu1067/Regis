@@ -12,7 +12,7 @@ function localBase(u) {
 const SUGGEST = [
   { name: 'llama3.2:3b', note: 'Meta Llama 3.2, 3B: good all-rounder, about 2 GB' },
   { name: 'gemma3:4b', note: 'Google Gemma 3, 4B: a bit smarter, about 3.3 GB' },
-  { name: 'qwen2.5-coder:3b', note: 'Qwen 2.5 Coder, 3B: for code (Luna, Obsidian), about 1.9 GB' }
+  { name: 'qwen2.5-coder:3b', note: 'Qwen 2.5 Coder, 3B: for code (Alicia, Obsidian), about 1.9 GB' }
 ];
 
 class Ollama {

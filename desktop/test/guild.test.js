@@ -13,7 +13,7 @@ globalThis.fetch = async (u, o) => {
   const b = JSON.parse(o.body); calls.push(b); const who = (b.system || '').match(/You are (\w+)/); const n = who ? who[1] : 'none';
   let text = n + ' heard ' + b.messages.length + ' message(s): ' + b.messages[b.messages.length - 1].content.slice(-40);
   if (n === 'Exusiai') text = 'Plan:\n\n- **one** thing\n\n```tasks\n[{"title":"Call three customers","due":"","prio":1},{"title":"Write the Mom Test script","due":"","prio":2}]\n```';
-  if (n === 'Luna') text = 'Here you go.\n\n```jsx\nexport default function LandingPage(){return <main className="p-8">Hi</main>}\n```';
+  if (n === 'Alicia') text = 'Here you go.\n\n```jsx\nexport default function LandingPage(){return <main className="p-8">Hi</main>}\n```';
   return new Response(JSON.stringify({ content: [{ type: 'text', text }], usage: { input_tokens: 5, output_tokens: 5 }, stop_reason: 'end_turn' }), { status: 200, headers: { 'content-type': 'application/json' } });
 };
 const MEET = '<!doctype html><title>Meet</title><body style="background:#fff"><button id="b">Join</button><p id="r">-</p><script>document.getElementById("b").onclick=function(){navigator.mediaDevices.getUserMedia({audio:true,video:true}).then(function(s){document.getElementById("r").textContent="granted "+s.getTracks().length}).catch(function(e){document.getElementById("r").textContent="denied "+e.name})}</script></body>';
@@ -40,11 +40,11 @@ app.whenReady().then(async () => {
   await J('var c=document.getElementById("cmd");c.value="And per SKU?";document.getElementById("cmd-form").requestSubmit()');
   ok(await until(() => J('return /Midas heard 3/.test(document.getElementById("gd-log").textContent)')), 'the second message carries his own history');
   await J('document.querySelector(\'#gd-rail [data-id="luna"]\').click()'); await sleep(500);
-  ok(await J('return !/Midas/.test(document.getElementById("gd-log").textContent)&&/Luna/.test(document.getElementById("gd-head").textContent)'), 'switching to Luna clears the chat view');
+  ok(await J('return !/Midas/.test(document.getElementById("gd-log").textContent)&&/Alicia/.test(document.getElementById("gd-head").textContent)'), 'switching to Alicia clears the chat view');
   await J('var c=document.getElementById("cmd");c.value="Build it";document.getElementById("cmd-form").requestSubmit()');
-  ok(await until(() => J('return !!document.querySelector("#gd-log .gd-code")')), 'Luna\'s code comes back in a code block with Copy and Save');
+  ok(await until(() => J('return !!document.querySelector("#gd-log .gd-code")')), 'Alicia\'s code comes back in a code block with Copy and Save');
   const cl = calls[calls.length - 1];
-  ok(/You are Luna/.test(cl.system) && cl.messages.length === 1 && !JSON.stringify(cl.messages).includes('margin'), 'Luna\'s request has none of Midas\'s conversation');
+  ok(/You are Alicia/.test(cl.system) && cl.messages.length === 1 && !JSON.stringify(cl.messages).includes('margin'), 'Alicia\'s request has none of Midas\'s conversation');
   const rows = await J('return await window.regisBridge.guild.history("midas")');
   ok(rows.length === 4 && rows.every((r) => r.role === 'user' || r.role === 'assistant'), 'Midas\'s history is kept apart (' + rows.length + ' rows)');
   const raw = JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'regis-data.json'), 'utf8')).meta.guild;

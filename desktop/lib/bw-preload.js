@@ -102,19 +102,31 @@ window.addEventListener('keydown', (e) => {
 }, true);
 /* 1.9.5 Chrome Web Store: its own button only works in Chrome, so Regis adds an "Add to Regis" button on extension pages */
 if (location.protocol === 'https:' && /^(chromewebstore\.google\.com|chrome\.google\.com)$/.test(location.hostname)) {
-  let btn = null, busy = false;
+  /* 1.9.6: the button now sits where the store's own greyed-out "Add to Chrome" button is (that one is hidden), and the
+     "Switch to Chrome to install extensions" strip is hidden. If the store's button can't be found, it floats bottom right as before. */
+  let btn = null, anchor = null, busy = false, label = 'Add to Regis', colour = '#1a73e8', doneFor = '';
   const isExt = () => /\/detail\/(?:[^\/]+\/)?[a-p]{32}/.test(location.pathname);
+  const FLOAT = 'position:fixed;right:24px;bottom:24px;z-index:2147483647;box-shadow:0 6px 20px rgba(0,0,0,.35);', LOOK = 'padding:10px 24px;border:0;border-radius:999px;color:#fff;font:500 14px "Google Sans",Roboto,system-ui,"Segoe UI",sans-serif;cursor:pointer;white-space:nowrap;';
+  const txt = (el) => String(el.textContent || '').replace(/\s+/g, ' ').trim();
+  const storeBtn = () => { const l = document.querySelectorAll('button,[role="button"]'); for (let i = 0; i < l.length; i++) { if (l[i] !== btn && /^(Add to Chrome|Add to Desktop|Get)$/i.test(txt(l[i])) && l[i].getBoundingClientRect().width > 0) return l[i]; } return null; };
+  const hideStrip = () => { const l = document.querySelectorAll('a,button,[role="button"]'); for (let i = 0; i < l.length; i++) { if (!/^Install Chrome$/i.test(txt(l[i]))) continue; let p = l[i].parentElement; for (let k = 0; k < 5 && p; k++, p = p.parentElement) { if (/Switch to Chrome/i.test(txt(p))) { if (txt(p).length < 160) p.style.setProperty('display', 'none', 'important'); break; } } } };
   const paint = () => {
     if (!document.body) return;
     if (!isExt()) { if (btn) { btn.remove(); btn = null; } return; }
-    if (btn && btn.isConnected) return;
-    btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Add to Regis';
-    btn.setAttribute('style', 'position:fixed;right:24px;bottom:24px;z-index:2147483647;padding:12px 20px;border:0;border-radius:999px;background:#1a73e8;color:#fff;font:600 15px system-ui,Segoe UI,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35)');
-    btn.addEventListener('click', () => { if (busy) return; busy = true; btn.textContent = 'Adding…'; try { ipcRenderer.send('bw:extInstall', location.href); } catch (_) { busy = false; } });
-    document.body.appendChild(btn);
+    if (doneFor && doneFor !== location.pathname) { doneFor = ''; label = 'Add to Regis'; colour = '#1a73e8'; }
+    try { hideStrip(); } catch (_) {}
+    let sb = null; try { sb = anchor && anchor.isConnected ? anchor : storeBtn(); } catch (_) {} anchor = sb;
+    if (!btn) {
+      btn = document.createElement('button'); btn.type = 'button'; btn.setAttribute('data-regis-add', '1');
+      btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (busy) return; busy = true; label = 'Adding…'; btn.textContent = label; try { ipcRenderer.send('bw:extInstall', location.href); } catch (_) { busy = false; } });
+    }
+    if (btn.textContent !== label) btn.textContent = label;
+    if (sb) { sb.style.setProperty('display', 'none', 'important'); btn.setAttribute('style', LOOK + 'background:' + colour); if (btn.previousElementSibling !== sb) sb.insertAdjacentElement('afterend', btn); }
+    else { btn.setAttribute('style', FLOAT + LOOK + 'background:' + colour); if (btn.parentElement !== document.body) document.body.appendChild(btn); }
   };
-  ipcRenderer.on('bw:extDone', (_e, d) => { busy = false; if (!btn) return; btn.textContent = d && d.ok ? '✓ ' + String(d.msg || 'Added to Regis') : String((d && d.msg) || 'Could not add it'); btn.style.background = d && d.ok ? '#188038' : '#c5221f'; if (!(d && d.ok)) setTimeout(() => { if (btn) { btn.textContent = 'Add to Regis'; btn.style.background = '#1a73e8'; } }, 5000); });
-  window.addEventListener('DOMContentLoaded', paint); setInterval(paint, 1200);
+  ipcRenderer.on('bw:extDone', (_e, d) => { busy = false; const ok = !!(d && d.ok); label = ok ? '✓ Added to Regis' : String((d && d.msg) || 'Could not add it').slice(0, 80); colour = ok ? '#188038' : '#c5221f'; if (ok) doneFor = location.pathname; paint();
+    if (!ok) setTimeout(() => { label = 'Add to Regis'; colour = '#1a73e8'; paint(); }, 6000); });
+  window.addEventListener('DOMContentLoaded', paint); setInterval(paint, 900);
 }
 const visible = (el) => { try { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; } catch (_) { return false; } };
 function userFor(pw) {

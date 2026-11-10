@@ -1,4 +1,4 @@
-# Regis handoff (written 2026-11-10, at version 1.9.5)
+# Regis handoff (written 2026-11-10, updated for version 1.9.6)
 
 Start a new session with: **"Read HANDOFF.md, then …your request…"**.
 `CLAUDE.md` is loaded automatically in every session and holds the per-version technical notes, so this file does not repeat them. It covers the current state, how to release, how to test, what is still open, and the mistakes not to repeat.
@@ -12,7 +12,7 @@ The owner's personal command centre: mail, calendar, tasks, a built-in browser, 
 The owner is not a developer. Explain in plain words, test everything, and never screenshot their real screen.
 
 ## 2. Current state
-- **Version 1.9.5**, installed on the owner's PC (`%LOCALAPPDATA%\Programs\Regis`) and pushed to GitHub (`anthony-wu1067/Regis`, branch `main`).
+- **Version 1.9.6** is built in this folder (both zips in `release/`). It is **not yet installed or pushed**: the owner's PC and GitHub still have 1.9.5 until they say "Yes, install it" / "Yes, push it".
 - Install source folder: `C:\Users\godsp\Downloads\Regis-app` (holds `node_modules` with the castlabs Electron; never delete it).
 - User data: `%APPDATA%\Regis` (`regis-data.json`, `regis-secrets.json`, `regis-events.log` = crash log).
 - Machine: Windows 11, i5-1335U, 12 GB RAM, Intel Iris Xe. Python is `py` (not `python`). `gh` is not installed.
@@ -20,6 +20,7 @@ The owner is not a developer. Explain in plain words, test everything, and never
 ### What exists (newest first)
 | Version | What it added |
 |---|---|
+| 1.9.6 | The base (five rooms, terrace, hallways, lift), the owner's own character pictures with blinks, walking and desk work, Luna renamed Alicia, rail icons, "/" on a new tab, no autoplay in reopened tabs, in-place "Add to Regis" on the Web Store |
 | 1.9.5 | Team dashboards (KPIs, task queue, add-ins), the office with walking chibi team leads and furniture editing, team face icons, wall colour pickers, Calm wall renamed Waterwall, "/" from inside a web page, "Add to Regis" on the Chrome Web Store, shimmer fix, GPU-crash fix |
 | 1.9.4 | Local AI through Ollama (Setup card, model download, Claude/Local per agent, fallback to Claude) |
 | 1.9.3 | Installer survives leftover/stuck Regis processes; backgrounds rebuild themselves (heartbeat) |
@@ -52,7 +53,7 @@ Run a UI suite with its output in a file (from `desktop/`):
 ```bash
 timeout 420 node_modules/electron/dist/electron.exe ../tools/rt.js test/teams.test.js /path/to/log.txt; grep -E '^FAIL| passed' /path/to/log.txt
 ```
-Suites and expected counts: `guild` 36, `teams` 29, `localai` 16, `browser` 67, `tabs` 29, `browser-ui` 16, `comm` 18, `fullscreen` 11, `extensions` 18 (needs network), `youtube` 9, `spotify` 10, `music` 30 (slow, about 6 minutes; give it `timeout 900`), `office` 14 (opens desktop PowerPoint: skip unless needed). Unit tests: `cd desktop && npm test` (22 + 35). The web tests need Playwright, which is not installed.
+Suites and expected counts: `guild` 36, `teams` 42, `localai` 16, `browser` 67, `tabs` 29, `browser-ui` 16, `comm` 18, `fullscreen` 11, `extensions` 18 (needs network), `youtube` 9, `spotify` 10, `music` 30 (slow, about 6 minutes; give it `timeout 900`), `office` 14 (opens desktop PowerPoint: skip unless needed). Unit tests: `cd desktop && npm test` (22 + 35). The web tests need Playwright, which is not installed.
 
 Known test quirks:
 - Each suite uses its own temp profile, so the owner's running Regis is not touched. Several suites can run one after another in the background.
@@ -67,7 +68,7 @@ Known test quirks:
 - Plain-language explanations, and being told what was and was not tested.
 - "Yes, push it" before any push; "Yes, install it" before closing their Regis.
 - Regis should feel fast: no forced layouts after page changes, animate only transform/opacity, pause animations when hidden.
-- Characters: the four team leads are **original chibi drawings** in the spirit of the owner's reference pictures (existing game/comic characters). Do not copy that artwork.
+- Characters: since 1.9.6 the four team leads and the rooms are **the owner's own pictures** (`tools/art/`, embedded by `py tools/art.py`). To change a look, replace the picture, re-measure the outlines in `CHB` and run the script.
 - Shortcuts: Alt+Space = Regis overlay; "/" = overlay (address bar in the Browser, command bar on Workspace); Alt+1..9 = pages.
 
 ## 6. Open items (ask the owner which to do)

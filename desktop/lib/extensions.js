@@ -50,7 +50,7 @@ function unzip(zip, dir) {
     if (name.endsWith('/')) { fs.mkdirSync(out, { recursive: true }); continue; }
     const lnl = zip.readUInt16LE(lo + 26), lxl = zip.readUInt16LE(lo + 28), data = zip.subarray(lo + 30 + lnl + lxl, lo + 30 + lnl + lxl + csize);
     const body = method === 0 ? data : method === 8 ? zlib.inflateRawSync(data) : null; if (!body) throw new Error('The extension uses a zip format Regis can’t open.');
-    total += body.length; if (total > 300 * 1024 * 1024) throw new Error('The extension is too big.');
+    total += body.length; if (total > 700 * 1024 * 1024) throw new Error('The extension is too big.');
     if (usize && body.length !== usize) throw new Error('The extension package is damaged.');
     fs.mkdirSync(path.dirname(out), { recursive: true }); fs.writeFileSync(out, body);
   }
@@ -113,7 +113,7 @@ class Extensions {
     const res = await net.fetch(url, { session: this.getSession() });
     if (!res.ok) throw new Error('The Chrome Web Store didn’t send the extension (' + res.status + ').');
     const buf = Buffer.from(await res.arrayBuffer()); if (buf.length < 100) throw new Error('This extension isn’t available from the Chrome Web Store any more.');
-    if (buf.length > 120 * 1024 * 1024) throw new Error('The extension is too big.');
+    if (buf.length > 250 * 1024 * 1024) throw new Error('The extension is too big.');
     return this._unpack(crxZip(buf), { id, store: true, key: crxKey(buf, id) });
   }
   async installFile(file) { const buf = fs.readFileSync(file); const id = 'local' + require('crypto').createHash('sha256').update(path.basename(file)).digest('hex').replace(/[^a-p]/g, '').slice(0, 27).padEnd(27, 'a'); return this._unpack(crxZip(buf), { id, store: false }); }

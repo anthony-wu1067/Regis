@@ -40,6 +40,8 @@ const isWeb = (u) => /^https?:\/\//i.test(String(u || ''));
 const secureUrl = (u) => /^https:\/\//i.test(String(u || '')) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?([/?#]|$)/i.test(String(u || ''));
 const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const errPage = (url, desc) => 'data:text/html;charset=utf-8,' + encodeURIComponent('<!doctype html><meta charset=utf-8><title>Can\u2019t reach this page</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0d0a18;color:#e8e4f5;font:15px/1.5 system-ui,sans-serif;text-align:center}main{max-width:460px;padding:24px}h1{font-size:22px;margin:0 0 8px}p{color:#a79fc2;margin:6px 0}code{color:#c8b6ff;word-break:break-all}button{margin-top:18px;padding:10px 20px;border:0;border-radius:999px;background:#b794ff;color:#14101f;font:600 14px system-ui;cursor:pointer}</style><main><h1>Can\u2019t reach this page</h1><p><code>' + esc(url) + '</code></p><p>' + esc(desc || 'The connection failed.') + '</p><p>Check your internet connection and the address.</p><button onclick="location.href=\'' + esc(url).replace(/'/g, '%27') + '\'">Try again</button></main>');
+/* runs in a tab Regis reopened by itself: pause anything that starts playing until the person has clicked or typed in the page */
+const QUIET_JS = '(function(){if(window.__regisQuiet)return;window.__regisQuiet=1;var ua=navigator.userActivation,stop=function(e){if(ua&&ua.hasBeenActive){document.removeEventListener("play",stop,true);document.removeEventListener("playing",stop,true);return}var m=e&&e.target;try{if(m&&m.pause&&!m.paused)m.pause()}catch(_){}};document.addEventListener("play",stop,true);document.addEventListener("playing",stop,true);try{[].forEach.call(document.querySelectorAll("video,audio"),function(m){stop({target:m})})}catch(_){}})()';
 /* shortcut map; returns an action name or null (also unit-tested) */
 function keyAction(i) {
   if (!i || i.type !== 'keyDown') return null;
@@ -154,14 +156,17 @@ class BrowserHost {
   }
   /* 1.8.9: only the first tab loads at start-up; the others wait asleep (with their saved titles) until you open them, like Chrome */
   restore(items) { if (this.tabs.length) return; const list = (items || []).map((x) => (typeof x === 'string' ? { u: x, t: '' } : x || {})).filter((x) => isWeb(x.u)).slice(0, 12); if (!list.length) return; this.init();
-    list.forEach((x, i) => { let host = ''; try { host = new URL(x.u).hostname.replace(/^www\./, ''); } catch (_) {} this.tabs.push({ id: ++this.n, title: x.t || host || 'Tab', url: x.u, view: null, loading: false, canBack: false, canFwd: false, born: Date.now(), asleep: i > 0 }); });
+    list.forEach((x, i) => { let host = ''; try { host = new URL(x.u).hostname.replace(/^www\./, ''); } catch (_) {} this.tabs.push({ id: ++this.n, title: x.t || host || 'Tab', url: x.u, view: null, loading: false, canBack: false, canFwd: false, born: Date.now(), asleep: i > 0, quiet: true }); });
     const first = this.tabs[0], tt = first.title; this.active = first.id; this.first = first.id; this._load(first, first.url); first.title = tt; this._attach(); this._emit(); }
   _ensureView(t) {
     if (t.view) return t.view;
     const v = new WebContentsView({ webPreferences: { partition: PARTITION, preload: path.join(__dirname, 'bw-preload.js'), sandbox: true, contextIsolation: true, nodeIntegration: false, spellcheck: true, backgroundThrottling: true } });
     const wc = v.webContents; t.view = v; t.added = false; t.vis = false;
     try { v.setBackgroundColor('#00000000'); } catch (_) {}
-    if (t.muted) try { wc.setAudioMuted(true); } catch (_) {}
+    if (t.muted || t.quiet) try { wc.setAudioMuted(true); } catch (_) {}
+    /* 1.9.6: a tab Regis reopened by itself (at start-up, or after sleeping) stays silent and paused until you click or type in it */
+    const hush = () => { if (t.quiet && !wc.isDestroyed()) wc.executeJavaScript(QUIET_JS).catch(() => {}); };
+    wc.on('dom-ready', hush); wc.on('did-navigate-in-page', hush);
     const sync = () => { const cu = wc.getURL(); if (cu && !/^data:/i.test(cu)) t.url = cu; t.canBack = wc.navigationHistory.canGoBack(); t.canFwd = wc.navigationHistory.canGoForward(); this._emitSoon(); };
     wc.on('page-title-updated', (_e, title) => { t.title = title || t.title; this._emitSoon(); if (this.onHistory && isWeb(t.url)) { try { this.onHistory({ u: t.url, t: t.title }); } catch (_) {} } });
     wc.on('audio-state-changed', (e) => { const a = !!(e && e.audible); if (a !== !!t.audible) { t.audible = a; this._emitSoon(); } });
@@ -178,7 +183,7 @@ class BrowserHost {
     wc.on('did-start-navigation', (_e, url, inPlace, main) => { if (main && !inPlace && isWeb(url)) { t.err = false; if (t.login) { t.login = false; this._emitSoon(); } } });
     wc.on('before-input-event', (e, input) => { this._active(); const a = keyAction(input); if (a && this.key(a, t.id)) e.preventDefault(); });
     /* 1.8.9: using a website counts as using Regis (so it doesn't go idle and pause its animations) */
-    wc.on('input-event', () => this._active());
+    wc.on('input-event', (_e, ev) => { this._active(); if (t.quiet && ev && /^(mouseDown|keyDown|rawKeyDown|touchStart|gestureTap)$/.test(ev.type)) { t.quiet = false; try { wc.setAudioMuted(!!t.muted); } catch (_) {} } });
     wc.on('context-menu', (_e, p) => this._ctx(wc, t, p));
     /* a video (or any page) going full screen: the page fills the whole screen, not just the browser area,
        and leaving it puts Regis back the way it was (still full screen if it was before) */
@@ -189,7 +194,7 @@ class BrowserHost {
     return v;
   }
   _load(t, url) { if (!isWeb(url)) return false; const v = this._ensureView(t); t.url = url; t.title = url.replace(/^https?:\/\//i, '').slice(0, 60); v.webContents.loadURL(url).catch(() => {}); return true; }
-  go(id, input) { const t = this._tab(id); if (!t) return false; const u = resolveInput(input); if (!u) return false; const ok = this._load(t, u); this._attach(); this._emit(); return ok; }
+  go(id, input) { const t = this._tab(id); if (!t) return false; const u = resolveInput(input); if (!u) return false; if (t.quiet) { t.quiet = false; const w0 = this._wc(id); if (w0) try { w0.setAudioMuted(!!t.muted); } catch (_) {} } const ok = this._load(t, u); this._attach(); this._emit(); return ok; }
   _attach() {
     const w = this._win(); if (!w) return;
     const act = this._tab(this.active); if (act && act.asleep) this._wake(act);
@@ -201,6 +206,7 @@ class BrowserHost {
     }
     if (want) { if (this.vfs && this.vfs.tab === act.id) this._vfsFit(); else want.setBounds(this.bounds); if (act) act.last = Date.now(); }
     this.attached = want;
+    if (this.visible && !want && act) { if (this.blankFocus !== act.id) { this.blankFocus = act.id; try { if (!w.webContents.isFocused()) w.webContents.focus(); } catch (_) {} } } else this.blankFocus = null;
   }
   setBounds(b) { const n = (v) => Math.max(0, Math.round(+v || 0)); this.bounds = { x: n(b.x), y: n(b.y), width: n(b.width), height: n(b.height) }; if (this.vfs) { this._vfsFit(); return true; } if (this.attached) this.attached.setBounds(this.bounds); return true; }
   /* the full-screen page covers the whole window */
@@ -232,14 +238,14 @@ class BrowserHost {
       const d = 'data:' + ty + ';base64,' + b.toString('base64'); if (this.icons.size > 200) this.icons.clear(); this.icons.set(url, d); t.icon = d; this._emitSoon(); } catch (_) {} }
   /* sleeping tabs: a tab you haven't looked at for a while (and that isn't playing sound) gives its memory back; it reloads when you open it */
   sleep(id) { const t = this._tab(id); if (!t || !t.view || t.id === this.active || !isWeb(t.url)) return false; t.asleep = true; t.audible = false; t.loading = false; this._drop(t); this._emit(); return true; }
-  _wake(t) { t.asleep = false; if (isWeb(t.url)) { const v = this._ensureView(t); v.webContents.loadURL(t.url).catch(() => {}); } }
+  _wake(t) { t.asleep = false; t.quiet = true; if (isWeb(t.url)) { const v = this._ensureView(t); v.webContents.loadURL(t.url).catch(() => {}); } }
   _sleepIdle() { if (!this.sleepMin) return; const lim = Date.now() - this.sleepMin * 60000; let n = 0;
     for (const t of this.tabs) { if (t.id !== this.active && t.view && !t.audible && !t.asleep && (t.last || t.born || 0) < lim) { if (this.sleep(t.id)) n++; } } return n; }
   setSleep(min) { this.sleepMin = Math.max(0, Math.min(720, +min || 0)); this._emit(); return this.sleepMin; }
   move(id, to) { const i = this.tabs.findIndex((t) => t.id === id); if (i < 0) return false; const t = this.tabs.splice(i, 1)[0]; to = Math.max(0, Math.min(this.tabs.length, +to || 0)); this.tabs.splice(to, 0, t); this._emit(); return true; }
   duplicate(id) { const t = this._tab(id); if (!t || !isWeb(t.url)) return false; const n = this.open(t.url); const i = this.tabs.findIndex((x) => x.id === id); this.move(n, i + 1); return n; }
   reopen() { const c = this.closed.pop(); if (!c) return false; const n = this.open(c.url); this.move(n, c.i); this.activate(n); return n; }
-  mute(id, on) { const t = this._tab(id); if (!t) return false; t.muted = on === undefined ? !t.muted : !!on; const wc = this._wc(id); if (wc) try { wc.setAudioMuted(t.muted); } catch (_) {} this._emit(); return t.muted; }
+  mute(id, on) { const t = this._tab(id); if (!t) return false; t.muted = on === undefined ? !t.muted : !!on; const wc = this._wc(id); if (wc) try { wc.setAudioMuted(t.muted || !!t.quiet); } catch (_) {} this._emit(); return t.muted; }
   find(id, text, opts) { const wc = this._wc(id); if (!wc) return false; text = String(text || ''); if (!text) { wc.stopFindInPage('clearSelection'); return true; } try { wc.findInPage(text, { forward: !(opts && opts.back), findNext: !!(opts && opts.next), matchCase: false }); } catch (_) {} return true; }
   stopFind(id) { const wc = this._wc(id); if (wc) try { wc.stopFindInPage('keepSelection'); } catch (_) {} return true; }
   print(id) { const wc = this._wc(id); if (wc) try { wc.print({ silent: false, printBackground: true }); } catch (_) {} return !!wc; }

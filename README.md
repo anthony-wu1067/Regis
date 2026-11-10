@@ -84,6 +84,20 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.6 The base, your own characters, and browser fixes
+
+- **Your characters:** the four team leads now use the pictures you sent (Exusiai, Midas, Alicia, Obsidian). **Luna is renamed Alicia**; her chats, queue and add-ins carry over.
+- **They move:** they breathe, blink, tilt their heads, smile with closed eyes, walk with moving legs, hurry when work arrives, sit behind their own desk while working, get thought bubbles at the things they visit, and say hello when they meet. Exusiai's halo floats.
+- **The base:** the single office is now a building seen from the side, like a base in a strategy game: the Common area and a terrace on the top floor, Exusiai's and Alicia's offices on the middle floor, Obsidian's and Midas's on the bottom floor. Short hallways lead to a lift in the middle, and the characters ride it between floors (one at a time).
+  - Press a room, or its name above the base, to zoom in. Press it again or **Whole base** to zoom out. Regis remembers your choice.
+  - The old furniture editing (add or drag furniture, wall and floor colours) is gone, because the rooms are now your pictures.
+- **Icons in the left rail:** Exusiai is a halo, Midas a gold ingot, Alicia a pen, Obsidian a diamond. Regis's star is centred again.
+- **Browser, "/" on a new tab:** pressing "/" on a new tab now puts the cursor in the search box (it used to open the Regis overlay), and a new tab always gets the keyboard, so you can type straight away.
+- **Browser, no surprise videos:** a tab that Regis reopens by itself (when the app starts, or when a sleeping tab wakes) stays paused and silent until you click or type in it.
+- **Chrome extensions:** on a Chrome Web Store page, the greyed-out "Add to Chrome" button is replaced by a working **Add to Regis** button in the same place, and the "Switch to Chrome" strip is hidden. Big extensions install now (Adblock Plus unpacks to 318 MB, over the old 300 MB limit).
+- **Update the desktop app once** (`Regis-app.zip`): the browser fixes live in the app itself, not in the page.
+- Tested: the team test suite (42 checks) plus a real install of Adblock Plus from the real Web Store in a throwaway profile. Not tested on a phone, and not with a real YouTube video (a test page that plays sound by itself was used).
+
 ## 1.9.5 Team dashboards, the office, and fixes
 
 - **Team dashboards:** opening Exusiai, Midas, Luna or Obsidian now shows a Dashboard (the chat is one tab over).
