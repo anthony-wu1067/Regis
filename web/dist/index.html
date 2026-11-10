@@ -4041,7 +4041,8 @@ function fxCore(G,inline){
   var SCN={cyber:1,blackwall:1,holo:1,tide:1};
   /* one loop for both; paced by a timer so nothing runs between frames (30 fps, 13-15 fps in Balanced) */
   function moving(){return K.run&&!K.reduce&&K.mode!=="lite"&&(K.bg==="aurora"||SCN[K.bg]?!!fc:K.bg==="cosmos"&&!!sx)}
-  function step(ts){timer=0;if(!moving()){busy=false;return}var dt=lt?Math.min(.1,(ts-lt)/1000):0;lt=ts;
+  var frames=0;
+  function step(ts){timer=0;if(!moving()){busy=false;return}frames++;var dt=lt?Math.min(.1,(ts-lt)/1000):0;lt=ts;
     if(SCN[K.bg])scDraw(dt);else if(K.bg==="aurora")auDraw(1);else coDraw(dt);
     timer=setTimeout(function(){raf(step)},K.mode==="bal"?(K.bg==="cosmos"?72:62):28)}
   function still(){if(SCN[K.bg]&&fc){scDraw(0);return}if(K.bg==="aurora"&&fc)auDraw(0);else if(K.bg==="cosmos"){coBuild();coDraw(0)}}
@@ -4053,10 +4054,20 @@ function fxCore(G,inline){
   function healed(){built="";SC=null;GL=null;GP=null;gW=0;if(fc&&fx)auSize();if(K.bg==="cosmos")coBuild();if(moving()){if(!busy){busy=true;lt=0;raf(step)}}else still()}
   function watch(c,gl){if(!c||!c.addEventListener)return;if(gl){c.addEventListener("webglcontextlost",function(e){e.preventDefault();GL=null;GP=null},false);c.addEventListener("webglcontextrestored",healed,false)}else c.addEventListener("contextrestored",healed,false)}
   function on(m){if(!m)return;if(m.heal){healed();return}if(m.t==="init"){gcv=m.gl||null;watch(m.fx);watch(m.cosmos);watch(m.stars);watch(gcv,true);fx=m.fx;fc=fx&&fx.getContext("2d");cv=m.cosmos;st=m.stars;cx=cv&&cv.getContext("2d");sx=st&&st.getContext("2d");apply(m.k||{});if(K.bg==="aurora")auSize();still();return}apply(m)}
-  if(!inline)G.onmessage=function(e){try{on(e.data)}catch(_){}};
+  /* 1.9.3 heartbeat: frames drawn and whether a drawing surface was lost; the page rebuilds everything if this goes wrong */
+  function lostNow(){try{return !!((GL&&GL.isContextLost&&GL.isContextLost())||(fc&&fc.isContextLost&&fc.isContextLost())||(cx&&cx.isContextLost&&cx.isContextLost())||(sx&&sx.isContextLost&&sx.isContextLost()))}catch(_){return false}}
+  if(!inline){G.onmessage=function(e){try{on(e.data)}catch(_){}};
+    setInterval(function(){var l=lostNow();if(l&&!G.__lostOnce){G.__lostOnce=1;try{healed()}catch(_){}}else if(!l)G.__lostOnce=0;
+      try{G.postMessage({beat:1,frames:frames,moving:moving(),lost:l})}catch(_){}frames=0;if(moving()&&!busy){busy=true;lt=0;raf(step)}},4000)}
   return on}
 
 var FXNAT=["browser","office","comm"];
+/* 1.9.3: if the background worker stops answering, or keeps saying its drawing surface is gone, throw it away and build a new one */
+function fxRebuild(why){var n=Date.now();if(FX.rebuiltAt&&n-FX.rebuiltAt<30000)return;FX.rebuiltAt=n;FX.rebuilds=(FX.rebuilds||0)+1;
+  try{lsw("regis-fxlog",(lsj("regis-fxlog",[])||[]).concat([new Date().toISOString()+" "+why]).slice(-20))}catch(_){}
+  try{if(FX.w)FX.w.terminate()}catch(_){}FX.w=null;["#fx","#cosmos","#stars","#bwgl"].forEach(function(q){var e=$(q);if(e)e.remove()});var mt=document.querySelector(".bg>.metal");if(mt)mt.remove();
+  try{initFx()}catch(_){}}
+setInterval(function(){if(!FX.w||!FX.beat)return;var R=document.documentElement;if(document.hidden||R.classList.contains("away")){FX.beat=Date.now();return}if(Date.now()-FX.beat>20000)fxRebuild("worker went silent")},5000);
 /* 1.9.2 Blackwall dials: f = how often (percent; 100 = the 1.9.1 pace), s = sharpness 0..100, r = size of spikes / ripples (percent) */
 var BWFX=(function(){var o=lsj("regis-bwfx",null)||{};var c=function(v,a,b,d){v=+v;return isFinite(v)?Math.max(a,Math.min(b,v)):d};return {f:c(o.f,15,200,60),s:c(o.s,0,100,50),r:c(o.r,30,250,100)}})();
 function bwFxUi(){[["f","%"],["s","%"],["r","%"]].forEach(function(k){var i=$("#bw-"+k[0]),o=$("#bw-"+k[0]+"-o");if(i&&document.activeElement!==i)i.value=BWFX[k[0]];if(o)o.textContent=BWFX[k[0]]+k[1]})}
@@ -4065,7 +4076,7 @@ document.addEventListener("input",function(ev){var t=ev.target;if(t&&/^bw-[fsr]$
 document.addEventListener("change",function(ev){var t=ev.target;if(t&&/^bw-[fsr]$/.test(t.id))bwFxSet({f:$("#bw-f").value,s:$("#bw-s").value,r:$("#bw-r").value},true)});
 setTimeout(function(){try{bwFxUi()}catch(_){}},0);
 function initFx(){
-  var host=$(".bg");if(!host||!document.createElement("canvas").getContext)return;
+  var host=$(".bg");if(!host||!document.createElement("canvas").getContext)return;FX.on=1;
   var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var fx=document.createElement("canvas"),cv=document.createElement("canvas"),st=document.createElement("canvas"),gw=document.createElement("canvas"),met=document.createElement("div");
   fx.id="fx";cv.id="cosmos";st.id="stars";gw.id="bwgl";met.className="metal";host.appendChild(gw);host.appendChild(fx);host.insertBefore(st,host.firstChild);host.insertBefore(cv,host.firstChild);host.insertBefore(met,host.firstChild);
@@ -4073,7 +4084,9 @@ function initFx(){
   if(fx.transferControlToOffscreen&&window.Worker&&typeof OffscreenCanvas!=="undefined"){
     try{var url=URL.createObjectURL(new Blob(["("+fxCore.toString()+")(self,false)"],{type:"text/javascript"})),w=new Worker(url);
       var o={fx:fx.transferControlToOffscreen(),cosmos:cv.transferControlToOffscreen(),stars:st.transferControlToOffscreen(),gl:gw.transferControlToOffscreen()};
-      w.onerror=function(){};send=function(m,tr){w.postMessage(m,tr||[])};send({t:"init",fx:o.fx,cosmos:o.cosmos,stars:o.stars,gl:o.gl,k:cfg()},[o.fx,o.cosmos,o.stars,o.gl]);FX.worker=true}catch(_){send=null}}
+      w.onerror=function(){};send=function(m,tr){w.postMessage(m,tr||[])};FX.w=w;FX.beat=Date.now();FX.bad=0;
+      w.onmessage=function(e){var d=e.data||{};if(!d.beat)return;FX.beat=Date.now();var R=document.documentElement,shown=!document.hidden&&!R.classList.contains("away")&&FXNAT.indexOf(S.view)<0;
+        if(shown&&(d.lost||(d.moving&&d.frames===0)))FX.bad++;else FX.bad=0;if(FX.bad>=3)fxRebuild("worker reported "+(d.lost?"a lost surface":"no frames"))};send({t:"init",fx:o.fx,cosmos:o.cosmos,stars:o.stars,gl:o.gl,k:cfg()},[o.fx,o.cosmos,o.stars,o.gl]);FX.worker=true}catch(_){send=null}}
   if(!send){var h=fxCore(window,true);send=function(m){h(m)};send({t:"init",fx:fx,cosmos:cv,stars:st,gl:gw,k:cfg()})}
   function col(){var c=getComputedStyle(document.documentElement).getPropertyValue("--accent").trim(),m;
     if(m=c.match(/^#([0-9a-f]{6})$/i))return[parseInt(m[1].slice(0,2),16),parseInt(m[1].slice(2,4),16),parseInt(m[1].slice(4,6),16)];
@@ -7778,7 +7791,7 @@ function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
   var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;
   var b=$("#shell-bar"),m=$("#shell-msg");if(!b||!m)return;m.textContent="Your Regis desktop app"+(sh?" ("+sh+")":"")+" is older than this page. Google sign-in, Spotify audio and autofill need the new app installed once.";b.hidden=false}).catch(function(){})}
-function shellHelp(){openModal("Update the Regis desktop app",'<ol class="steps"><li>Quit Regis: right-click its icon by the clock, then <b>Quit Regis</b>.</li><li>Unzip the new <code>Regis-app.zip</code> and copy everything into your Regis folder, replacing the old files. Your data and settings are kept.</li><li>Double-click <b>Setup Regis</b>. It keeps the Spotify audio engine if you have it.</li><li>For Spotify playback inside Regis, double-click <b>Enable Spotify audio</b> and follow its window (a free castlabs account the first time).</li><li>Open Regis again.</li></ol>');try{bwSync()}catch(_){}}
+function shellHelp(){openModal("Update the Regis desktop app",'<ol class="steps"><li>Unzip the new <code>Regis-app.zip</code> into your Regis folder (usually <b>Downloads › Regis-app</b>), replacing the old files. Your data and settings are kept.</li><li>Double-click <b>Install Regis</b> in that folder.</li><li>If it says Regis is still open, type <b>Y</b> and press Enter: it closes Regis for you.</li><li>When it says it is done, open Regis from its Desktop icon.</li></ol>');try{bwSync()}catch(_){}}
 setTimeout(shellCheck,2500);
 
 /* ---------- 1.9.1 Guild: AI workspaces on the Workspace page ----------

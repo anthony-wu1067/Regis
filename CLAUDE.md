@@ -43,6 +43,10 @@ egis`; localStorage for file:// is shared across folders, so settings carry over
 2. Phone layout was rebuilt in 1.7.6 (bottom tab bar). Only checked in simulated iPhone screenshots, not on a device.
 3. Google sign-in in the built-in browser (since 1.7.9): plain Chrome UA everywhere plus a `window.chrome` surface (app, runtime, csi, loadTimes; functions report `[native code]`) injected by `lib/bw-preload.js` in the main world, only on accounts.google.com / accounts.youtube.com since 1.9.1. Never call `wc.setUserAgent` during a navigation: it crashed Electron on the docs.google.com to accounts.google.com redirect (1.7.7/1.7.8). Not yet tested with a real account.
 
+## Notes from 1.9.3
+- Installer: `build-app.js --install` only counts Regis.exe processes whose ExecutablePath is inside the install folder (a pathless leftover Regis process blocked every install, so the owner stayed on the 1.8.9 shell for days and APP.guild was missing). If one is running it asks Y/n and taskkills that tree.
+- Background heartbeat: the worker posts `{beat,frames,moving,lost}` every 4 s (`lostNow` checks isContextLost on GL and the 2D contexts, and tries `healed()` once). Page `fxRebuild(why)` terminates the worker, removes #fx/#cosmos/#stars/#bwgl/.metal and calls `initFx()` again, after 3 bad beats on a visible background page or 20 s of silence; at most once per 30 s; reasons in localStorage `regis-fxlog`. `chrome://gpucrash` in a hidden window is how to crash the GPU in a test (the 1.9.2 page already survived it).
+
 ## Notes from 1.9.2
 - Blackwall dials: localStorage `regis-bwfx` `{f,s,r}` (how often 15-200 %, default 60; sharpness 0-100, default 50; size 30-250 %), page `BWFX`/`bwFxSet`, sent in `cfg()` as `bwf`/`bws`/`bwr`. Worker: waits and glitch gaps divide by `bwf`, max live pushes scale with it; `bwr` scales amplitude and (sqrt) width; shader uniform `uSh` mixes the falloff exponent 1.0-3.4, the spike strength and an 8-lobe term. The controls sit in `#lk-bw` *inside* the section, because `lookGroups` unwraps `.lk-s` sections (an id on the section is lost).
 

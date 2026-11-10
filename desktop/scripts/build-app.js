@@ -58,9 +58,26 @@ if (rcedit) {
 /* 5. install: replace the old copy, keep nothing else of it */
 let target = OUT;
 if (INSTALL) {
-  const running = spawnSync('tasklist', ['/FI', 'IMAGENAME eq Regis.exe', '/FO', 'CSV', '/NH'], { encoding: 'utf8' });
-  if (/Regis\.exe/i.test(running.stdout || '')) fail('Regis is open. Quit it (right-click its icon by the clock, Quit Regis), then run this again.');
-  fs.rmSync(DEST, { recursive: true, force: true });
+  /* 1.9.3: only a Regis running from the installed folder blocks the install (an empty leftover Regis process used to block it
+     forever, even after Quit). If it is open, offer to close it here instead of giving up. */
+  const live = () => { const r = spawnSync('powershell', ['-NoProfile', '-Command', "Get-CimInstance Win32_Process -Filter \"Name='Regis.exe'\" | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.StartsWith('" + DEST.replace(/'/g, "''") + "', [StringComparison]::OrdinalIgnoreCase) } | ForEach-Object { $_.ProcessId }"], { encoding: 'utf8' });
+    return String(r.stdout || '').split(/\s+/).filter((x) => /^\d+$/.test(x)); };
+  let pids = live();
+  if (pids.length) {
+    process.stdout.write('\nRegis is still open (maybe only as the icon by the clock).\nClose it now and continue? Type Y and press Enter: ');
+    let ans = ''; try { const b = Buffer.alloc(64); const n = fs.readSync(0, b, 0, 64, null); ans = b.toString('utf8', 0, n).trim(); } catch (_) {}
+    if (!/^y/i.test(ans)) fail('Regis is open. Quit it (right-click its icon by the clock, Quit Regis), then run this again.');
+    spawnSync('taskkill', ['/T', '/F'].concat(...pids.map((p) => ['/PID', p])), { encoding: 'utf8' });
+    for (let i = 0; i < 20 && live().length; i++) spawnSync('powershell', ['-NoProfile', '-Command', 'Start-Sleep -Milliseconds 500']);
+    if (live().length) fail('Regis would not close. Restart the computer, then run this again.');
+    say('closed Regis');
+  }
+  /* a file Windows won't let go of (a stuck process can hold the old Regis.exe until a restart) is renamed aside instead of
+     stopping the install; the leftovers are cleaned up by the next install */
+  const clear = (dir) => { if (!fs.existsSync(dir)) return; for (const e of fs.readdirSync(dir, { withFileTypes: true })) { const p = path.join(dir, e.name);
+    if (e.isDirectory()) { clear(p); try { fs.rmdirSync(p); } catch (_) {} continue; }
+    try { fs.rmSync(p, { force: true }); } catch (_) { if (!/\.stuck-\d+$/.test(p)) { try { fs.renameSync(p, p + '.stuck-' + Date.now()); } catch (_) {} } } } };
+  try { fs.rmSync(DEST, { recursive: true, force: true }); } catch (_) { clear(DEST); say('some old files were in use; they were set aside'); }
   fs.mkdirSync(path.dirname(DEST), { recursive: true });
   fs.cpSync(OUT, DEST, { recursive: true });
   target = DEST;

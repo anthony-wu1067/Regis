@@ -84,6 +84,12 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.3 Installer that works, backgrounds that rebuild themselves
+
+- **Install Regis works again.** It was blocked by an empty leftover Regis process and kept saying Regis was open, so the desktop app stayed on 1.8.9 (which also hid the AI agents). It now ignores leftovers and, if Regis really is open, offers to close it: type Y and press Enter.
+- **Backgrounds rebuild themselves.** The background checks in every few seconds; if it stops drawing or loses its drawing surface (after a graphics reset), Regis throws it away and builds a new one. This works even with an older desktop app.
+- The "update the desktop app" steps in Regis are up to date.
+
 ## 1.9.2 Blackwall dials
 
 - **Blackwall dials** (Appearance > Background, shown with the Firewall or Calm wall background):
