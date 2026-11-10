@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('regisBridge', {
   saveUpdateUrl: (u) => call('app:saveUpdateUrl', u), updateCheck: () => call('app:updateCheck'), updateApply: () => call('app:updateApply'),
   onUpdate: (cb) => { ipcRenderer.on('update:ready', (_e, v) => { try { cb(String(v)); } catch (_) {} }); },
   /* 1.9.1 Guild: AI workspaces (each agent has its own persona and its own history) */
+  /* 1.9.4 local AI (Ollama) */
+  localAI: { status: () => call('ai:localStatus'), set: (p) => call('ai:localSet', p), pull: (name) => call('ai:localPull', name), test: () => call('ai:localTry'), onPull: (cb) => { ipcRenderer.on('ai:pull', (_e, p) => { try { cb(p); } catch (_) {} }); } },
   guild: { agents: () => call('guild:agents'), history: (id) => call('guild:history', id), send: (id, text, extra) => call('guild:send', id, text, extra || {}), clear: (id) => call('guild:clear', id) },
   /* 1.9.1 the Regis overlay (global shortcut) and alerts that float above web pages */
   onOverlay: (cb) => { ipcRenderer.on('app:overlay', () => { try { cb(); } catch (_) {} }); },

@@ -84,6 +84,16 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.4 Local AI (Ollama)
+
+- **Local AI:** Regis can use AI models that run on your own computer through Ollama (a free app from ollama.com). Nothing leaves the computer and there is no per-use cost.
+  - Setup > Local AI shows whether Ollama is running, downloads a model for you (with progress), and has a Test button.
+  - Tick who uses it: Regis's own commands, Exusiai, Midas, Luna, Obsidian. Each agent's chat also has a Claude / Local switch.
+  - If the local AI fails, Claude answers instead (you can turn that off). Each reply says which one answered.
+  - Regis only talks to Ollama on this computer, never another address.
+  - On an ordinary laptop small models answer at a few words a second; Claude stays better for long code.
+- Desktop app only (not the web or iPhone version). Updating: run *Install Regis* once.
+
 ## 1.9.3 Installer that works, backgrounds that rebuild themselves
 
 - **Install Regis works again.** It was blocked by an empty leftover Regis process and kept saying Regis was open, so the desktop app stayed on 1.8.9 (which also hid the AI agents). It now ignores leftovers and, if Regis really is open, offers to close it: type Y and press Enter.

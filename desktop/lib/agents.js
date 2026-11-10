@@ -77,11 +77,13 @@ function systemFor(agentId, extra) {
    Reads always filter by scope, so a conversation can never leak into another agent's request. */
 const MAX_ROWS = 400, SEND_ROWS = 24, SEND_CHARS = 150000;
 class Guild {
-  constructor({ anthropic, table, now = Date.now }) { this.ai = anthropic; this.table = table; this.now = now; this.busy = {}; }
+  constructor({ anthropic, table, now = Date.now, local = null, prefs = () => ({}) }) { this.ai = anthropic; this.table = table; this.now = now; this.busy = {}; this.local = local; this.prefs = prefs; }
+  /* 1.9.4: which brain answers: 'local' (Ollama on this computer) or 'claude'; local can fall back to Claude if it fails */
+  engine(agentId) { const p = this.prefs() || {}; return this.local && p.model && p.use && p.use[agentId] === 'local' ? 'local' : 'claude'; }
   _rows() { const r = this.table.load(); return Array.isArray(r) ? r : []; }
   history(agentId) {
     if (!AGENTS[agentId]) throw Object.assign(new Error('Unknown agent'), { code: 'bad_agent' });
-    return this._rows().filter((r) => r && r.context_scope === agentId).map((r) => ({ id: r.id, role: r.role, text: r.text, at: r.at, file: r.file || '' }));
+    return this._rows().filter((r) => r && r.context_scope === agentId).map((r) => ({ id: r.id, role: r.role, text: r.text, at: r.at, file: r.file || '', via: r.via || '' }));
   }
   clear(agentId) {
     if (!AGENTS[agentId]) throw Object.assign(new Error('Unknown agent'), { code: 'bad_agent' });
@@ -109,10 +111,15 @@ class Guild {
       while (sendRows.length && sendRows[0].role !== 'user') sendRows.shift();
       const messages = [];
       sendRows.forEach((r) => { const c = r.content || r.text || ''; const last = messages[messages.length - 1]; if (last && last.role === r.role) last.content += '\n\n' + c; else messages.push({ role: r.role, content: c }); });
-      const res = await this.ai.sample(messages, { agentId, system: systemFor(agentId, extra), modelTier: a.tier, maxTokens: a.maxTokens });
-      const bot = { id: id(), context_scope: agentId, role: 'assistant', text: res.text, content: res.text, at: this.now() };
+      const sys = systemFor(agentId, extra), eng = this.engine(agentId), p = this.prefs() || {};
+      let res, via = eng === 'local' ? 'local:' + p.model : 'claude';
+      if (eng === 'local') {
+        try { res = await this.local.sample(messages, { system: sys, maxTokens: Math.min(a.maxTokens, 6000), model: p.model }); }
+        catch (e) { if (p.fallback === false) throw e; res = await this.ai.sample(messages, { agentId, system: sys, modelTier: a.tier, maxTokens: a.maxTokens }); via = 'claude (local AI failed: ' + String(e.message || e).slice(0, 120) + ')'; }
+      } else res = await this.ai.sample(messages, { agentId, system: sys, modelTier: a.tier, maxTokens: a.maxTokens });
+      const bot = { id: id(), context_scope: agentId, role: 'assistant', text: res.text, content: res.text, at: this.now(), via };
       const fresh = this._rows(); this._add(fresh, user); this._add(fresh, bot); this.table.save(fresh);
-      return { user: { id: user.id, role: 'user', text: user.text, file: user.file, at: user.at }, reply: { id: bot.id, role: 'assistant', text: bot.text, at: bot.at }, truncated: !!res.truncated };
+      return { user: { id: user.id, role: 'user', text: user.text, file: user.file, at: user.at }, reply: { id: bot.id, role: 'assistant', text: bot.text, at: bot.at, via }, truncated: !!res.truncated };
     } finally { this.busy[agentId] = false; }
   }
 }

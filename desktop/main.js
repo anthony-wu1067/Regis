@@ -7,6 +7,7 @@ const { Google, signIn } = require('./lib/google');
 const { Anthropic } = require('./lib/anthropic');
 const { Guild, agentList } = require('./lib/agents');
 const { AlertFloat } = require('./lib/alert-float');
+const { Ollama, localBase } = require('./lib/ollama');
 let alertFloat = null;
 const { Canvas, normHost } = require('./lib/canvas');
 const { Mini } = require('./lib/mini');
@@ -165,13 +166,29 @@ app.whenReady().then(async () => {
   ipcMain.handle('db:load', wrap(() => store.getDb()));
   ipcMain.handle('db:save', wrap((db) => { store.setDb(db); return true; }));
   ipcMain.handle('mcp:call', wrap((server, tool, input) => server === 'Canvas' ? canvas.callTool(tool, input || {}) : google.callTool(server, tool, input)));
+  /* 1.9.4 Local AI (Ollama on this computer). Settings in store meta 'aiLocal': { model, use: {regis|agentId: 'local'|'claude'}, fallback, base } */
+  const AGENT_IDS = ['regis'].concat(agentList().map((a) => a.id));
+  const aiPrefs = () => { const p = store.getMeta('aiLocal', {}) || {}; return { model: String(p.model || ''), use: p.use && typeof p.use === 'object' ? p.use : {}, fallback: p.fallback !== false, base: localBase(p.base) }; };
+  const ollama = new Ollama({ getBase: () => aiPrefs().base });
+  ipcMain.handle('ai:localStatus', wrap(async () => Object.assign(await ollama.status(), { prefs: aiPrefs() })));
+  ipcMain.handle('ai:localSet', wrap((p) => { p = p && typeof p === 'object' ? p : {}; const cur = aiPrefs(), use = {};
+    AGENT_IDS.forEach((id) => { const v = p.use && p.use[id] !== undefined ? p.use[id] : cur.use[id]; if (v === 'local' || v === 'claude') use[id] = v; });
+    const next = { model: p.model !== undefined ? String(p.model).slice(0, 120) : cur.model, use, fallback: p.fallback !== undefined ? !!p.fallback : cur.fallback, base: localBase(p.base !== undefined ? p.base : cur.base) };
+    store.setMeta('aiLocal', next); return next; }));
+  ipcMain.handle('ai:localTry', wrap(async () => { const p = aiPrefs(); const t0 = Date.now(); const r = await ollama.sample('Reply with exactly this sentence: Local AI is working.', { model: p.model, maxTokens: 40 }); return { text: r.text.slice(0, 200), ms: Date.now() - t0 }; }));
+  ipcMain.handle('ai:localPull', wrap(async (name) => { await ollama.pull(name, (pr) => send('ai:pull', pr)); send('ai:pull', { name: String(name), status: 'success', pct: 100, done: true }); return true; }));
   ipcMain.handle('claude:sample', wrap(async (input, opts = {}) => {
+    const p = aiPrefs();
+    if (p.model && p.use.regis === 'local') {
+      try { const r = await ollama.sample(input, { model: p.model, maxTokens: opts.maxTokens || 2048, json: !!opts.json }); return opts.json ? { value: Anthropic.parseJson(r.text) } : r; }
+      catch (e) { if (!p.fallback) throw e; }
+    }
     if (opts.json) return { value: await claude.json(input, opts) };
     return claude.sample(input, opts);
   }));
   /* 1.9.1 Guild: AI workspaces. One table of chat rows (context_scope = agent id) in Regis's data file; each request only ever
      reads its own scope, and the agent's persona goes in as the system prompt (lib/agents.js) */
-  const guild = new Guild({ anthropic: claude, table: { load: () => store.getMeta('guild', []), save: (rows) => store.setMeta('guild', rows) } });
+  const guild = new Guild({ anthropic: claude, local: ollama, prefs: aiPrefs, table: { load: () => store.getMeta('guild', []), save: (rows) => store.setMeta('guild', rows) } });
   ipcMain.handle('guild:agents', wrap(() => agentList()));
   ipcMain.handle('guild:history', wrap((id) => guild.history(String(id || ''))));
   ipcMain.handle('guild:send', wrap((id, text, extra) => guild.send(String(id || ''), text, extra && typeof extra === 'object' ? { tasks: extra.tasks, file: extra.file } : {})));

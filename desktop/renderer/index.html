@@ -2945,6 +2945,14 @@ html.mob .rov{padding-top:calc(10vh + env(safe-area-inset-top,0px))}
 #sched-list .win .note{display:block;padding:8px 12px;border-radius:var(--r2);background:var(--inset);color:var(--fg2)}
 #sched-list .ev+.sec,#sched-list .win+.sec,#sched-list .empty+.sec{margin-top:22px}
 #sched-list .empty{margin-bottom:6px}
+
+/* 1.9.4 local AI */
+.lai-use{display:flex;flex-direction:column;gap:6px;margin:4px 0 8px}
+.lai-dl{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.lai-s{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--inset)}
+.lai-s span{flex:1;min-width:0;display:flex;flex-direction:column}.lai-s small{color:var(--fg3);font-size:12px}.lai-s em{font-style:normal;color:var(--good);font-size:12.5px}
+.gd-eng.on{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.gd-via{margin-top:6px;font-size:11.5px;color:var(--fg3)}
 </style>
 
 <div class="scan" aria-hidden="true"></div><div class="xgrid" aria-hidden="true"></div>
@@ -3360,6 +3368,10 @@ html.mob .rov{padding-top:calc(10vh + env(safe-area-inset-top,0px))}
             <p class="note" id="k-status"></p>
             <div class="fbar"><input id="k-key" type="password" autocomplete="off" placeholder="Anthropic API key (sk-ant-…)" style="flex:1 1 260px"><button class="btn pri" data-act="app-key">Save key</button></div>
             <p class="note" id="usage-line"></p>
+          </div>
+          <div class="appbox" id="lai-box"><div class="sec">Local AI (runs on this computer: free and private)</div>
+            <p class="note" id="lai-status">Checking…</p>
+            <div id="lai-body"></div>
           </div>
           <div class="appbox"><div class="sec">Canvas (school assignments)</div>
             <p class="note" id="cv-status"></p>
@@ -6201,7 +6213,7 @@ async function applyDump(){var d=S.dump;if(!d)return;var calOk=S.conn.cal.st==="
   S.dump=null;$("#dump-out").innerHTML="";$("#dump-text").value="";dumpStatus("")}
 
 /* ---------- desktop app: setup, keys, usage ---------- */
-async function appRefresh(){if(!APP)return;
+async function appRefresh(){if(!APP)return;try{laiRefresh()}catch(_){}
   var st;try{st=await APP.getStatus()}catch(_){return}S.appStatus=st;
   $("#app-setup").hidden=false;
   $("#g-status").textContent=st.googleConnected?"Connected"+(st.googleEmail?" as "+st.googleEmail:"")+".":st.googleConfigured?"Client saved. Press Save & connect to sign in with Google.":"Not set up yet. The README explains the one-time Google setup (about 10 minutes).";
@@ -6370,6 +6382,7 @@ document.addEventListener("click",async function(ev){
     case "ofd-app":case "ofd-filter":case "ofd-doc":case "ofd-keys":case "ofd-new":case "ofd-start":case "ofd-pick":case "ofd-open":case "ofd-close":case "ofd-adopt":case "ofd-pop":await ofdAct(act,b);break;
     case "bw-mute":if(bwNative()&&APP.browser.mute)APP.browser.mute(+b.dataset.id);break;
     case "bw-reset":bwFxSet({f:60,s:50,r:100},true);break;
+case "lai-check":case "lai-pull":case "lai-test":case "lai-get":case "gd-eng":await laiAct(act,b);break;
 case "gd-pick":case "gd-new":case "gd-clear":case "gd-copy":case "gd-save":case "gd-tasks":case "gd-att":case "gd-fileclr":case "ov-to":case "ov-close":await gdAct(act,b);break;
 case "bwg-new":case "bwg-ren":case "bwg-col":case "bwg-ungrp":case "bwg-close":case "bwg-tog":await bwGrpAct(act,b);break;
 case "bp-yes":case "bp-no":case "bw-perms":case "bp-forget":await bpAct(act,b);break;
@@ -7786,7 +7799,7 @@ setTimeout(function(){if(APP&&APP.linkMode)APP.linkMode(linkHere()).catch(functi
 /* 1.8.3 full screen: the button and F11 both use the desktop window's true full screen (no Windows title bar); the page follows its state */
 if(APP&&APP.onFullscreen)APP.onFullscreen(function(v){setFs(!!v)});
 if(APP&&APP.fsState)APP.fsState().then(function(v){setFs(!!v)}).catch(function(){});
-var SHELL_NEED="1.9.1";
+var SHELL_NEED="1.9.4";
 function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
   var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;
@@ -7817,11 +7830,12 @@ function gdPick(id,quiet){if(id==="regis"||!gdAgent(id))id=null;var was=GD.cur;G
   if(GD.h[id])gdDraw();else{if(log)log.innerHTML='<div class="gd-load note">Loading…</div>';APP.guild.history(id).then(function(h){h=Array.isArray(h)?h:[];if(GD.h[id]){var have={};h.forEach(function(x){have[x.id]=1});GD.h[id]=h.concat(GD.h[id].filter(function(x){return !have[x.id]}))}else GD.h[id]=h;if(GD.cur===id)gdDraw()}).catch(function(e){if(GD.cur===id&&log)log.innerHTML='<div class="gd-err">'+esc((e&&e.message)||"Couldn’t load this chat.")+'</div>'})}
   if(!quiet&&S.view==="work"&&c)setTimeout(function(){try{c.focus({preventScroll:true})}catch(_){}},30)}
 function gdHead(){var a=gdAgent(GD.cur),h=$("#gd-head"),ch=$("#gd-chat");if(!a||!h)return;if(ch)ch.style.setProperty("--gc",gdCol(a));
-  h.innerHTML='<i class="gd-hav" aria-hidden="true">'+esc(String(a.glyph||a.name).slice(0,1))+'</i><div class="grow"><b>'+esc(a.name)+'</b><small>'+esc(a.role)+'</small></div><button class="btn sm ghost" type="button" data-act="gd-new">New chat</button>'}
+  var loc=laiUses(GD.cur);h.innerHTML='<i class="gd-hav" aria-hidden="true">'+esc(String(a.glyph||a.name).slice(0,1))+'</i><div class="grow"><b>'+esc(a.name)+'</b><small>'+esc(a.role)+'</small></div>'+
+    (LAI.ok&&LAI.prefs&&LAI.prefs.model?'<button class="btn sm ghost gd-eng'+(loc?" on":"")+'" type="button" data-act="gd-eng" title="Switch between Claude (online) and the local AI on this computer">'+(loc?"Local · "+esc(short(LAI.prefs.model,22)):"Claude")+'</button>':'')+'<button class="btn sm ghost" type="button" data-act="gd-new">New chat</button>'}
 function gdDraw(){var id=GD.cur,a=gdAgent(id),log=$("#gd-log");if(!a||!log)return;GD.codes=[];GD.tasks=[];var g=esc(String(a.glyph||a.name).slice(0,1)),h=GD.h[id]||[];
   var out='<div class="gd-m ai"><i class="gd-mav" aria-hidden="true">'+g+'</i><div class="gd-b gd-hello">'+esc(a.hello||("Hi, I’m "+a.name+"."))+'</div></div>';
   h.forEach(function(m){if(m.role==="user")out+='<div class="gd-m me"><div class="gd-b">'+(m.file?'<span class="gd-fat">📄 '+esc(m.file)+'</span>':'')+esc(m.text||"")+'</div></div>';
-    else out+='<div class="gd-m ai"><i class="gd-mav" aria-hidden="true">'+g+'</i><div class="gd-b md">'+gdMd(m.text)+'</div></div>'});
+    else out+='<div class="gd-m ai"><i class="gd-mav" aria-hidden="true">'+g+'</i><div class="gd-b md">'+gdMd(m.text)+(m.via&&m.via!=="claude"?'<div class="gd-via">'+esc(/^local:/.test(m.via)?"Answered by the local AI ("+m.via.slice(6)+")":m.via.replace(/^claude/,"Answered by Claude"))+'</div>':'')+'</div></div>'});
   if(GD.busy[id])out+='<div class="gd-m ai"><i class="gd-mav" aria-hidden="true">'+g+'</i><div class="gd-b gd-typing" aria-label="'+esc(a.name)+' is writing"><i></i><i></i><i></i></div></div>';
   if(GD.err&&GD.err.id===id)out+='<div class="gd-err" role="alert">'+esc(GD.err.msg)+' Your message is back in the box below, so you can send it again.</div>';
   log.innerHTML=out;if(S.view==="work")requestAnimationFrame(function(){var f=$("#cmd-form");if(f&&f.scrollIntoView)try{f.scrollIntoView({block:"end"})}catch(_){}})}
@@ -7958,6 +7972,41 @@ document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.dataset|
   document.addEventListener("focusin",function(e){var t=e.target;if(t&&(t.id==="bw-addr"||t.id==="bw-sq")&&!pend)try{t.select()}catch(_){}})})();
 function greetShim(){var g=$("#greet"),R=document.documentElement;if(!g||!R.classList.contains("bal")||R.classList.contains("x-shimmer")||R.classList.contains("away")||(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches))return;
   if(g.classList.contains("shim1"))return;g.classList.add("shim1");clearTimeout(greetShim.t);greetShim.t=setTimeout(function(){g.classList.remove("shim1")},4600)}
+
+/* ---------- 1.9.4 Local AI (Ollama): Setup card, per-agent switch ---------- */
+var LAI={ok:false,running:false,models:[],suggest:[],prefs:null,pull:null};
+var LAI_WHO=[["regis","Regis’s own commands (tell Regis, Plan my day, mail rules)"],["exusiai","Exusiai"],["midas","Midas"],["luna","Luna"],["obsidian","Obsidian"]];
+function laiUses(id){var p=LAI.prefs;return !!(p&&p.model&&p.use&&p.use[id]==="local")}
+function laiMB(n){return n?(n/1073741824).toFixed(1)+" GB":""}
+async function laiRefresh(){var st=$("#lai-status"),bd=$("#lai-body");if(!APP||!APP.localAI){if(st)st.textContent="Local AI works in the Regis desktop app (not in the web version).";if(bd)bd.innerHTML="";return}
+  try{var r=await APP.localAI.status();LAI.ok=true;LAI.running=!!r.running;LAI.models=r.models||[];LAI.suggest=r.suggest||[];LAI.prefs=r.prefs||{use:{}}}catch(_){LAI.ok=false}
+  laiRender();try{if(GD.cur)gdHead()}catch(_){}}
+function laiRender(){var st=$("#lai-status"),bd=$("#lai-body");if(!st||!bd)return;var P=LAI.prefs||{use:{}};
+  if(!LAI.running){st.textContent="Not found. Regis uses Ollama, a free app that runs AI models on this computer.";
+    bd.innerHTML='<ol class="steps"><li>Download Ollama for Windows and install it.</li><li>Open it once (it then runs quietly by the clock).</li><li>Press <b>Check again</b>, then download a model here.</li></ol><div class="fbar"><button class="btn pri" type="button" data-act="lai-get">Get Ollama</button><button class="btn" type="button" data-act="lai-check">Check again</button></div>'+
+      '<p class="note">On a laptop like this one, small models answer at a few words a second. Claude stays better for Luna’s pages and big scripts.</p>';return}
+  st.textContent="Ollama is running"+(LAI.models.length?" with "+LAI.models.length+" model"+(LAI.models.length>1?"s":"")+".":", but no model is downloaded yet.");
+  var have={};LAI.models.forEach(function(m){have[m.name]=1});
+  var sel=LAI.models.length?'<label class="f">Model<select id="lai-model">'+LAI.models.map(function(m){return '<option value="'+esc(m.name)+'"'+(P.model===m.name?" selected":"")+'>'+esc(m.name)+(m.size?" · "+laiMB(m.size):"")+'</option>'}).join("")+'</select></label>':"";
+  var dl='<div class="lai-dl"><div class="sec">Download a model</div>'+LAI.suggest.map(function(x){var got=have[x.name]||have[x.name.replace(/:latest$/,"")];return '<div class="lai-s"><span><b>'+esc(x.name)+'</b><small>'+esc(x.note)+'</small></span>'+(got?'<em>Downloaded</em>':'<button class="btn sm" type="button" data-act="lai-pull" data-n="'+esc(x.name)+'"'+(LAI.pull?" disabled":"")+'>Download</button>')+'</div>'}).join("")+
+    '<div class="fbar"><input id="lai-name" placeholder="Other model, e.g. phi4-mini" autocomplete="off" spellcheck="false" style="flex:1 1 200px"><button class="btn sm" type="button" data-act="lai-pull"'+(LAI.pull?" disabled":"")+'>Download</button></div><p class="note" id="lai-prog" aria-live="polite">'+(LAI.pull?esc(LAI.pull):"")+'</p></div>';
+  var use=LAI.models.length?'<div class="sec">Use the local AI for</div><div class="lai-use">'+LAI_WHO.map(function(w){return '<label class="sp-chk"><input type="checkbox" data-lai-use="'+w[0]+'"'+(P.use&&P.use[w[0]]==="local"?" checked":"")+'> '+esc(w[1])+'</label>'}).join("")+'</div>'+
+    '<label class="sp-chk"><input type="checkbox" id="lai-fb"'+(P.fallback!==false?" checked":"")+'> If the local AI fails, use Claude instead</label>'+
+    '<div class="fbar"><button class="btn" type="button" data-act="lai-test">Test the local AI</button><button class="btn ghost" type="button" data-act="lai-check">Refresh</button></div><p class="note" id="lai-test-out"></p>':"";
+  bd.innerHTML=sel+use+dl}
+async function laiSave(){if(!APP||!APP.localAI)return;var use={};LAI_WHO.forEach(function(w){var c=document.querySelector('[data-lai-use="'+w[0]+'"]');if(c)use[w[0]]=c.checked?"local":"claude"});var m=$("#lai-model"),fb=$("#lai-fb");
+  try{LAI.prefs=await APP.localAI.set({model:m?m.value:undefined,use:use,fallback:fb?fb.checked:undefined});toast("Local AI settings saved.","good");try{if(GD.cur)gdHead()}catch(_){}}catch(e){toast((e&&e.message)||"Couldn’t save.","bad")}}
+document.addEventListener("change",function(e){var t=e.target;if(!t)return;if(t.id==="lai-model"||t.id==="lai-fb"||(t.dataset&&t.dataset.laiUse))laiSave()});
+if(APP&&APP.localAI&&APP.localAI.onPull)APP.localAI.onPull(function(p){if(!p)return;LAI.pull=p.done?null:(p.name+": "+(p.status||"")+(p.pct!=null?" "+p.pct+"%":""));var o=$("#lai-prog");if(o)o.textContent=LAI.pull||"";if(p.done)laiRefresh()});
+async function laiAct(act,b){var A=APP&&APP.localAI;
+  if(act==="lai-get"){try{window.open("https://ollama.com/download/windows","_blank","noopener")}catch(_){}return}
+  if(!A)return;
+  if(act==="lai-check"){await laiRefresh();return}
+  if(act==="lai-pull"){var n=b.dataset.n||(($("#lai-name")||{}).value||"").trim();if(!n){toast("Type a model name first.","");return}LAI.pull=n+": starting…";laiRender();
+    try{await A.pull(n);LAI.pull=null;toast("Downloaded "+n+".","good");await laiRefresh();if(!LAI.prefs.model){LAI.prefs=await A.set({model:n});laiRender()}}catch(e){LAI.pull=null;laiRender();toast((e&&e.message)||"Couldn’t download it.","bad")}return}
+  if(act==="lai-test"){var o=$("#lai-test-out");if(o)o.textContent="Asking the local AI… (the first answer can take a while while the model loads)";try{var r=await A.test();if(o)o.textContent="It said: “"+r.text.trim()+"” in "+(r.ms/1000).toFixed(1)+" s."}catch(e){if(o)o.textContent=(e&&e.message)||"No answer."}return}
+  if(act==="gd-eng"){var id=GD.cur;if(!id||!LAI.prefs)return;var u={};u[id]=laiUses(id)?"claude":"local";try{LAI.prefs=await A.set({use:u});gdHead();toast(gdAgent(id).name+" now uses "+(laiUses(id)?"the local AI ("+LAI.prefs.model+")":"Claude")+".","good")}catch(e){toast((e&&e.message)||"Couldn’t switch.","bad")}}}
+setTimeout(function(){if(APP&&APP.localAI)laiRefresh().catch(function(){})},1500);
 setTimeout(function(){try{ovInit()}catch(_){}try{gdInit()}catch(_){}},0);
 setTimeout(function(){if(S.view==="work")try{greetShim()}catch(_){}},900);
 
