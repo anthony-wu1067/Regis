@@ -11,10 +11,13 @@ class Anthropic {
     if (!key) throw err('needs_setup', 'Add your Anthropic API key in Setup to use Claude features.');
     const messages = typeof input === 'string' ? [{ role: 'user', content: input }] : input;
     const model = opts.model || MODELS[opts.modelTier || 'default'] || MODELS.default;
+    /* 1.9.1 Guild: an agentId picks that agent's persona as the system prompt (callers may pass a ready-made one) */
+    let sys = opts.system ? String(opts.system) : '';
+    if (!sys && opts.agentId) { try { sys = require('./agents.js').systemFor(String(opts.agentId)); } catch (_) { sys = ''; } if (!sys) throw err('bad_agent', 'Unknown agent.'); }
     const r = await this.f('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: Object.assign({ 'x-api-key': key, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' }, this.browser ? { 'anthropic-dangerous-direct-browser-access': 'true' } : {}),
-      body: JSON.stringify({ model, max_tokens: opts.maxTokens || 4096, messages })
+      body: JSON.stringify(Object.assign({ model, max_tokens: opts.maxTokens || 4096, messages }, sys ? { system: sys } : {}))
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok) {

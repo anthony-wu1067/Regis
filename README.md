@@ -84,6 +84,29 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.1 The Guild: AI workspaces, plus browser, alert and background fixes
+
+- **AI workspaces (the Guild).** The Workspace page has a rail on the left, like Discord: Regis (your normal workspace) and four agents, each with its own personality and its own chat history. Nothing from one agent's chat is ever sent with another's.
+  - **Exusiai** (business operations): plans the week like a Jira board and coaches customer interviews with The Mom Test. She sees your open Regis tasks, and her suggested tasks come back as a card with "Add to my tasks".
+  - **Midas** (e-commerce and finance): knows about the 15,000-unit Matcha and Lychee R&D run in Rancho Cucamonga, shows his maths for margins, and blocks anything over 50 mg of caffeine per serving.
+  - **Luna** (web studio): attach a Markdown file (paper-clip button) and she returns a React + Tailwind landing page, with Copy and Save buttons.
+  - **Obsidian** (game studio): Roblox Luau scripts, UI, and celestial, volcanic and enchanted-forest biomes.
+  - While an agent is open, the "tell Regis" bar is its message box. Agents use your Anthropic API key (Setup), billed per use.
+- **Regis overlay:** press **Alt+Space** anywhere (or **/** on any page except the Workspace) for a "tell Regis" bar over whatever you're doing. Tab picks who you're talking to, or start with "@midas", "@luna" and so on.
+- **Camera and microphone in the Browser:** Teams, Meet and Zoom can now use them. The site asks first in a bar above the page (Allow or Block, remembered per site if you like). Browser menu > Camera and microphone lists your answers.
+- **Google AI Mode in the Browser takes typing again.** Since 1.7.9, Regis changed a built-in browser function on every website so that Google sign-in would accept it. Google's bot check treated that as tampering: Search showed its "unusual traffic" page and the AI box ignored typing. The change now runs only on Google's sign-in pages.
+- **Meeting alerts are no longer hidden behind web pages:** on the Browser, Office and Comm pages they float above the page.
+- **Tab groups:** drag a group's name to move the whole group. Right-click it to rename it, change its colour, collapse it, ungroup it, close it, or open a new tab in it.
+- **Address bar:** the first click selects the whole address, like Chrome.
+- **Downloads:** a cleaner list grouped into In progress, Today and Earlier, with coloured file-type icons. The buttons appear when you hover.
+- **Backgrounds:** they pause while the Browser, Office or Comm covers them, and are redrawn when you come back. Their animation can no longer get stuck after a graphics reset.
+- **Blackwall:** sharper, faster shards with more glitches. New **Blackwall Calm** (preset, colour and "Calm wall" background): blue ripples and a soft hologram haze, no glitches.
+- **Schedule:** more room between Open windows, Tomorrow and the events.
+- **Page change into the Browser** plays the pixel transition again: the blocks reveal the last picture of your tab, then the live page appears.
+- **Greeting shimmer** now plays in Balanced mode too: one sweep when the Workspace opens.
+- **Spotify:** a request budget of about 24 a minute. the timed "what's playing" check is skipped when it runs out, the same request is never sent twice at once, and anything you tap still goes straight away. This keeps Regis under Spotify's limit.
+- Updating: the desktop app changed, so run *Install Regis* once.
+
 ## 1.9.0 Calendar back, iMessage in Comm, backgrounds survive
 
 - **Calendar month view is back.** The Comm page added in 1.8.9 used a style name the calendar's month grid already used, which hid the grid. Comm's styles have their own names now.

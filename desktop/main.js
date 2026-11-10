@@ -5,6 +5,9 @@ const http = require('http');
 const { Store } = require('./lib/store');
 const { Google, signIn } = require('./lib/google');
 const { Anthropic } = require('./lib/anthropic');
+const { Guild, agentList } = require('./lib/agents');
+const { AlertFloat } = require('./lib/alert-float');
+let alertFloat = null;
 const { Canvas, normHost } = require('./lib/canvas');
 const { Mini } = require('./lib/mini');
 const { Updater } = require('./lib/updater');
@@ -21,6 +24,11 @@ const MINI_KEY = 'CommandOrControl+Shift+M';
 function setMini(on) { if (!mini) return false; const r = mini.set(!!on); if (win && !win.isDestroyed()) win.webContents.send('mini:state', r); return r; }
 const pendingCaptures = [];
 const CAPTURE_KEY = 'CommandOrControl+Shift+Space';
+/* 1.9.1 the Regis overlay: a "tell Regis" bar over whatever page is open. Alt+Space (Ctrl+Space would steal Excel's
+   select-column and code editors' autocomplete); Ctrl+Alt+Space if another app already uses Alt+Space. */
+const OVERLAY_KEYS = ['Alt+Space', 'CommandOrControl+Alt+Space'];
+let overlayKey = '';
+function summonOverlay() { if (!win || win.isDestroyed()) createWindow(); const was = win.isVisible() && !win.isMinimized() && win.isFocused(); showWindow(); try { win.webContents.send('app:overlay', was); } catch (_) {} }
 const wrap = (fn) => async (_e, ...a) => { try { return { ok: true, value: await fn(...a) }; } catch (e) { return { ok: false, error: { code: e.code || 'error', message: e.message || String(e) } }; } };
 
 
@@ -80,7 +88,7 @@ function createWindow() {
   const vis = (v) => () => { try { if (win && !win.isDestroyed()) win.webContents.send('win:vis', v); } catch (_) {} };
   win.on('hide', vis(false)); win.on('minimize', vis(false)); win.on('show', vis(true)); win.on('restore', vis(true));
   /* docked Office windows follow the Regis window */
-  ['move', 'resize', 'maximize', 'unmaximize', 'enter-full-screen', 'leave-full-screen', 'hide', 'show', 'minimize', 'restore'].forEach((ev) => win.on(ev, () => { if (officeDock) officeDock.follow(); if (plDock) plDock.follow(); }));
+  ['move', 'resize', 'maximize', 'unmaximize', 'enter-full-screen', 'leave-full-screen', 'hide', 'show', 'minimize', 'restore'].forEach((ev) => win.on(ev, () => { if (officeDock) officeDock.follow(); if (plDock) plDock.follow(); if (alertFloat) alertFloat.follow(); }));
   const staged = updater && updater.current();      // a newer interface downloaded over the air, if any
   runningVersion = staged ? staged.version : app.getVersion();
   win.loadFile(staged ? path.join(staged.dir, 'index.html') : BUNDLED_PAGE);
@@ -161,11 +169,18 @@ app.whenReady().then(async () => {
     if (opts.json) return { value: await claude.json(input, opts) };
     return claude.sample(input, opts);
   }));
+  /* 1.9.1 Guild: AI workspaces. One table of chat rows (context_scope = agent id) in Regis's data file; each request only ever
+     reads its own scope, and the agent's persona goes in as the system prompt (lib/agents.js) */
+  const guild = new Guild({ anthropic: claude, table: { load: () => store.getMeta('guild', []), save: (rows) => store.setMeta('guild', rows) } });
+  ipcMain.handle('guild:agents', wrap(() => agentList()));
+  ipcMain.handle('guild:history', wrap((id) => guild.history(String(id || ''))));
+  ipcMain.handle('guild:send', wrap((id, text, extra) => guild.send(String(id || ''), text, extra && typeof extra === 'object' ? { tasks: extra.tasks, file: extra.file } : {})));
+  ipcMain.handle('guild:clear', wrap((id) => guild.clear(String(id || ''))));
   ipcMain.handle('app:status', wrap(() => ({
     googleConfigured: !!(store.getMeta('gClientId', '') && store.getSecret('gSecret')), googleConnected: !!store.getSecret('gRefresh'),
     googleEmail: store.getMeta('gEmail', ''), anthropicKey: !!store.getSecret('anthropicKey'), usage: store.monthUsage(),
     canvasConnected: !!(store.getMeta('cvHost', '') && store.getSecret('cvToken')), canvasHost: (store.getMeta('cvHost', '') || '').replace(/^https?:\/\//, ''),
-    openAtLogin: app.getLoginItemSettings().openAtLogin, voice: true, version: runningVersion || app.getVersion(), shell: app.getVersion(), drm: DRM, drmSig: drmSig(), updateUrl: updateUrl()
+    openAtLogin: app.getLoginItemSettings().openAtLogin, voice: true, overlayKey, version: runningVersion || app.getVersion(), shell: app.getVersion(), drm: DRM, drmSig: drmSig(), updateUrl: updateUrl()
   })));
   ipcMain.handle('app:saveGoogle', wrap(({ clientId, clientSecret }) => {
     if (clientId) store.setMeta('gClientId', String(clientId).trim()); if (clientSecret) store.setSecret('gSecret', String(clientSecret).trim()); return true; }));
@@ -193,7 +208,7 @@ app.whenReady().then(async () => {
     return HIST.map((x) => [sc(x), x]).filter((p) => p[0] >= 0).sort((a, b) => b[0] - a[0]).slice(0, n).map((p) => p[1]); };
   /* Easy Files: a site asked for a file; Regis's picker answers through these one-time tokens */
   const filePend = new Map();
-  browserHost = new BrowserHost({ getWin: () => win, sleepMin: +store.getMeta('bwSleep', 30), onFind: (r) => send('browser:find', r), onHistory: histAdd, onFilePick: (r) => { filePend.set(r.token, { wc: r.wc, multiple: r.multiple, at: Date.now() }); if (filePend.size > 30) filePend.delete(filePend.keys().next().value); send('browser:filepick', { token: r.token, accept: r.accept, multiple: r.multiple, host: r.host, tab: r.tab }); }, onKey: (k) => { if (win && !win.isDestroyed()) win.webContents.send('browser:key', k); }, onCred: (c) => { if (win && !win.isDestroyed()) win.webContents.send('browser:cred', c); }, shield: store.getMeta('bwShield', '1') !== '0', onPersist: (urls) => store.setMeta('bwTabs', JSON.stringify(urls)) });
+  browserHost = new BrowserHost({ getWin: () => win, sleepMin: +store.getMeta('bwSleep', 30), onFind: (r) => send('browser:find', r), onHistory: histAdd, onPerm: (p) => send('browser:perm', p), permLoad: () => store.getMeta('bwPerms', {}) || {}, permSave: (v) => store.setMeta('bwPerms', v), onFilePick: (r) => { filePend.set(r.token, { wc: r.wc, multiple: r.multiple, at: Date.now() }); if (filePend.size > 30) filePend.delete(filePend.keys().next().value); send('browser:filepick', { token: r.token, accept: r.accept, multiple: r.multiple, host: r.host, tab: r.tab }); }, onKey: (k) => { if (win && !win.isDestroyed()) win.webContents.send('browser:key', k); }, onCred: (c) => { if (win && !win.isDestroyed()) win.webContents.send('browser:cred', c); }, shield: store.getMeta('bwShield', '1') !== '0', onPersist: (urls) => store.setMeta('bwTabs', JSON.stringify(urls)) });
   const dl = new Downloads({ dir: app.getPath('downloads'), load: () => { try { return JSON.parse(store.getMeta('downloads', '[]') || '[]'); } catch (_) { return []; } }, save: (l) => store.setMeta('downloads', JSON.stringify(l)), onChange: (l) => send('browser:downloads', l), onDone: (d) => send('browser:dldone', d) });
   dl.attach(session.fromPartition(PARTITION));
   const bw = browserHost;
@@ -304,6 +319,12 @@ app.whenReady().then(async () => {
   ipcMain.handle('browser:viewKeys', wrap((k) => { keyAction.views = String(k || '').toLowerCase().replace(/[^a-z]/g, '').slice(0, 26); return keyAction.views; }));
   ipcMain.handle('browser:history', wrap((q, n) => histFind(q, n)));
   ipcMain.handle('browser:historyDel', wrap((u) => { HIST = HIST.filter((x) => x.u !== String(u)); histSave(); return true; }));
+  ipcMain.handle('browser:permAnswer', wrap((id, allow, remember) => bw.permAnswer(+id, !!allow, !!remember)));
+  ipcMain.handle('browser:perms', wrap(() => bw.permList()));
+  ipcMain.handle('browser:permForget', wrap((h) => bw.permForget(String(h || ''))));
+  /* 1.9.1 alerts drawn above web pages / docked apps (lib/alert-float.js) */
+  alertFloat = new AlertFloat({ getWin: () => win, onAct: (a) => send('alert:act', a) });
+  ipcMain.handle('alert:float', wrap((list, rect) => { const th = rect && rect.theme; return alertFloat.show(list, rect, th && typeof th === 'object' ? th : {}); }));
   ipcMain.handle('browser:clear', wrap(async (o) => { o = o || {}; if (o.history) { HIST = []; histSave(); } if (o.downloads) dl.clear(); await bw.clearData({ cache: !!o.cache, cookies: !!o.cookies }); return true; }));
   ipcMain.on('bw:filepick', (e, d) => { try { bw.filePick(e.sender, d); } catch (_) {} });
   ipcMain.handle('browser:fileGive', wrap(async (token, c) => {
@@ -389,6 +410,7 @@ app.whenReady().then(async () => {
   } catch (_) { /* tray unsupported: closing the window will still just hide it */ }
   try { globalShortcut.register(MINI_KEY, () => { showWindow(); setMini(!(mini && mini.on)); }); } catch (_) { /* shortcut unsupported */ }
   try { if (!globalShortcut.register(CAPTURE_KEY, openCapture)) console.warn('Quick capture shortcut is taken by another app.'); } catch (_) { /* shortcut unsupported */ }
+  for (const k of OVERLAY_KEYS) { try { if (globalShortcut.register(k, summonOverlay)) { overlayKey = k; break; } } catch (_) { /* shortcut unsupported */ } }
   /* give docked Office windows their frames back before the Regis window goes away */
   app.on('before-quit', (e) => { const docks = [officeDock, plDock].filter((d) => d && d.ps); if (docks.length && !officeBye) { e.preventDefault(); officeBye = true; quitting = true; Promise.all(docks.map((d) => d.releaseAll())).finally(() => app.quit()); return; } });
   app.on('before-quit', () => { quitting = true; try { browserHost && browserHost.destroy(); } catch (_) {} globalShortcut.unregisterAll(); store.flush(); });

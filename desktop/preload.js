@@ -17,6 +17,11 @@ contextBridge.exposeInMainWorld('regisBridge', {
   onVis: (cb) => { ipcRenderer.on('win:vis', (_e, v) => { try { cb(!!v); } catch (_) {} }); },
   saveUpdateUrl: (u) => call('app:saveUpdateUrl', u), updateCheck: () => call('app:updateCheck'), updateApply: () => call('app:updateApply'),
   onUpdate: (cb) => { ipcRenderer.on('update:ready', (_e, v) => { try { cb(String(v)); } catch (_) {} }); },
+  /* 1.9.1 Guild: AI workspaces (each agent has its own persona and its own history) */
+  guild: { agents: () => call('guild:agents'), history: (id) => call('guild:history', id), send: (id, text, extra) => call('guild:send', id, text, extra || {}), clear: (id) => call('guild:clear', id) },
+  /* 1.9.1 the Regis overlay (global shortcut) and alerts that float above web pages */
+  onOverlay: (cb) => { ipcRenderer.on('app:overlay', () => { try { cb(); } catch (_) {} }); },
+  alertFloat: { show: (list, rect) => call('alert:float', list, rect || null), onAct: (cb) => { ipcRenderer.on('alert:act', (_e, a) => { try { cb(a); } catch (_) {} }); } },
   /* 1.8.9 Comm page: chat apps */
   comm: { state: () => call('comm:state'), add: (a) => call('comm:add', a), remove: (id, wipe) => call('comm:remove', id, !!wipe), mute: (id, on) => call('comm:mute', id, !!on), bg: (id, on) => call('comm:bg', id, !!on),
     reload: (id) => call('comm:reload', id), show: (v, id) => call('comm:show', !!v, id || null), bounds: (b) => call('comm:bounds', b), float: (id, min) => call('comm:float', id, min), overlay: (on) => call('comm:overlay', !!on),
@@ -38,7 +43,9 @@ contextBridge.exposeInMainWorld('regisBridge', {
     onFind: (cb) => { ipcRenderer.on('browser:find', (_e, r) => { try { cb(r); } catch (_) {} }); },
     onFilePick: (cb) => { ipcRenderer.on('browser:filepick', (_e, r) => { try { cb(r); } catch (_) {} }); },
     onDownloads: (cb) => { ipcRenderer.on('browser:downloads', (_e, l) => { try { cb(l); } catch (_) {} }); },
-    onDlDone: (cb) => { ipcRenderer.on('browser:dldone', (_e, d) => { try { cb(d); } catch (_) {} }); }
+    onDlDone: (cb) => { ipcRenderer.on('browser:dldone', (_e, d) => { try { cb(d); } catch (_) {} }); },
+    onPerm: (cb) => { ipcRenderer.on('browser:perm', (_e, p) => { try { cb(p); } catch (_) {} }); }, permAnswer: (id, allow, remember) => call('browser:permAnswer', id, !!allow, !!remember),
+    perms: () => call('browser:perms'), permForget: (host) => call('browser:permForget', host)
   },
   office: { recent: () => call('office:recent'), open: (p) => call('office:open', p), show: (p) => call('office:show', p),
     /* 1.8.4: the desktop Word, Excel and PowerPoint docked inside Regis */

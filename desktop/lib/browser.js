@@ -60,8 +60,10 @@ function keyAction(i) {
 
 /* which Alt+letter shortcuts belong to Regis pages (the rest stay with the website), set by the page */
 keyAction.views = 'hwmbo';
+function hostOf(u) { try { const x = new URL(String(u)); return /^https?:$/.test(x.protocol) ? x.hostname.toLowerCase() : ''; } catch (_) { return ''; } }
 class BrowserHost {
-  constructor({ getWin, onPersist, onCred, onKey, onFind, onHistory, onFilePick, shield = true, sleepMin = 30 }) {
+  constructor({ getWin, onPersist, onCred, onKey, onFind, onHistory, onFilePick, onPerm, permLoad, permSave, shield = true, sleepMin = 30 }) {
+    this.onPerm = onPerm || null; this.permLoad = permLoad || (() => ({})); this.permSave = permSave || (() => {}); this.permPend = new Map(); this.permN = 0;
     this.getWin = getWin; this.onKey = onKey || null; this.onPersist = onPersist || (() => {}); this.onCred = onCred || null; this.pT = null; this.lastPersist = '';
     this.onFind = onFind || null; this.onHistory = onHistory || null; this.onFilePick = onFilePick || null; this.closed = []; this.sleepMin = +sleepMin || 0; this.sleepT = null; this.icons = new Map();
     this.tabs = []; this.active = null; this.n = 0; this.visible = false; this.bounds = { x: 0, y: 0, width: 0, height: 0 };
@@ -73,8 +75,20 @@ class BrowserHost {
     const ses = this.ses;
     const ua = (ses.getUserAgent() || '').replace(/\sElectron\/\S+/i, '').replace(/\sregis\/\S+/i, '').replace(/\sRegis\/\S+/i, '');
     ses.setUserAgent(ua); this.ua = ua;
-    ses.setPermissionRequestHandler((_wc, perm, cb) => cb(['clipboard-sanitized-write', 'fullscreen', 'pointerLock'].includes(perm)));
-    ses.setPermissionCheckHandler((_wc, perm) => ['clipboard-sanitized-write', 'fullscreen'].includes(perm));
+    /* 1.9.1 camera and microphone: like Chrome, the site asks and you answer (Allow / Block, remembered per site if you like).
+       Meeting sites (Teams, Meet, Zoom) check the permission before asking, so the check only says no for sites you blocked. */
+    ses.setPermissionRequestHandler((wc, perm, cb, d) => {
+      if (['clipboard-sanitized-write', 'fullscreen', 'pointerLock'].includes(perm)) return cb(true);
+      if (perm !== 'media') return cb(false);
+      this._askMedia(wc, d || {}, cb);
+    });
+    ses.setPermissionCheckHandler((wc, perm, origin, d) => {
+      if (['clipboard-sanitized-write', 'fullscreen'].includes(perm)) return true;
+      if (perm !== 'media') return false;
+      const host = hostOf(origin || (d && d.requestingUrl) || ''), s = host && this.permLoad()[host];
+      if (!host) return false; const k = d && d.mediaType === 'video' ? 'video' : d && d.mediaType === 'audio' ? 'audio' : '';
+      return !(s && (k ? s[k] === 'block' : (s.audio === 'block' && s.video === 'block')));
+    });
     clearInterval(this.sleepT); this.sleepT = setInterval(() => this._sleepIdle(), 60000);
     ses.webRequest.onBeforeRequest((d, cb) => {
       if (this.shield && d.resourceType !== 'mainFrame') { try { if (hostBlocked(new URL(d.url).hostname)) { this.blocked++; this._emitSoon(); return cb({ cancel: true }); } } catch (_) {} }
@@ -82,6 +96,29 @@ class BrowserHost {
     });
   }
   _win() { const w = this.getWin && this.getWin(); return w && !w.isDestroyed() ? w : null; }
+  _askMedia(wc, d, cb) {
+    const host = hostOf(d.requestingUrl || (wc && !wc.isDestroyed() ? wc.getURL() : ''));
+    const types = (Array.isArray(d.mediaTypes) && d.mediaTypes.length ? d.mediaTypes : ['audio', 'video']).filter((x) => x === 'audio' || x === 'video');
+    if (!host || !types.length) return cb(false);
+    const saved = this.permLoad()[host] || {};
+    if (types.every((k) => saved[k] === 'allow')) return cb(true);
+    if (types.some((k) => saved[k] === 'block')) return cb(false);
+    const t = this.tabs.find((x) => x.view && !x.view.webContents.isDestroyed() && wc && x.view.webContents.id === wc.id);
+    if (!this.onPerm) return cb(false);
+    /* one question per site at a time; more requests from it wait for the same answer */
+    for (const p of this.permPend.values()) if (p.host === host && types.every((k) => p.types.includes(k))) { p.cbs.push(cb); return; }
+    const id = ++this.permN, p = { id, host, types, cbs: [cb], tab: t ? t.id : null, timer: setTimeout(() => this.permAnswer(id, false, false), 120000) };
+    this.permPend.set(id, p);
+    try { this.onPerm({ id, host, kind: types.length === 2 ? 'camera and microphone' : types[0] === 'video' ? 'camera' : 'microphone', tab: p.tab }); } catch (_) { this.permAnswer(id, false, false); }
+  }
+  permAnswer(id, allow, remember) {
+    const p = this.permPend.get(+id); if (!p) return false; this.permPend.delete(+id); clearTimeout(p.timer);
+    if (remember) { const all = Object.assign({}, this.permLoad()), s = Object.assign({}, all[p.host] || {}); p.types.forEach((k) => { s[k] = allow ? 'allow' : 'block'; }); all[p.host] = s; this.permSave(all); }
+    p.cbs.forEach((f) => { try { f(!!allow); } catch (_) {} });
+    return true;
+  }
+  permList() { const all = this.permLoad(); return Object.keys(all).sort().map((h) => ({ host: h, audio: all[h].audio || '', video: all[h].video || '' })); }
+  permForget(host) { const all = Object.assign({}, this.permLoad()); delete all[String(host)]; this.permSave(all); return true; }
   _tab(id) { return this.tabs.find((t) => t.id === id); }
   _active() { const n = Date.now(); if (n - (this.actT || 0) < 3000) return; this.actT = n; if (this.onActive) try { this.onActive(); } catch (_) {} }
   /* chrome.tabs for extensions: Regis's tabs in Chrome's shape (ids are the tabs' webContents ids) */

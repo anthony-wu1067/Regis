@@ -4,4 +4,5 @@ if (!globalThis.Buffer) globalThis.Buffer = Buffer;
 const { Google, buildAuthUrl, zonedToUtc, SCOPES } = require('../../desktop/lib/google.js');
 const { Anthropic } = require('../../desktop/lib/anthropic.js');
 const { Canvas, normHost } = require('../../desktop/lib/canvas.js');
-globalThis.RegisLib = { Google, Anthropic, Canvas, normHost, buildAuthUrl, SCOPES, zonedToUtc };
+const { Guild, agentList } = require('../../desktop/lib/agents.js');
+globalThis.RegisLib = { Google, Anthropic, Canvas, Guild, agentList, normHost, buildAuthUrl, SCOPES, zonedToUtc };

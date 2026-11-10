@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Regis alerts</title>
+<style>
+  html,body{margin:0;background:transparent;color:var(--fg,#f1e9ff);font:500 13px "DM Sans","Segoe UI",system-ui,sans-serif;overflow:hidden;user-select:none}
+  #l{display:flex;flex-direction:column;gap:8px;padding:2px 2px 10px}
+  .a{background:var(--bg,#120c1c);border:1px solid var(--line,rgba(255,255,255,.18));border-left:3px solid var(--ac,#b794ff);border-radius:12px;padding:10px 12px 10px;
+    box-shadow:0 10px 26px -10px rgba(0,0,0,.7);animation:in .22s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes in{from{opacity:0;transform:translateY(-6px)}}
+  @media (prefers-reduced-motion:reduce){.a{animation:none}}
+  .k{font:600 10px/1 Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ac,#b794ff)}
+  .t{font-weight:650;font-size:14px;margin:5px 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .m{color:var(--fg2,#cdbfe6);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .b{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  button{border:1px solid var(--line,rgba(255,255,255,.18));background:transparent;color:inherit;border-radius:8px;padding:4px 10px;font:600 12px "DM Sans","Segoe UI",sans-serif;cursor:pointer}
+  button:hover{background:rgba(255,255,255,.08)}
+  button.p{background:var(--ac,#b794ff);border-color:transparent;color:var(--ink,#120c1c)}
+  button.g{border-color:transparent;color:var(--fg2,#cdbfe6)}
+  button:focus-visible{outline:2px solid var(--ac,#b794ff);outline-offset:1px}
+</style></head>
+<body><div id="l" role="alert" aria-live="assertive"></div>
+<script>
+  /* Alerts drawn above web pages and docked apps. Text only (textContent); every button sends one fixed action back to Regis. */
+  var L = document.getElementById('l'), F = window.regisAlerts;
+  function btn(txt, cls, id, a) { var b = document.createElement('button'); b.type = 'button'; b.textContent = txt; if (cls) b.className = cls; b.onclick = function () { F.act(id, a); }; return b; }
+  function draw(s) {
+    s = s || {}; var th = s.theme || {}, R = document.documentElement;
+    ['ac', 'bg', 'fg', 'fg2', 'line', 'ink'].forEach(function (k) { if (th[k] && /^[#a-z0-9(),.\s%-]{1,60}$/i.test(th[k])) R.style.setProperty('--' + k, th[k]); });
+    L.textContent = '';
+    (s.list || []).slice(0, 3).forEach(function (al) {
+      var d = document.createElement('div'); d.className = 'a';
+      var k = document.createElement('div'); k.className = 'k'; k.textContent = String(al.label || 'Alert'); d.appendChild(k);
+      var t = document.createElement('div'); t.className = 't'; t.textContent = String(al.title || ''); t.title = String(al.title || ''); d.appendChild(t);
+      if (al.body) { var m = document.createElement('div'); m.className = 'm'; m.textContent = String(al.body); d.appendChild(m); }
+      var b = document.createElement('div'); b.className = 'b';
+      if (al.link) b.appendChild(btn(String(al.linkText || 'Open'), 'p', al.id, 'join'));
+      b.appendChild(btn('Show', '', al.id, 'show')); b.appendChild(btn('Snooze 10 min', 'g', al.id, 'snooze')); b.appendChild(btn('Dismiss', 'g', al.id, 'dismiss'));
+      d.appendChild(b); L.appendChild(d);
+    });
+    requestAnimationFrame(function () { F.size(Math.ceil(L.getBoundingClientRect().height)); });
+  }
+  F.onState(draw);
+</script>
+</body></html>

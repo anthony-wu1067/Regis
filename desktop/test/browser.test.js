@@ -80,9 +80,9 @@ app.whenReady().then(async () => {
   ok(isSignIn('https://accounts.google.com/v3/signin') && !isSignIn('https://www.google.com/') && !isSignIn('https://accounts.google.com.evil.com/') && !isSignIn('http://accounts.google.com/'), 'sign-in page detection');
   host.go(host.active, base + '/a'); await until(() => host.snapshot().tabs.find((x) => x.id === host.active).title === 'Page A');
   const lwc2 = host._tab(host.active).view.webContents;
-  const loc = JSON.parse(await lwc2.executeJavaScript("JSON.stringify({chrome:typeof window.chrome,keys:window.chrome?Object.keys(window.chrome).sort():[],nat:Function.prototype.toString.call(window.chrome.loadTimes),ts:Function.prototype.toString.call(Function.prototype.toString),own:(function x(){return 1}).toString(),lt:typeof window.chrome.loadTimes().requestTime})"));
-  ok(loc.chrome === 'object' && loc.keys.join() === 'app,csi,loadTimes,runtime', 'pages get window.chrome with app, csi, loadTimes and runtime');
-  ok(/\[native code\]/.test(loc.nat) && /\[native code\]/.test(loc.ts) && /return 1/.test(loc.own) && loc.lt === 'number', 'those functions look built-in, and normal functions still show their own source');
+  const loc = JSON.parse(await lwc2.executeJavaScript("JSON.stringify({chrome:typeof window.chrome,ck:window.chrome?Object.keys(window.chrome).sort().join():'',ts:Function.prototype.toString.call(Function.prototype.toString),own:(function x(){return 1}).toString()})"));
+  ok(loc.ck !== 'app,csi,loadTimes,runtime', 'ordinary pages get no window.chrome stand-in (since 1.9.1 it is only for Google sign-in pages; window.chrome here: ' + (loc.ck || loc.chrome) + ')');
+  ok(/\[native code\]/.test(loc.ts) && /return 1/.test(loc.own), 'and their built-in functions are left untouched (Google\'s bot check flagged the change)');
   const sent = []; host.ses.webRequest.onSendHeaders({ urls: ['https://accounts.google.com/*'] }, (d) => { if (d.resourceType === 'mainFrame') sent.push(d.requestHeaders); });
   const gone = []; app.on('render-process-gone', (_e, _w, d) => gone.push(d.reason)); app.on('child-process-gone', (_e, d) => gone.push(d.type + ':' + d.reason));
   const g = host.open('https://docs.google.com/document/u/0/'); const gt = host._tab(g);

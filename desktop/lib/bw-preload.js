@@ -30,7 +30,9 @@ const chromeSurface = function () {
     if (window.chrome !== c) Object.defineProperty(window, 'chrome', { value: c, writable: true, configurable: true, enumerable: true });
   } catch (_) {}
 };
-if (/^https?:$/.test(location.protocol)) {
+/* 1.9.1: only on Google's sign-in pages. On every other page the stand-in (it replaces Function.prototype.toString) looked like tampering
+   to Google's bot protection: Search answered with its 'unusual traffic' page and the AI Mode box would not take typing. */
+if (location.protocol === 'https:' && /^accounts\.(google|youtube)\.com$/i.test(location.hostname)) {
   try { if (contextBridge && contextBridge.executeInMainWorld) contextBridge.executeInMainWorld({ func: chromeSurface }); else throw 0; }
   catch (_) { try { webFrame.executeJavaScript('(' + chromeSurface.toString() + ')()'); } catch (_) {} }
 }

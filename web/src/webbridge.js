@@ -58,7 +58,11 @@
   }
   setInterval(function () { if (!document.hidden) checkUpdate().catch(function () {}); }, 30 * 60 * 1000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) checkUpdate().catch(function () {}); });
+  /* 1.9.1 Guild: the same AI workspaces as the desktop app; history in this browser's storage, one table with a context_scope per row */
+  var guild = L.Guild ? new L.Guild({ anthropic: claude, table: { load: function () { return get('regis-guild', []); }, save: function (r) { set('regis-guild', r); } } }) : null;
   window.regisBridge = {
+    guild: guild ? { agents: function () { return Promise.resolve(L.agentList()); }, history: function (id) { return Promise.resolve().then(function () { return guild.history(String(id || '')); }); },
+      send: function (id, t, x) { return guild.send(String(id || ''), t, x || {}); }, clear: function (id) { return Promise.resolve().then(function () { return guild.clear(String(id || '')); }); } } : null,
     updateCheck: checkUpdate,
     updateApply: function () { setTimeout(function () { location.reload(); }, 50); return Promise.resolve(true); },
     onUpdate: function (cb) { updCbs.push(cb); },
