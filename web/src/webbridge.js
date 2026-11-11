@@ -63,7 +63,7 @@
   var kit = L.teamKit ? L.teamKit({ anthropic: claude, table: function (k, d) { return { load: function () { return get('regis-' + (k === 'guild' ? 'guild' : 'tk-' + k), d); }, save: function (v) { set('regis-' + (k === 'guild' ? 'guild' : 'tk-' + k), v); } }; } }) : null;
   var guild = kit ? kit.guild : null, P = function (f) { return function () { var a = arguments; return Promise.resolve().then(function () { return f.apply(null, a); }); }; };
   window.regisBridge = {
-    teams: kit ? { get: P(kit.api.get), policy: P(kit.api.policy), global: P(kit.api.global), run: P(kit.api.run), memAdd: P(kit.api.memAdd), memDel: P(kit.api.memDel), ledger: P(kit.api.ledger) } : null,
+    teams: kit ? (function () { var o = { onChange: function (cb) { kit.onChange(cb); } }; Object.keys(kit.api).forEach(function (k) { o[k] = P(kit.api[k]); }); return o; })() : null,
     guild: guild ? { agents: function () { return Promise.resolve(L.agentList()); }, history: function (id) { return Promise.resolve().then(function () { return guild.history(String(id || '')); }); },
       send: function (id, t, x) { return guild.send(String(id || ''), t, x || {}); }, clear: function (id) { return Promise.resolve().then(function () { return guild.clear(String(id || '')); }); } } : null,
     updateCheck: checkUpdate,

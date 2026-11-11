@@ -1,6 +1,6 @@
 {
   "name": "regis",
-  "version": "1.9.7",
+  "version": "1.9.8",
   "description": "Regis — your personal command center for mail, calendar, Drive and daily plan",
   "main": "main.js",
   "author": "Regis",
@@ -8,7 +8,7 @@
   "scripts": {
     "build:page": "node scripts/make-index.js",
     "start": "node scripts/make-index.js && electron .",
-    "test": "node test/run.js && node test/sync.test.js && node test/shim.test.js && node test/teamcore.test.js",
+    "test": "node test/run.js && node test/sync.test.js && node test/shim.test.js && node test/teamcore.test.js && node test/phase2.test.js",
     "dist": "node scripts/make-index.js && electron-builder",
     "shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-shortcut.ps1",
     "drm:on": "node scripts/drm.js on",

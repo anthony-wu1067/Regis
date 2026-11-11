@@ -28,7 +28,7 @@ app.whenReady().then(async () => {
   await J('document.querySelector(\'#vsw [data-v="work"]\').click()'); await sleep(900);
 
   // ---- Guild ----
-  ok(await until(() => J('var r=document.getElementById("gd-rail");return r&&!r.hidden&&r.querySelectorAll(".gd-av").length===5')), 'the Workspace has a rail with Regis and four agents');
+  ok(await until(() => J('var r=document.getElementById("gd-rail");return r&&!r.hidden&&r.querySelectorAll(".gd-av[data-act=gd-pick]").length===5&&r.querySelectorAll(".gd-av").length===6')), 'the Workspace has a rail with Regis, four agents and the Office');
   const railBox = await J('var r=document.getElementById("gd-rail").getBoundingClientRect(),g=document.querySelector("main.grid").getBoundingClientRect();return [r.right,g.left]');
   ok(railBox[0] <= railBox[1], 'the rail sits left of the workspace, not over it (' + railBox.map(Math.round) + ')');
   await J('document.querySelector(\'#gd-rail [data-id="midas"]\').click()'); await sleep(400);

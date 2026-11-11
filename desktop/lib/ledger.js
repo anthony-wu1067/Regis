@@ -2,7 +2,9 @@
 /* 1.9.7 Claude ledger and hard caps. Every Claude call Regis makes goes through meter(): the caps are checked BEFORE the
    request is sent and the real token counts are written down after it. The limits live here, in the application; nothing a
    model writes can raise them or skip the check. Shared by the desktop app and the web build.
-   One row per call: { id, teamId, taskId, at, model, inputTokens, outputTokens, estimatedCost }.
+   One row per call: { id, teamId, taskId, ref, engine, at, model, inputTokens, outputTokens, estimatedCost }.
+   taskId is the id the per-task limit counts against (one run of a task); ref is the task it belongs to. Since 1.9.8 calls to the local AI
+   are written down too (engine 'local', cost 0) so usage can be reported; they never count against a Claude limit.
    `table` is { load() -> rows[], save(rows) }, like the Guild's, so the rows can move to a database later. */
 const err = (code, message, extra) => Object.assign(new Error(message), { code }, extra || {});
 /* US dollars per million tokens (input, output). Estimates only: update when Anthropic's prices change.
@@ -27,15 +29,31 @@ class Ledger {
   _today() { const d = dayOf(this.now()); return this._rows().filter((r) => r && dayOf(r.at) === d); }
   record(e) {
     e = e || {}; const model = String(e.model || '');
-    const row = { id: Math.random().toString(36).slice(2, 10), teamId: String(e.teamId || 'regis').slice(0, 40), taskId: String(e.taskId || '').slice(0, 60), at: this.now(), model,
+    const row = { id: Math.random().toString(36).slice(2, 10), teamId: String(e.teamId || 'regis').slice(0, 40), taskId: String(e.taskId || '').slice(0, 80), ref: String(e.ref || '').slice(0, 60), engine: e.engine === 'local' ? 'local' : 'claude', at: this.now(), model,
       inputTokens: Math.max(0, Math.round(+e.inputTokens || 0)), outputTokens: Math.max(0, Math.round(+e.outputTokens || 0)) };
-    row.estimatedCost = Math.round(costOf(model, row.inputTokens, row.outputTokens) * 1e6) / 1e6;
+    row.estimatedCost = row.engine === 'local' ? 0 : Math.round(costOf(model, row.inputTokens, row.outputTokens) * 1e6) / 1e6;
     const old = this.now() - KEEP_DAYS * 864e5; let rows = this._rows().filter((r) => r && r.at > old); rows.push(row); if (rows.length > MAX_ROWS) rows = rows.slice(-MAX_ROWS);
     this.table.save(rows); return row;
   }
-  callsForTask(taskId) { if (!taskId) return 0; return this._rows().filter((r) => r && r.taskId === taskId).length + (this.open['t:' + taskId] || 0); }
-  costToday(teamId) { return this._today().filter((r) => !teamId || r.teamId === teamId).reduce((s, r) => s + (r.estimatedCost || 0), 0); }
-  callsToday(teamId) { return this._today().filter((r) => !teamId || r.teamId === teamId).length; }
+  /* a call to the local AI: free, but worth knowing about */
+  recordLocal(e) { return this.record(Object.assign({}, e, { engine: 'local', inputTokens: 0, outputTokens: 0 })); }
+  callsForTask(taskId) { if (!taskId) return 0; return this._rows().filter((r) => r && r.engine !== 'local' && r.taskId === taskId).length + (this.open['t:' + taskId] || 0); }
+  costToday(teamId) { return this._today().filter((r) => r.engine !== 'local' && (!teamId || r.teamId === teamId)).reduce((s, r) => s + (r.estimatedCost || 0), 0); }
+  callsToday(teamId) { return this._today().filter((r) => r.engine !== 'local' && (!teamId || r.teamId === teamId)).length; }
+  /* totals for any set of rows */
+  _sum(rows) { const o = { local: { calls: 0 }, claude: { calls: 0, inputTokens: 0, outputTokens: 0, cost: 0 } }; rows.forEach((r) => { if (r.engine === 'local') o.local.calls++; else { o.claude.calls++; o.claude.inputTokens += r.inputTokens || 0; o.claude.outputTokens += r.outputTokens || 0; o.claude.cost += r.estimatedCost || 0; } }); o.claude.cost = Math.round(o.claude.cost * 1e6) / 1e6; return o; }
+  /* usage report. scope: {} = all of Regis today, { teamId } = one team today, { ref } = one task (all its runs), { taskId } = one run */
+  usage(scope, limits) {
+    scope = scope || {}; const L = cleanLimits(limits); let rows;
+    if (scope.taskId) rows = this._rows().filter((r) => r && r.taskId === scope.taskId); else if (scope.ref) rows = this._rows().filter((r) => r && r.ref === scope.ref); else rows = this._today().filter((r) => !scope.teamId || r.teamId === scope.teamId);
+    const o = this._sum(rows); if (scope.taskId || scope.ref) { if (scope.taskId) o.callsLeft = Math.max(0, L.perTask - this.callsForTask(scope.taskId)); return o; }
+    const all = this.costToday(), team = scope.teamId ? this.costToday(scope.teamId) : all;
+    o.caps = { perTask: L.perTask, teamDaily: L.teamDaily, globalDaily: L.globalDaily };
+    o.left = { team: Math.max(0, Math.round((L.teamDaily - team) * 1e6) / 1e6), global: Math.max(0, Math.round((L.globalDaily - all) * 1e6) / 1e6) };
+    o.blocked = scope.teamId ? (team >= L.teamDaily ? 'team' : all >= L.globalDaily ? 'global' : '') : (all >= L.globalDaily ? 'global' : ''); return o;
+  }
+  /* the last n days, per day: for a small history chart or table */
+  days(teamId, n) { const out = []; const rows = this._rows(); for (let i = (n || 7) - 1; i >= 0; i--) { const d = dayOf(this.now() - i * 864e5), s = this._sum(rows.filter((r) => r && dayOf(r.at) === d && (!teamId || r.teamId === teamId))); out.push({ day: d, local: s.local.calls, claude: s.claude.calls, cost: s.claude.cost }); } return out; }
   /* may this call be made? -> { ok } or { ok:false, code, reason }. Calls that are in flight count too, so two at once can't slip past. */
   check(meta, limits) {
     meta = meta || {}; const L = cleanLimits(limits), team = String(meta.teamId || 'regis');
@@ -48,7 +66,7 @@ class Ledger {
   summary(teamId, limits) {
     const L = cleanLimits(limits);
     return { teamId: teamId || '', team: { cost: this.costToday(teamId), calls: this.callsToday(teamId), cap: L.teamDaily }, all: { cost: this.costToday(), calls: this.callsToday(), cap: L.globalDaily }, perTask: L.perTask,
-      recent: this._rows().filter((r) => r && (!teamId || r.teamId === teamId)).slice(-12).reverse() };
+      recent: this._rows().filter((r) => r && r.engine !== 'local' && (!teamId || r.teamId === teamId)).slice(-12).reverse() };
   }
 }
 
@@ -63,8 +81,8 @@ function meter(anthropic, ledger, getLimits) {
     try {
       const o = Object.assign({}, opts); delete o.meter;
       const r = await anthropic.sample(input, o);
-      const u = r.usage || {}; const row = ledger.record({ teamId: m.teamId, taskId: m.taskId, model: r.model || o.model || '', inputTokens: u.input, outputTokens: u.output });
-      return Object.assign({}, r, { cost: row.estimatedCost });
+      const u = r.usage || {}; const row = ledger.record({ teamId: m.teamId, taskId: m.taskId, ref: m.ref, model: r.model || o.model || '', inputTokens: u.input, outputTokens: u.output });
+      return Object.assign({}, r, { cost: row.estimatedCost, tokens: { input: row.inputTokens, output: row.outputTokens } });
     } finally { if (k) { ledger.open[k] -= 1; if (ledger.open[k] <= 0) delete ledger.open[k]; } }
   };
   const parse = anthropic.constructor && anthropic.constructor.parseJson;

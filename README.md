@@ -84,6 +84,21 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.8 AI teams, Phase 2: team dashboards, task and run history, personas, soul.md, the Office
+
+- **Every team has a full dashboard**, and all four use the same one, filled with that team's data. Sections: Overview, Tasks, Members, Tools & workflows, Memory, Activity, AI usage & limits. The header shows the team, its mission, the lead, whether it is working, its routing rule and today's Claude spend.
+- **Tasks are kept by Regis itself now**, not by the page. Each task has a status (queued, planning, running, waiting, completed, failed, cancelled), a priority, who it is assigned to, the engine, and its result. Your old queue and KPI numbers are moved over automatically the first time you open each team. A task that was running when Regis closed is marked as not finished.
+- **Run history.** Every run of a task leaves a record: when, the lead, which specialists, the engine and why, Claude calls, estimated cost, time taken, whether it escalated or hit a limit, and each step. Press Details on a task. This is separate from the chat.
+- **Usage.** Local AI calls are counted now too. You can see calls, tokens and estimated cost for all of Regis, per team, per task and per run, plus the last 7 days. The limits are unchanged: 3 Claude calls per task, $2 per team per day, $5 for Regis per day.
+- **Members with personas.** Each lead and specialist is a named member with a role, a persona, capabilities, a status and recent work: Nora and Felix (Exusiai), Iris and Theo (Midas), June and Marco (Alicia), Ren and Vera (Obsidian). Specialists still have no chat of their own.
+- **soul.md.** On a member's card press Upload soul.md to give them a personality file (Markdown, up to about 24 KB). View shows it, Remove goes back to the default. A soul changes how a member sounds and works. It cannot change rules, permissions, tools, spending limits or routing, because Regis never reads it for settings.
+- **Office.** The animated base moved out of the dashboards into its own entry at the bottom of the left rail (the coffee cup). It shows the real state: who is working on what, which specialist has been given a part, and idle when idle. Clicking a character opens that team.
+- **Approvals (foundation only).** Tools now follow one rule: read and draft tools run by themselves, a tool that writes outside Regis needs your approval each time, and destructive tools are blocked. No writing tools exist yet, so the approval list is empty.
+- **Browser extensions:** an extension no longer puts its icon in the toolbar by itself. Open the puzzle button and press the pin next to an extension to show or hide its icon. Hidden extensions keep working.
+- **Not built** (later phases): plugins and outside services, scheduled workflows, creating your own teams, editing personas in the app.
+- **Update the desktop app once** (`Regis-app.zip`).
+- Tested with a fake Claude and a fake local AI. Not tested with a real Ollama model or on a phone.
+
 ## 1.9.7 AI teams, Phase 1: real teams, local-first, and hard Claude limits
 
 The plan this follows is in `AI_TEAM_ARCHITECTURE.md`. This is Phase 1 only (the foundation).

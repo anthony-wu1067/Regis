@@ -8,6 +8,8 @@ const { TeamMemory } = require('../lib/memory');
 const { ToolRegistry, builtin: bt } = require('../lib/tools');
 const { WorkflowRegistry, builtin: bf } = require('../lib/workflows');
 const { Orchestrator, MAX_CALLS } = require('../lib/orchestrator');
+const { TaskStore } = require('../lib/tasks');
+const { ExecutionStore } = require('../lib/executions');
 const { Guild, AGENTS, systemFor } = require('../lib/agents');
 let pass = 0, fail = 0; const ok = (c, m) => { if (c) pass++; else { fail++; console.log('FAIL', m); } };
 const rejects = async (p, code) => { try { await p; return false; } catch (e) { return !code || e.code === code; } };
@@ -25,7 +27,8 @@ const rig = (o = {}) => {
   const memory = new TeamMemory({ table: mem([]), now }), tools = bt(new ToolRegistry(), { memory }), workflows = bf(new WorkflowRegistry());
   const prefs = () => ({ model: o.noLocal ? '' : 'llama3.2:3b', use: {}, fallback: true });
   const guild = new Guild({ anthropic: claude, local: fl, prefs, table: mem([]), now });
-  const orch = new Orchestrator({ teams, ledger, memory, tools, workflows, claude, local: fl, prefs, guild, agents: AGENTS, systemFor, now });
+  const tasks = new TaskStore({ table: mem([]), now }), executions = new ExecutionStore({ table: mem([]), now });
+  const orch = new Orchestrator({ teams, ledger, memory, tools, workflows, tasks, executions, claude, local: fl, prefs, guild, agents: AGENTS, systemFor, now });
   return { fc, fl, teams, ledger, claude, memory, tools, workflows, guild, orch };
 };
 (async () => {

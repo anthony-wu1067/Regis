@@ -185,7 +185,7 @@ app.whenReady().then(async () => {
   ipcMain.handle('claude:sample', wrap(async (input, opts = {}) => {
     const p = aiPrefs();
     if (p.model && p.use.regis === 'local') {
-      try { const r = await ollama.sample(input, { model: p.model, maxTokens: opts.maxTokens || 2048, json: !!opts.json }); return opts.json ? { value: Anthropic.parseJson(r.text) } : r; }
+      try { const r = await ollama.sample(input, { model: p.model, maxTokens: opts.maxTokens || 2048, json: !!opts.json }); try { kit.ledger.recordLocal({ teamId: 'regis', model: 'local:' + p.model }); } catch (_) {} return opts.json ? { value: Anthropic.parseJson(r.text) } : r; }
       catch (e) { if (!p.fallback) throw e; }
     }
     return kit.sample(input, opts);   /* 1.9.7: counted as team 'regis' and capped like every other Claude call */
@@ -198,7 +198,8 @@ app.whenReady().then(async () => {
   ipcMain.handle('guild:send', wrap((id, text, extra) => guild.send(String(id || ''), text, extra && typeof extra === 'object' ? { tasks: extra.tasks, file: extra.file, addins: extra.addins } : {})));
   ipcMain.handle('guild:clear', wrap((id) => guild.clear(String(id || ''))));
   /* 1.9.7 Teams: the organisation under the four leads (specialists, tools, workflows, memory, policy), the queue's orchestrator and the Claude ledger */
-  ['get', 'policy', 'global', 'run', 'memAdd', 'memDel', 'ledger'].forEach((k) => ipcMain.handle('team:' + k, wrap((...a) => kit.api[k](...a))));
+  Object.keys(kit.api).forEach((k) => ipcMain.handle('team:' + k, wrap((...a) => kit.api[k](...a))));
+  kit.onChange((e) => send('team:changed', e));   /* 1.9.8: the page hears about task and run changes as they happen */
   ipcMain.handle('app:status', wrap(() => ({
     googleConfigured: !!(store.getMeta('gClientId', '') && store.getSecret('gSecret')), googleConnected: !!store.getSecret('gRefresh'),
     googleEmail: store.getMeta('gEmail', ''), anthropicKey: !!store.getSecret('anthropicKey'), usage: store.monthUsage(),

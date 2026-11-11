@@ -28,9 +28,11 @@ app.whenReady().then(async () => {
   // the team under the lead
   const tv = await J('return await ' + T + '.get("midas")');
   ok(tv.id === 'midas' && tv.lead.agentId === 'midas' && tv.specialists.length === 2 && tv.policy.escalationPolicy === 'when-needed' && tv.policy.maxClaudeCallsPerTask === 3 && tv.ledger.team.cap === 2 && tv.global.maxDailyClaudeCost === 5 && tv.memory.scope === 'midas', 'Midas is a team: a lead, two specialists, its own memory, a local-first policy and limits');
-  ok(await until(() => J('var c=document.getElementById("tq-card");return !!c&&/E-Commerce & Finance team/.test(c.textContent)&&/Lead: Midas/.test(c.textContent)&&/Cost Analyst/.test(c.textContent)&&/Claude today, this team/.test(c.textContent)')), 'the dashboard shows the team card (lead, specialists, today\'s Claude spend)');
-  const add = async (title, eng) => { await J('document.getElementById("tm-title").value=' + JSON.stringify(title) + ';' + (eng ? 'document.getElementById("tq-eng").value=' + JSON.stringify(eng) + ';' : '') + 'document.querySelector(\'form[data-tm-form="task"]\').requestSubmit()'); await sleep(250); };
-  const run = async () => { const n = await J('return document.querySelectorAll("#tm-body .st-d,#tm-body .st-f").length'); await J('document.querySelector(\'#tm-body [data-act="tm-run"]\').click()'); return until(() => J('return document.querySelectorAll("#tm-body .st-d,#tm-body .st-f").length>' + n + '&&!document.querySelector("#tm-body .st-w")'), 20000); };
+  const sec = async (x) => { await J('var b=document.querySelector(\'#tm-body [data-act="tw-sec"][data-s="' + x + '"]\');if(b&&b.getAttribute("aria-pressed")!=="true")b.click()'); await sleep(350); };
+  ok(await until(() => J('var h=document.querySelector("#tm-body .tw-hd");return !!h&&/E-Commerce & Finance/.test(h.textContent)&&/Lead: Midas/.test(h.textContent)&&/Calm Controller/.test(h.textContent)&&/Claude today/.test(h.textContent)')), 'the dashboard header shows the team, its lead and today\'s Claude spend');
+  await sec('members'); ok(await J('var t=document.querySelector("#tm-body .tw-mem").textContent;return /Iris/.test(t)&&/Cost Analyst/.test(t)&&/Numbers Person/.test(t)&&/Theo/.test(t)&&document.querySelectorAll("#tm-body .tw-m").length===3'), 'the Members section shows the lead and both specialists with their personas');
+  const add = async (title, eng) => { await sec('tasks'); await J('document.getElementById("tm-title").value=' + JSON.stringify(title) + ';' + (eng ? 'document.getElementById("tq-eng").value=' + JSON.stringify(eng) + ';' : '') + 'document.querySelector(\'form[data-tm-form="task"]\').requestSubmit()'); await sleep(250); };
+  const run = async () => { await sec('tasks'); const n = await J('return document.querySelectorAll("#tm-body .st-d,#tm-body .st-f").length'); await J('document.querySelector(\'#tm-body [data-act="tm-run"]\').click()'); return until(() => J('return document.querySelectorAll("#tm-body .st-d,#tm-body .st-f").length>' + n + '&&!document.querySelector("#tm-body .st-w")'), 20000); };
   const rowText = (re) => J('var r=[].find.call(document.querySelectorAll("#tm-body .tm-t"),function(x){return ' + re + '.test(x.textContent)});return r?r.className+" | "+r.textContent:""');
   // 1. routine -> local, no Claude
   await add('Summarise the supplier notes'); ok(await run(), 'a routine task runs');
@@ -41,15 +43,15 @@ app.whenReady().then(async () => {
   ok(claudeCalls.length === 1 && chats.length >= 2 && /<team_notes>/.test(claudeCalls[0].messages[0].content) && /You are Midas/.test(claudeCalls[0].system), 'the complex task escalated to Claude once; specialists prepared notes on the local AI');
   ok(/Done by Claude · 1 call · about \$0\.01/.test(await rowText('/Analyse why our margin/')), 'the finished task shows it was Claude, how many calls and the estimated cost');
   let led = await J('return await ' + T + '.ledger()');
-  ok(led.all.calls === 1 && Math.abs(led.all.cost - 0.014) < 1e-6 && led.recent[0].teamId === 'midas' && /^q-/.test(led.recent[0].taskId) && led.recent[0].inputTokens === 2000 && led.recent[0].outputTokens === 1000, 'the Claude call is in the ledger: team, task, tokens and estimated cost');
+  ok(led.all.calls === 1 && Math.abs(led.all.cost - 0.014) < 1e-6 && led.recent[0].teamId === 'midas' && /^x-/.test(led.recent[0].taskId) && led.recent[0].inputTokens === 2000 && led.recent[0].outputTokens === 1000, 'the Claude call is in the ledger: team, task, tokens and estimated cost');
   await sleep(900);   // the model's answer asked for ten more calls: nothing may follow
   ok(claudeCalls.length === 1, 'a model asking for more Claude calls gets none (no orchestration loop)');
-  ok(await until(() => J('return /Claude today, this team: \\$0\\.01/.test(document.getElementById("tq-card").textContent.replace(/\\s+/g," "))')), 'the card shows today\'s spend');
+  ok(await until(() => J('return /Claude today: \\$0\\.01/.test(document.querySelector("#tm-body .tw-hd").textContent.replace(/\\s+/g," "))')), 'the header shows today\'s spend');
   // 3. asked for Claude on one task
   await add('Tidy the price list', 'claude'); ok(await run(), 'a task marked Claude runs');
   ok(claudeCalls.length === 2 && /you asked for Claude/.test(await rowText('/Tidy the price list/')), 'choosing Claude for a task uses Claude');
   // 4. team cap reached -> complex task refused, no call
-  await J('var i=document.querySelector(\'#tq-card [data-tq="maxDailyClaudeCost"]\');i.value="0";i.dispatchEvent(new Event("change",{bubbles:true}))'); await sleep(700);
+  await sec('usage'); await J('var i=document.querySelector(\'#tm-body [data-tq="maxDailyClaudeCost"]\');i.value="0";i.dispatchEvent(new Event("change",{bubbles:true}))'); await sleep(700);
   ok((await J('return await ' + T + '.get("midas")')).policy.maxDailyClaudeCost === 0, 'the team limit can be changed on the card');
   await add('Compare our strategy with competitors and recommend what to do'); ok(await run(), 'a complex task with the budget used up finishes');
   ok(claudeCalls.length === 2 && /st-f/.test(await rowText('/Compare our strategy/')) && /budget/.test(await rowText('/Compare our strategy/')), 'over the team limit the task is refused with the reason, and Claude is not called');
@@ -76,7 +78,7 @@ app.whenReady().then(async () => {
   ok(claudeCalls.length === 4 && /all of Regis/.test(await rowText('/pricing strategy again/')), 'and queued tasks are stopped by the global limit as well');
   await J('await ' + T + '.global({maxDailyClaudeCost:5})');
   // 6. policy: local only
-  await J('var s=document.querySelector(\'#tq-card [data-tq="escalationPolicy"]\');s.value="local-only";s.dispatchEvent(new Event("change",{bubbles:true}))'); await sleep(700);
+  await sec('usage'); await J('var s=document.querySelector(\'#tm-body [data-tq="escalationPolicy"]\');s.value="local-only";s.dispatchEvent(new Event("change",{bubbles:true}))'); await sleep(700);
   const lc = chats.length; await add('Analyse the margin strategy in depth'); await run();
   ok(claudeCalls.length === 4 && chats.length > lc && /Done by the local AI/.test(await rowText('/margin strategy in depth/')), '"Local AI only" keeps even complex tasks off Claude');
   await J('await ' + T + '.policy("midas",{escalationPolicy:"when-needed"})');
@@ -91,13 +93,13 @@ app.whenReady().then(async () => {
   // 9. memory
   const mv = await J('return (await ' + T + '.get("midas")).memoryItems');
   ok(mv.length >= 3 && mv.every((m) => m.kind === 'result') && (await J('return (await ' + T + '.get("luna")).memoryItems')).length === 0, 'finished tasks left notes in Midas\'s memory, and no other team can see them');
-  ok(await until(() => J('return document.querySelectorAll("#tq-card .tq-mi").length>=3')), 'the card lists the team\'s memory');
+  await sec('memory'); ok(await until(() => J('return document.querySelectorAll("#tm-body .tq-mi").length>=3')), 'the Memory section lists the team\'s memory');
   await J('document.getElementById("tq-memin").value="Landed cost target is $1.20";document.querySelector(\'form[data-tq-form="mem"]\').requestSubmit()');
-  ok(await until(() => J('return /Landed cost target/.test(document.getElementById("tq-card").textContent)')), 'you can add something for the team to remember');
+  ok(await until(() => J('return /Landed cost target/.test(document.getElementById("tm-body").textContent)')), 'you can add something for the team to remember');
   const lc2 = claudeCalls.length; await add('Analyse the landed cost and recommend a price', 'claude'); await run();
   ok(claudeCalls.length === lc2 + 1 && /<team_memory>[\s\S]*Landed cost target is \$1\.20/.test(claudeCalls[lc2].system), 'the lead reads team memory before the next task');
-  await J('[].find.call(document.querySelectorAll("#tq-card .tq-mi"),function(x){return /Landed cost target/.test(x.textContent)}).querySelector("[data-act=tq-memdel]").click()');
-  ok(await until(() => J('return !/Landed cost target/.test(document.getElementById("tq-card").textContent)')), 'and remove it again');
+  await sec('memory'); await J('[].find.call(document.querySelectorAll("#tm-body .tq-mi"),function(x){return /Landed cost target/.test(x.textContent)}).querySelector("[data-act=tq-memdel]").click()');
+  ok(await until(() => J('return !/Landed cost target/.test(document.querySelector("#tm-body .tq-mem").textContent)')), 'and remove it again');
   // 10. the old engine switch still works for chat
   await J('await window.regisBridge.localAI.set({use:{midas:"local"}})');
   const r = await J('var x=await window.regisBridge.guild.send("midas","quick question");return x.reply.via');

@@ -20,7 +20,7 @@ contextBridge.exposeInMainWorld('regisBridge', {
   /* 1.9.1 Guild: AI workspaces (each agent has its own persona and its own history) */
   /* 1.9.4 local AI (Ollama) */
   localAI: { status: () => call('ai:localStatus'), set: (p) => call('ai:localSet', p), pull: (name) => call('ai:localPull', name), test: () => call('ai:localTry'), onPull: (cb) => { ipcRenderer.on('ai:pull', (_e, p) => { try { cb(p); } catch (_) {} }); } },
-  teams: { get: (id) => call('team:get', id), policy: (id, p) => call('team:policy', id, p), global: (p) => call('team:global', p), run: (id, task, extra) => call('team:run', id, task, extra || {}), memAdd: (id, text) => call('team:memAdd', id, text), memDel: (id, mid) => call('team:memDel', id, mid), ledger: () => call('team:ledger') },
+  teams: Object.assign({}, ...["list", "get", "org", "policy", "global", "taskAdd", "taskEdit", "taskCancel", "taskRetry", "taskDel", "taskGet", "run", "execGet", "migrate", "kpiSet", "memAdd", "memDel", "soulGet", "soulSet", "soulDel", "approve", "ledger", "usage"].map((k) => ({ [k]: (...a) => call('team:' + k, ...a) })), { onChange: (cb) => { ipcRenderer.on('team:changed', (_e, d) => { try { cb(d); } catch (_) {} }); } }),
   guild: { agents: () => call('guild:agents'), history: (id) => call('guild:history', id), send: (id, text, extra) => call('guild:send', id, text, extra || {}), clear: (id) => call('guild:clear', id) },
   /* 1.9.1 the Regis overlay (global shortcut) and alerts that float above web pages */
   onOverlay: (cb) => { ipcRenderer.on('app:overlay', () => { try { cb(); } catch (_) {} }); },

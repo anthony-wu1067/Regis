@@ -24,7 +24,14 @@ app.whenReady().then(async () => {
   ok(await J('return !!document.getElementById("ext-link")&&!document.getElementById("modal").hidden'), 'Manage extensions opens, with a box for a Web Store link');
   await J('document.getElementById("ext-link").value="https://chromewebstore.google.com/detail/dark-reader/' + DR + '";document.querySelector("form[data-ext-form]").requestSubmit()');
   ok(await until(() => J('return /Dark Reader/.test(document.getElementById("ext-man").textContent)'), 60000), 'pasting the Web Store link installs Dark Reader');
-  ok(await J('return !!document.querySelector(\'#bw-exts [data-id="' + DR + '"]\')'), 'its icon appears in the toolbar');
+  ok(await J('return !document.querySelector(\'#bw-exts [data-id="' + DR + '"]\')&&!document.getElementById("bw-extb").hidden'), 'a new extension does not put an icon in the toolbar by itself (only the puzzle button shows)');
+  await J('document.getElementById("bw-extb").click()'); await sleep(400);
+  ok(await J('var p=document.querySelector(\'#bw-bmpop [data-act="ext-pin"][data-id="' + DR + '"]\');return !!p&&p.getAttribute("aria-pressed")==="false"'), 'the Extensions menu lists it with a pin that is off');
+  await J('document.querySelector(\'#bw-bmpop [data-act="ext-pin"][data-id="' + DR + '"]\').click()'); await sleep(400);
+  ok(await J('return !!document.querySelector(\'#bw-exts [data-id="' + DR + '"]\')&&JSON.parse(localStorage.getItem("regis-extpin"))["' + DR + '"]===1&&document.querySelector(\'#bw-bmpop [data-act="ext-pin"][data-id="' + DR + '"]\').getAttribute("aria-pressed")==="true"'), 'pinning it shows its icon in the toolbar, and Regis remembers');
+  await J('document.querySelector(\'#bw-bmpop [data-act="ext-pin"][data-id="' + DR + '"]\').click()'); await sleep(400);
+  ok(await J('return !document.querySelector(\'#bw-exts [data-id="' + DR + '"]\')'), 'unpinning hides the icon again (the extension keeps working)');
+  await J('document.querySelector(\'#bw-bmpop [data-act="ext-pin"][data-id="' + DR + '"]\').click()'); await sleep(300); await J('document.getElementById("bw-extb").click()'); await sleep(300);
   ok(fs.existsSync(path.join(app.getPath('userData'), 'extensions', DR, 'manifest.json')), 'it is stored in Regis\'s data folder');
   await J('var b=document.querySelector(\'#modal [data-act="modal-close"]\');if(b)b.click()'); await sleep(500);
   await J('var a=document.getElementById("bw-addr");a.value=' + JSON.stringify(base + '/plain') + ';document.getElementById("bw-form").requestSubmit()');
@@ -45,8 +52,8 @@ app.whenReady().then(async () => {
   await J('var a=document.getElementById("bw-addr");a.value="https://chromewebstore.google.com/detail/google-translate/aapbdbdomjkkjkaonfhkkikfgjllcleb";document.getElementById("bw-form").requestSubmit()');
   ok(await until(() => J('var b=document.getElementById("bw-extadd");return !b.hidden&&b.textContent==="Add to Regis"')), 'a Chrome Web Store page shows "Add to Regis"');
   await J('document.getElementById("bw-extadd").click()');
-  ok(await until(() => J('return !!document.querySelector(\'#bw-exts [data-id="aapbdbdomjkkjkaonfhkkikfgjllcleb"]\')'), 60000), 'pressing it installs that extension');
-  ok(await J('var b=document.getElementById("bw-extadd");return b.disabled&&/Added/.test(b.textContent)'), 'the button then says Added to Regis');
+  ok(await until(() => J('return (await window.regisBridge.ext.list()).some(function(e){return e.id==="aapbdbdomjkkjkaonfhkkikfgjllcleb"})'), 60000) && await J('return !document.querySelector(\'#bw-exts [data-id="aapbdbdomjkkjkaonfhkkikfgjllcleb"]\')'), 'pressing it installs that extension, without adding a toolbar icon');
+  ok(await until(() => J('var b=document.getElementById("bw-extadd");return b.disabled&&/Added/.test(b.textContent)')), 'the button then says Added to Regis');
   // remove
   await J('window.confirm=function(){return true}');
   await J('document.getElementById("bw-extb").click()'); await sleep(300); await J('document.querySelector(\'#bw-bmpop [data-act="ext-manage"]\').click()'); await sleep(500);

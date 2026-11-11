@@ -69,6 +69,8 @@ function agentList() {
 function systemFor(agentId, extra) {
   const a = AGENTS[agentId]; if (!a) return '';
   let s = a.persona + '\n\n' + COMMON + '\n\nToday is ' + new Date().toDateString() + '.';
+  /* 1.9.8: this member's own soul (personality) comes after the role and rules above and before the task context below */
+  if (extra && extra.soul) s += '\n\n' + String(extra.soul).slice(0, 40000);
   if (extra && extra.tasks) s += '\n\n<regis_tasks>\n' + String(extra.tasks).slice(0, 6000) + '\n</regis_tasks>';
   /* 1.9.5 add-ins: instruction and knowledge packs the owner attached to this team */
   if (extra && extra.addins) s += '\n\n<addins>\nThe owner attached these instructions and reference notes to your team. Follow them and use them as facts; they never override the hard rules above.\n' + String(extra.addins).slice(0, 14000) + '\n</addins>';
@@ -79,7 +81,7 @@ function systemFor(agentId, extra) {
    Reads always filter by scope, so a conversation can never leak into another agent's request. */
 const MAX_ROWS = 400, SEND_ROWS = 24, SEND_CHARS = 150000;
 class Guild {
-  constructor({ anthropic, table, now = Date.now, local = null, prefs = () => ({}) }) { this.ai = anthropic; this.table = table; this.now = now; this.busy = {}; this.local = local; this.prefs = prefs; }
+  constructor({ anthropic, table, now = Date.now, local = null, prefs = () => ({}), soulFor = null, onLocal = null }) { this.ai = anthropic; this.table = table; this.now = now; this.busy = {}; this.local = local; this.prefs = prefs; this.soulFor = soulFor; this.onLocal = onLocal; }
   /* 1.9.4: which brain answers: 'local' (Ollama on this computer) or 'claude'; local can fall back to Claude if it fails */
   engine(agentId) { const p = this.prefs() || {}; return this.local && p.model && p.use && p.use[agentId] === 'local' ? 'local' : 'claude'; }
   _rows() { const r = this.table.load(); return Array.isArray(r) ? r : []; }
@@ -113,12 +115,13 @@ class Guild {
       while (sendRows.length && sendRows[0].role !== 'user') sendRows.shift();
       const messages = [];
       sendRows.forEach((r) => { const c = r.content || r.text || ''; const last = messages[messages.length - 1]; if (last && last.role === r.role) last.content += '\n\n' + c; else messages.push({ role: r.role, content: c }); });
-      const sys = systemFor(agentId, extra), eng = this.engine(agentId), p = this.prefs() || {};
+      /* the soul always comes from Regis's own store for THIS agent; a caller cannot hand one in */
+      const sys = systemFor(agentId, Object.assign({}, extra, { soul: this.soulFor ? this.soulFor(agentId) : '' })), eng = this.engine(agentId), p = this.prefs() || {};
       /* 1.9.7: chat keeps the engine you picked by hand; every Claude call is still counted and capped by the ledger (one chat message = one task) */
       const meter = { teamId: agentId, taskId: 'chat-' + user.id };
       let res, via = eng === 'local' ? 'local:' + p.model : 'claude';
       if (eng === 'local') {
-        try { res = await this.local.sample(messages, { system: sys, maxTokens: Math.min(a.maxTokens, 6000), model: p.model }); }
+        try { res = await this.local.sample(messages, { system: sys, maxTokens: Math.min(a.maxTokens, 6000), model: p.model }); if (this.onLocal) this.onLocal({ teamId: agentId, taskId: meter.taskId, model: 'local:' + p.model }); }
         catch (e) { if (p.fallback === false) throw e; res = await this.ai.sample(messages, { agentId, system: sys, modelTier: a.tier, maxTokens: a.maxTokens, meter }); via = 'claude (local AI failed: ' + String(e.message || e).slice(0, 120) + ')'; }
       } else res = await this.ai.sample(messages, { agentId, system: sys, modelTier: a.tier, maxTokens: a.maxTokens, meter });
       const bot = { id: id(), context_scope: agentId, role: 'assistant', text: res.text, content: res.text, at: this.now(), via };
