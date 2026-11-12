@@ -18,7 +18,7 @@ class AlertFloat {
     this.rect = rect && typeof rect === 'object' ? { top: Math.max(0, +rect.top || 0), right: Math.max(0, +rect.right || 0) } : this.rect;
     if (!list.length) { this.hide(); return false; }
     const win = this.getWin(); if (!win || win.isDestroyed()) return false;
-    this.state = { list, theme: theme || {} };
+    this.state = { list, theme: theme || {} }; clearTimeout(this.gone);
     if (!this.fw || this.fw.isDestroyed()) {
       this.fw = new BrowserWindow({ parent: win, width: W, height: 140, frame: false, transparent: true, resizable: false, movable: false, minimizable: false, maximizable: false, fullscreenable: false,
         skipTaskbar: true, hasShadow: false, show: false, focusable: true, backgroundColor: '#00000000', title: 'Regis alerts',
@@ -41,7 +41,8 @@ class AlertFloat {
     if (!fw.isVisible()) fw.showInactive();
   }
   follow() { if (this.fw && !this.fw.isDestroyed() && this.state) this.place(); }
-  hide() { this.state = null; this.h = 0; if (this.fw && !this.fw.isDestroyed()) { try { this.fw.hide(); } catch (_) {} } }
+  /* 1.9.10: hidden for a minute with nothing to show: close the window (its process goes with it); the next alert makes a new one */
+  hide() { this.state = null; this.h = 0; if (this.fw && !this.fw.isDestroyed()) { try { this.fw.hide(); } catch (_) {} clearTimeout(this.gone); this.gone = setTimeout(() => { if (!this.state) this.destroy(); }, +process.env.REGIS_ALERT_IDLE_MS || 60000); } }
   destroy() { if (this.fw && !this.fw.isDestroyed()) { try { this.fw.destroy(); } catch (_) {} } this.fw = null; }
 }
 module.exports = { AlertFloat };

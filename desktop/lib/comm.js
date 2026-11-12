@@ -11,6 +11,8 @@ const CHROME_UA = (v) => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 /* unread count from the page title: "(3) Discord", "* Slack", "• Messenger" */
 function unreadOf(title) { const t = String(title || ''); const m = t.match(/^\s*[\(\[](\d{1,4})\+?[\)\]]/); if (m) return +m[1]; if (/^\s*[*•!]\s/.test(t)) return -1; return 0; }
 
+/* 1.9.10: memory of one app's process in MB (shown in its menu, so the owner can see what keeping it running costs) */
+function memOf(wc) { try { const pid = wc.getOSProcessId(), m = require('electron').app.getAppMetrics().find((x) => x.pid === pid); return m ? Math.round((m.memory.privateBytes || m.memory.workingSetSize) / 1024) : 0; } catch (_) { return 0; } }
 class CommHost {
   constructor({ getWin, load, save, onState, chromeVersion, preload }) {
     this.getWin = getWin; this.load = load; this.save = save; this.onState = onState; this.ua = CHROME_UA(chromeVersion); this.preload = preload;
@@ -22,7 +24,7 @@ class CommHost {
   _persist() { try { this.save({ apps: this.apps.map((a) => ({ id: a.id, name: a.name, url: a.url, native: a.native || '', icon: a.icon || '', color: a.color || '', muted: !!a.muted, bg: a.bg !== false })), muteAll: this.muteAll }); } catch (_) {} }
   muted(id) { const a = this.apps.find((x) => x.id === id); return this.muteAll || !!(a && a.muted); }
   state() {
-    return { apps: this.apps.map((a) => { const v = this.views.get(a.id); return { id: a.id, name: a.name, url: a.url, native: a.native || '', icon: a.icon || '', color: a.color || '', muted: !!a.muted, bg: a.bg !== false, live: !!v, unread: v ? v.unread : 0, title: v ? v.title : '', loading: v ? v.loading : false }; }),
+    return { apps: this.apps.map((a) => { const v = this.views.get(a.id); return { id: a.id, name: a.name, url: a.url, native: a.native || '', icon: a.icon || '', color: a.color || '', muted: !!a.muted, bg: a.bg !== false, live: !!v, mb: v ? memOf(v.wc) : 0, unread: v ? v.unread : 0, title: v ? v.title : '', loading: v ? v.loading : false }; }),
       active: this.active, muteAll: this.muteAll, float: this.float, floatMin: this.floatMin };
   }
   _emit() { if (this.emitT) return; this.emitT = setTimeout(() => { this.emitT = 0; if (this.onState) try { this.onState(this.state()); } catch (_) {} }, 120); }
@@ -40,7 +42,8 @@ class CommHost {
     }
     const view = new WebContentsView({ webPreferences: { partition: this._part(a.id), sandbox: true, contextIsolation: true, nodeIntegration: false, spellcheck: true, backgroundThrottling: false } });
     try { view.setBackgroundColor('#0b0710'); } catch (_) {}
-    const wc = view.webContents; v = { view, wc, unread: 0, title: a.name, loading: true, host: null, shown: false };
+    const wc = view.webContents; v = { view, wc, unread: 0, title: a.name, loading: true, host: null, shown: false, born: Date.now(), seen: Date.now(), audible: false };
+    wc.on('audio-state-changed', (e) => { v.audible = !!(e && e.audible); });
     this.views.set(a.id, v);
     wc.setAudioMuted(this.muted(a.id));
     wc.on('page-title-updated', (_e, t) => { v.title = t; const u = unreadOf(t); if (u !== v.unread) { v.unread = u; this._emit(); this._floatTitle(); } });
@@ -116,9 +119,18 @@ class CommHost {
   _detach(v) { try { if (v.host && !v.host.isDestroyed()) v.host.contentView.removeChildView(v.view); } catch (_) {} v.host = null; v.shown = false; }
   _put(v, host, bounds) {
     if (v.host !== host) { this._detach(v); try { host.contentView.addChildView(v.view); v.host = host; } catch (_) { return; } }
-    try { v.view.setBounds(bounds); } catch (_) {} if (!v.shown) { try { v.view.setVisible(true); } catch (_) {} v.shown = true; }
+    try { v.view.setBounds(bounds); } catch (_) {} v.seen = Date.now(); if (!v.shown) { try { v.view.setVisible(true); } catch (_) {} v.shown = true; }
   }
   _hide(v) { if (v.shown) { try { v.view.setVisible(false); } catch (_) {} v.shown = false; } }
+  /* 1.9.9: after the graphics process restarts, redraw the chat app on screen (see BrowserHost.repaint) */
+  repaint() { let n = 0; this.views.forEach((v) => { if (!v.shown) return; n++; try { v.wc.invalidate(); } catch (_) {} try { const b = v.view.getBounds(); if (b.width > 2) v.view.setBounds(Object.assign({}, b, { width: b.width - 1 })); } catch (_) {} });
+    if (n) setTimeout(() => { try { this._layout(); } catch (_) {} }, 80); return n; }
+  /* 1.9.10: a chat app NOT set to keep running for notifications is closed after 5 minutes unseen (2 minutes when the computer is
+     short of memory); it opens again when you open it. Apps set to keep running are never closed. Called every minute by main. */
+  idle(pressure) { const now = Date.now(), lim = pressure ? 120000 : (+process.env.REGIS_COMM_IDLE_MS || 300000); let n = 0;
+    this.apps.forEach((a) => { const v = this.views.get(a.id); if (!v || a.bg !== false || v.shown || this.float === a.id || v.audible) return; if (now - (v.seen || v.born || 0) < lim) return;
+      this._detach(v); try { v.wc.close(); } catch (_) {} this.views.delete(a.id); n++; });
+    if (n) this._emit(); return n; }
   _layout() {
     const w = this._win(); if (!w) return; const winOk = w.isVisible() && !w.isMinimized(); const fw = this.fw && !this.fw.isDestroyed() ? this.fw : null;
     let floatShown = false;

@@ -50,7 +50,7 @@
   var caps = { db: db, mcp: mcp, sample: sample, user: user, permissions: perms };
   window.claude = { use: function (n) { return (n === 'db' ? ready() : Promise.resolve()).then(function () { return caps[n] || null; }); } };
   window.regisApp = {
-    getStatus: B.getStatus, saveGoogle: B.saveGoogle, connectGoogle: B.connectGoogle, disconnectGoogle: B.disconnectGoogle,
+    getStatus: B.getStatus, audible: B.audible || null, memory: B.memory || null, saveGoogle: B.saveGoogle, connectGoogle: B.connectGoogle, disconnectGoogle: B.disconnectGoogle,
     saveCanvas: B.saveCanvas, removeCanvas: B.removeCanvas, saveKey: B.saveKey, setOpenAtLogin: B.setOpenAtLogin, notify: B.notify, onCapture: B.onCapture, setMini: B.setMini, getMini: B.getMini, onMini: B.onMini,
     deviceId: function () { return ready().then(function () { return meta.dev; }); },
     syncStatus: function () { return ready().then(function () { return fullStatus(); }); },

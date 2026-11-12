@@ -2684,6 +2684,7 @@ html[data-look] .mdl-card,html[data-glass="liquid"][data-look] .mdl-card{-webkit
 .ext-mi img{width:18px;height:18px;object-fit:contain;flex:none}
 .ext-mi span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ext-mi em{font:600 10px var(--f-mono);font-style:normal;color:var(--accent)}
+.cmx-mb{display:block;font-size:11px;color:var(--fg3);font-weight:400;margin-top:2px}
 .ext-pin{flex:none;width:26px;height:26px;border-radius:8px;border:0;background:transparent;color:var(--fg3);cursor:pointer;padding:0;display:grid;place-items:center}.ext-pin svg{width:16px;height:16px;fill:currentColor;transform:rotate(35deg)}.ext-pin:hover{background:var(--line);color:var(--fg)}.ext-pin[aria-pressed=true]{color:var(--accent)}.ext-pn{padding:2px 10px 0;font-size:11.5px}
 .ext-sw{flex:none;position:relative;width:34px;height:20px;border-radius:10px;border:0;background:var(--line2);cursor:pointer;padding:0}
 .ext-sw::after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:var(--fg2);transition:transform .18s var(--ease),background .18s}
@@ -5031,7 +5032,7 @@ function applyView(v,save){if(VIEWS.indexOf(v)<0)v="work";var prev=S.view;S.view
   if(save){try{localStorage.setItem("regis-view",v)}catch(_){}}
   $$('[data-act="view"]').forEach(function(b){var on=b.dataset.v===v;if(b.getAttribute("role")==="tab")b.setAttribute("aria-selected",String(on));else if(on)b.setAttribute("aria-current","true");else b.removeAttribute("aria-current")});
   var br=$("#browser");if(br)br.hidden=v!=="browser";
-  if(v==="music")mcInit();else if(typeof spShow==="function"&&SP&&spOn())spShow();
+  if(v==="music")mcInit();else{if(prev==="music")try{muPark()}catch(_){}if(typeof spShow==="function"&&SP&&spOn())spShow()}
   if(v==="home"){homeBuild();homeRender();homeTick(true)}
   if(v==="work"&&prev!==v)try{greetShim()}catch(_){}
   if(v==="browser"){if(typeof browserEnter==="function")browserEnter()}else if(prev==="browser"&&typeof browserLeave==="function")browserLeave();
@@ -5079,13 +5080,17 @@ function lsw(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}}
 var MU={list:lsj("regis-mu",null)||[{k:"playlist",id:"37i9dQZF1DX4sWSpwq3LiO",n:"Peaceful Piano"},{k:"playlist",id:"37i9dQZF1DWZeKCadgRdKQ",n:"Deep Focus"},{k:"playlist",id:"37i9dQZF1DWWQRwui0ExPn",n:"Lofi Beats"},{k:"playlist",id:"37i9dQZF1DXcBWIGoYBM5M",n:"Today’s Top Hits"}],sel:+(lsj("regis-mu-sel",0))||0,shown:""};
 function muSave(){lsw("regis-mu",MU.list);lsw("regis-mu-sel",MU.sel)}
 function muParse(t){t=String(t||"").trim();var m=t.match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?(track|album|playlist|artist|show|episode)\/([A-Za-z0-9]{22})/)||t.match(/^spotify:(track|album|playlist|artist|show|episode):([A-Za-z0-9]{22})$/);return m?{k:m[1],id:m[2]}:null}
+/* 1.9.10: the player frame runs as its own process and starts the DRM process too, so it only exists while the Music page is open (or playing) */
 function muRender(){var l=$("#mu-list"),fr=$("#mu-frame");if(!l||!fr)return;var it=MU.list[MU.sel];
   l.innerHTML=MU.list.length?MU.list.map(function(x,i){return '<div class="mu-it" aria-current="'+(i===MU.sel)+'"><button class="mu-pick" data-act="mu-pick" data-i="'+i+'"><i aria-hidden="true">♫</i><span>'+esc(x.n||("Spotify "+x.k))+'<small>'+esc(x.k)+'</small></span></button><button class="btn sm ghost danger" data-act="mu-del" data-i="'+i+'" aria-label="Remove from shelf">✕</button></div>'}).join(""):'<div class="empty">Paste a Spotify link above to add it here.</div>';
-  var key=it?it.k+"/"+it.id:"";if(key===MU.shown)return;MU.shown=key;
+  var key=it?it.k+"/"+it.id:"";if(key===MU.shown)return;if(S.view!=="music"&&!fr.firstChild)return;MU.shown=key;
   if(!it){fr.textContent="";return}
   var f=document.createElement("iframe");f.src="https://open.spotify.com/embed/"+it.k+"/"+it.id+"?theme=0";f.height=(it.k==="track"||it.k==="episode")?152:352;f.title="Spotify player";f.allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";f.referrerPolicy="origin";f.setAttribute("sandbox","allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms");fr.textContent="";fr.appendChild(f);
   var a=$("#mu-open");if(a)a.href="https://open.spotify.com/"+it.k+"/"+it.id}
-function mcInit(){if(!mcInit.d){mcInit.d=1;muRender()}spShow()}
+function mcInit(){mcInit.d=1;muRender();spShow()}
+/* leaving Music: take the player frame away unless it is making sound (the desktop app can tell; elsewhere it is kept) */
+function muPark(){var fr=$("#mu-frame");if(!fr||!fr.firstChild)return;var go=function(){if(S.view==="music")return;fr.textContent="";MU.shown=""};
+  if(APP&&APP.audible)APP.audible().then(function(a){if(!a)go()}).catch(function(){});else if(spDesk())go()}
 document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.matches)return;
   if(f.matches("[data-actsubmit=mu-add]")){e.preventDefault();var r=muParse($("#mu-url").value);if(!r){toast("That doesn’t look like a Spotify link.","bad");return}MU.list.push({k:r.k,id:r.id,n:$("#mu-name").value.trim()||("Spotify "+r.k)});MU.sel=MU.list.length-1;$("#mu-url").value="";$("#mu-name").value="";muSave();muRender()}
 });
@@ -5178,7 +5183,7 @@ function spShow(){var on=spOn();try{spHoldUi()}catch(_){}var a=$("#sp-app"),b=$(
   document.documentElement.classList.toggle("sp-bar-on",!!(on&&np&&!np.hidden));document.documentElement.classList.toggle("sp-on",on);document.documentElement.classList.toggle("sp-rp-on",!!SP.rp);var rb=$("#sp-rpb");if(rb)rb.setAttribute("aria-pressed",String(!!SP.rp));
   var u=$("#sp-weburi");if(u){u.textContent=spRedirect();if(location.protocol==="file:")u.parentNode.hidden=true}var c=$("#sp-cid");if(c&&!c.value)c.value=SP.cid||"";var w=$("#sp-warn");if(w)w.textContent=(!spDesk()&&!spWebOK())?"Sign-in needs the Regis desktop app or your own web address. It can’t run inside Claude’s artifact view.":"";
   $("#sp-sub").textContent=on&&SP.me?"Signed in as "+(SP.me.display_name||SP.me.id)+(SP.me.product&&SP.me.product!=="premium"?" · "+SP.me.product+" plan (playback needs Premium)":""):"Spotify inside Regis.";
-  if(on&&spPlayerOK())spSdk();
+  if(on&&spPlayerOK()&&(S.view==="music"||SP.sdkWant))spSdk();
   if(on){if(!SP.opened){SP.opened=1;spLoadMe().then(function(){spOpen(SP.view)})}else spLoadMe();spNavRender();if(!SP.tickT)SP.tickT=setInterval(spTick,1000);if(!SP.lyT)SP.lyT=setInterval(function(){spLyrSync();if(!SP.lyNT||SP.lyNTk!==SP.curId){SP.lyNTk=SP.curId;spLyNext()}},300);spPoll()}else{muRender()}}
 async function spLoadMe(){if(SP.me&&SP.pl)return;try{SP.me=SP.me||await spApi("GET","/me");var l=await spApi("GET","/me/playlists?limit=50"),all=(l&&l.items)||[],pg=0;while(l&&l.next&&pg++<9){l=await spApi("GET",l.next.replace("https://api.spotify.com/v1",""));all=all.concat(l.items||[])}SP.pl=all.filter(Boolean);spPls();var m=$("#sp-me");if(m)m.innerHTML='<span>'+esc(SP.me.display_name||SP.me.id)+'</span><button class="btn sm ghost" data-act="sp-out">Sign out</button>';$("#sp-sub").textContent="Signed in as "+(SP.me.display_name||SP.me.id)+(SP.me.product&&SP.me.product!=="premium"?" · "+SP.me.product+" plan (playback needs Premium)":"");var wh=$("#sp-who");if(wh){wh.textContent=(SP.me.display_name||SP.me.id||"?").trim().charAt(0).toUpperCase();wh.title=SP.me.display_name||SP.me.id}}catch(e){if(e.status===401||e.status===403)toast(e.message+" If this is a new app, add your email under User Management in the Spotify dashboard.","bad");else spErr(e)}}
 function spStart(){SP.hist=[];SP.hi=-1;SP.lc={};SP.me=null;SP.pl=null;SP.view={t:"home"};SP.opened=1;spShow();setView("music",true);return spLoadMe().then(function(){spOpen({t:"home"})})}
@@ -5353,7 +5358,9 @@ function spQClean(r,id){var q=((r&&r.queue)||[]).filter(Boolean),cu=r&&r.current
 function spQNext(id,n){spApi("GET","/me/player/queue").then(function(r){if(SP.rpId!==id)return;var cu=r&&r.currently_playing,stale=!cu||cu.id!==id;
   SP.qn=spQClean(r,id).slice(0,1);spRpn();if(stale&&n<3)setTimeout(function(){if(SP.rpId===id)spQNext(id,n+1)},1200+n*800)}).catch(function(){})}
 async function spPlay(body,dev){var key=JSON.stringify(body||0);if(SP.playBusy&&SP.playBusy===key&&Date.now()-SP.playAt<1500)return;SP.playBusy=key;SP.playAt=Date.now();try{await spPlay2(body,dev)}finally{setTimeout(function(){if(SP.playBusy===key)SP.playBusy=null},1500)}}
-async function spPlay2(body,dev){if(!dev&&spDrmBad()&&(!SP.st||!SP.st.device||SP.st.device.id===SP.sdkDev)){await spDevices();var po=spPickOther();if(po){dev=po.id;try{await spApi("PUT","/me/player",{device_ids:[po.id],play:false})}catch(_){}}}
+async function spPlay2(body,dev){/* 1.9.10: the web player is not loaded at start-up any more; playing from Regis starts it, and with no device playing yet it waits briefly for it */
+  if(!SP.sdk&&!dev&&spPlayerOK()&&!spDrmBad()){spSdk();if(!(SP.st&&SP.st.device)){for(var sw=0;sw<20&&!SP.sdkDev;sw++)await new Promise(function(r){setTimeout(r,200)})}}
+  if(!dev&&spDrmBad()&&(!SP.st||!SP.st.device||SP.st.device.id===SP.sdkDev)){await spDevices();var po=spPickOther();if(po){dev=po.id;try{await spApi("PUT","/me/player",{device_ids:[po.id],play:false})}catch(_){}}}
   var q=dev?"?device_id="+dev:(SP.st&&SP.st.device?"":(SP.sdkDev?"?device_id="+SP.sdkDev:(SP.devs[0]?"?device_id="+SP.devs[0].id:"")));try{await spApi("PUT","/me/player/play"+q,body);setTimeout(spPoll,500)}catch(e){if(e.status===404){var d=await spDevices();if(d.length){try{await spApi("PUT","/me/player",{device_ids:[d[0].id],play:false});await spApi("PUT","/me/player/play?device_id="+d[0].id,body);setTimeout(spPoll,600);return}catch(e2){spErr(e2);return}}}spErr(e)}}
 async function spDevices(){try{var r=await spApi("GET","/me/player/devices");SP.devs=(r&&r.devices)||[]}catch(_){SP.devs=[]}return SP.devs}
 async function spCtl(k){if(!SP.st&&k!=="toggle"){await spPoll()}
@@ -5405,7 +5412,7 @@ function spPbErr(e){spLog("pb-error",e&&e.message);spRescue("playback_error")}
 /* stall watchdog: playing, not loading, but the position stopped moving for 3 checks */
 setInterval(function(){if(!SP.sdk||!spLocal()||document.hidden)return;SP.sdk.getCurrentState().then(function(x){if(!x||x.paused||x.loading){SP.stN=0;SP.stP=x?x.position:-1;return}
   var d=x.duration||0;if(x.position===SP.stP&&x.position>0&&(!d||x.position<d-2500)){SP.stN=(SP.stN||0)+1;if(SP.stN>=3){SP.stN=0;spRescue("stall at "+Math.round(x.position/1000)+"s")}}else SP.stN=0;SP.stP=x.position}).catch(function(){})},1000);
-function spSdk(){if(SP.sdk||SP.sdkTried||!spPlayerOK())return;SP.sdkTried=1;var sc=document.createElement("script");sc.src="https://sdk.scdn.co/spotify-player.js";sc.async=true;document.head.appendChild(sc);
+function spSdk(){SP.sdkWant=1;if(SP.sdk||SP.sdkTried||!spPlayerOK())return;SP.sdkTried=1;var sc=document.createElement("script");sc.src="https://sdk.scdn.co/spotify-player.js";sc.async=true;document.head.appendChild(sc);
   window.onSpotifyWebPlaybackSDKReady=function(){try{SP.sdk=new Spotify.Player({name:"Regis",getOAuthToken:function(cb){spFresh().then(cb)},volume:.6});SP.sdk.addListener("ready",function(x){SP.sdkDev=x.device_id;spLog("ready",x.device_id);spPoll().then(function(){if((!SP.st||!SP.st.device)&&!spDrmBad()){spApi("PUT","/me/player",{device_ids:[x.device_id],play:false}).then(function(){setTimeout(spPoll,500)}).catch(function(){})}})});SP.sdk.addListener("authentication_error",function(e){spLog("authentication_error",e&&e.message);toast("Spotify needs you to sign in again.","bad")});SP.sdk.addListener("account_error",function(e){spLog("account_error",e&&e.message);toast("The web player needs Spotify Premium.","bad")});SP.sdk.addListener("playback_error",function(e){spLog("playback_error",e&&e.message);spPbErr(e)});
     SP.sdk.addListener("player_state_changed",function(x){if(!x)return;SP.sdkAt=Date.now();var c=x.track_window&&x.track_window.current_track;spLog("state",{pos:x.position,paused:x.paused,loading:x.loading,track:c&&c.name,shuf:x.shuffle,rs:x.repeat_mode,why:x.disallows&&Object.keys(x.disallows).filter(function(k){return x.disallows[k]}).join("+")});
       if(c&&(spLocal()||spHeld()||!SP.st||!SP.st.item||(SP.st.device&&SP.st.device.id===SP.sdkDev))&&!SP.seeking)spFromSdk(x);
@@ -7997,7 +8004,7 @@ async function cmAct(a,b){if(!cmOk())return;var C=APP.comm,id=b.dataset.id;
     if(a==="cmx-pop"){await C.float(id);toast("Chat popped out. Drag it anywhere; it stays on top of every page.","good");return}
     if(a==="cmx-reload"){await C.reload(id);return}
     if(a==="cmx-menu"){var c2=cmApps().find(function(x){return x.id===id});if(!c2)return;var r=b.getBoundingClientRect();
-      bwPopAt(r.right-240,r.bottom+6,'<button role="menuitem" type="button" data-act="cmx-bgt" data-id="'+esc(id)+'"><span>'+(c2.bg!==false?"✓ ":"")+'Keep running for notifications</span></button><hr><button role="menuitem" type="button" data-act="cmx-rm" data-id="'+esc(id)+'"><span>Remove '+esc(c2.name)+'…</span></button>',"cm");return}
+      bwPopAt(r.right-240,r.bottom+6,'<button role="menuitem" type="button" data-act="cmx-bgt" data-id="'+esc(id)+'"><span>'+(c2.bg!==false?"✓ ":"")+'Keep running for notifications'+(c2.mb?'<small class="cmx-mb">'+(c2.bg!==false?"Uses about "+c2.mb+" MB all the time":"Uses about "+c2.mb+" MB while open; closes 5 minutes after you leave it")+'</small>':(c2.bg===false?'<small class="cmx-mb">Off: opens when you open it, closes 5 minutes after you leave it</small>':''))+'</span></button><hr><button role="menuitem" type="button" data-act="cmx-rm" data-id="'+esc(id)+'"><span>Remove '+esc(c2.name)+'…</span></button>',"cm");return}
     if(a==="cmx-bgt"){bwBmClose();var c3=cmApps().find(function(x){return x.id===id});if(c3)await C.bg(id,c3.bg===false);return}
     if(a==="cmx-rm"){bwBmClose();var c4=cmApps().find(function(x){return x.id===id});if(!c4)return;if(!confirm("Remove "+c4.name+" from Comm? You'll be signed out of it here."))return;await C.remove(id,true);toast(c4.name+" removed.","good");return}
     if(a==="cmx-phonelink"){await C.phoneLink();return}
@@ -8015,7 +8022,7 @@ setTimeout(function(){if(APP&&APP.linkMode)APP.linkMode(linkHere()).catch(functi
 /* 1.8.3 full screen: the button and F11 both use the desktop window's true full screen (no Windows title bar); the page follows its state */
 if(APP&&APP.onFullscreen)APP.onFullscreen(function(v){setFs(!!v)});
 if(APP&&APP.fsState)APP.fsState().then(function(v){setFs(!!v)}).catch(function(){});
-var SHELL_NEED="1.9.8";
+var SHELL_NEED="1.9.10";
 function vLt(a,b){a=String(a||"0").split(".").map(Number);b=String(b||"0").split(".").map(Number);for(var i=0;i<3;i++){if((a[i]||0)!==(b[i]||0))return (a[i]||0)<(b[i]||0)}return false}
 function shellCheck(){if(!APP||!APP.getStatus)return;APP.getStatus().then(function(st){var sh=st&&st.shell;if(sh&&!vLt(sh,SHELL_NEED))return;
   var skip="";try{skip=localStorage.getItem("regis-shell-skip")||""}catch(_){}if(skip===SHELL_NEED)return;

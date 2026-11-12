@@ -143,6 +143,9 @@ class OfficeDock {
   async releaseAll() { clearTimeout(this.timer); if (!this.ps) return; try { await this._cmd({ op: 'bye' }, 5000); } catch (_) {} try { this.ps.stdin.end(); } catch (_) {} }
   async rescue() { try { await this._cmd({ op: 'rescue' }, 8000); } catch (_) {} }
   stop() { clearTimeout(this.timer); if (this.ps) { try { this.ps.stdin.end(); } catch (_) {} } }
+  /* 1.9.10: the PowerShell helper uses 60-90 MB; stop it once nothing has been docked or asked for in `ms` (it restarts when needed) */
+  idle(ms) { const busy = this.visible || (this.docs && this.docs.size) || (this.wait && this.wait.size) || (this.expect && this.expect.until > Date.now());
+    if (!this.ps || busy) { this.lastBusy = Date.now(); return false; } if (Date.now() - (this.lastBusy || 0) < ms) return false; this.stop(); this.lastBusy = Date.now(); return true; }
 }
 
 module.exports = { OfficeDock, kindOf };

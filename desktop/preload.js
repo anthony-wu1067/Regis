@@ -5,7 +5,7 @@ contextBridge.exposeInMainWorld('regisBridge', {
   dbLoad: () => call('db:load'), dbSave: (db) => call('db:save', db),
   tool: (server, tool, input) => call('mcp:call', server, tool, input),
   sample: (input, opts) => call('claude:sample', input, opts),
-  getStatus: () => call('app:status'), saveGoogle: (v) => call('app:saveGoogle', v), connectGoogle: () => call('app:connectGoogle'),
+  getStatus: () => call('app:status'), audible: () => call('app:audible'), memory: () => call('app:memory'), saveGoogle: (v) => call('app:saveGoogle', v), connectGoogle: () => call('app:connectGoogle'),
   disconnectGoogle: () => call('app:disconnectGoogle'), saveCanvas: (v) => call('app:saveCanvas', v), removeCanvas: () => call('app:removeCanvas'), saveKey: (k) => call('app:saveKey', k), setOpenAtLogin: (b) => call('app:openAtLogin', b),
   onGpuReset: (cb) => { ipcRenderer.on('app:gpuReset', () => { try { cb(); } catch (_) {} }); },
   fullscreen: (on) => call('win:fullscreen', on), fsState: () => call('win:fsState'), onFullscreen: (cb) => { ipcRenderer.on('win:fs', (_e, v) => { try { cb(!!v); } catch (_) {} }); },

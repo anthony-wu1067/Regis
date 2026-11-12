@@ -7,6 +7,7 @@ const { Google, signIn } = require('./lib/google');
 const { Anthropic } = require('./lib/anthropic');
 const { agentList } = require('./lib/agents');
 const { teamKit } = require('./lib/teamkit');
+const memwatch = require('./lib/memwatch');
 const { AlertFloat } = require('./lib/alert-float');
 const { Ollama, localBase } = require('./lib/ollama');
 let alertFloat = null;
@@ -108,12 +109,33 @@ function createWindow() {
   win.on('enter-full-screen', () => { if (!win.isDestroyed()) win.webContents.send('win:fs', true); });
   win.on('leave-full-screen', () => { if (!win.isDestroyed()) win.webContents.send('win:fs', false); });
   win.on('closed', () => { win = null; if (mini) mini.reset(); });
+  /* 1.9.9: if the Regis page's own renderer dies, load it again (instead of leaving a dead window); note hangs in the events log */
+  const me = win;
+  win.webContents.on('render-process-gone', (_e, d) => { evlog('REGIS-PAGE gone ' + (d && d.reason) + ' ' + (d && d.exitCode)); if (d && d.reason !== 'clean-exit') setTimeout(() => { try { if (!me.isDestroyed()) me.webContents.reload(); } catch (_) {} }, 600); });
+  win.on('unresponsive', () => evlog('REGIS-PAGE not responding ' + screenState()));
+  win.on('responsive', () => evlog('REGIS-PAGE responding again'));
   win.webContents.on('did-finish-load', () => { if (updater && runningVersion) { const p = updater.pending(runningVersion); if (p) win.webContents.send('update:ready', p.version); } });
   win.webContents.on('did-finish-load', () => { if (mini && mini.on) win.webContents.send('mini:state', true); });
 }
 
+/* 1.9.9 white-screen safety net. regis-events.log lines (time, what happened, what was on screen; no addresses, no content) */
+function evlog(line) { try { require('fs').appendFileSync(path.join(app.getPath('userData'), 'regis-events.log'), new Date().toISOString() + ' ' + line + '\n'); } catch (_) {} }
+function screenState() {
+  try { const w = win && !win.isDestroyed() ? win : null, b = browserHost;
+    return '[window ' + (!w ? 'none' : !w.isVisible() ? 'hidden' : w.isMinimized() ? 'minimised' : w.isFullScreen() ? 'full screen' : w.isMaximized() ? 'maximised' : 'normal') +
+      (b && b.visible ? ', browser tab shown' + (b.attached && b.tabs.some((t) => t.view === b.attached && t.loading) ? ' (loading)' : '') + (b.vfs ? ', video full screen' : '') : '') +
+      (commHost && [...commHost.views.values()].some((v) => v.shown) ? ', chat app shown' : '') + ']'; } catch (_) { return '[?]'; } }
+/* after the graphics process restarts: ask every visible surface for a fresh frame (main page, the shown tab, the shown chat app) */
+function repaintAll(why) {
+  try { if (win && !win.isDestroyed() && win.isVisible()) win.webContents.invalidate(); } catch (_) {}
+  let r = {}; try { if (browserHost) r = browserHost.repaint(); } catch (_) {}
+  try { if (commHost) commHost.repaint(); } catch (_) {}
+  if (why === 'gpu') evlog('repainted after GPU restart' + (r.tab ? ' (tab' + (r.loading ? ', loading' : '') + ')' : ''));
+}
 /* keep audio smooth: do not let Chromium slow the page down when the window is behind others or minimised to the tray */
-for (const sw of ['disable-renderer-backgrounding', 'disable-backgrounding-occluded-windows', 'disable-background-timer-throttling']) app.commandLine.appendSwitch(sw);
+/* 1.9.10: these used to be switched on for the whole app (every hidden tab ran at full speed and could not be trimmed). The Regis
+   window keeps running in the background through its own backgroundThrottling:false, which is what Spotify needs; tabs are throttled
+   when hidden, like in Chrome. */
 /* 1.9.5: after a few graphics-process crashes Chromium stops using the graphics card for the rest of the session (WebGL off: the
    Firewall / Waterwall backgrounds went blank). The owner's Intel driver crashes it several times an evening; keep restarting it. */
 app.commandLine.appendSwitch('disable-gpu-process-crash-limit');
@@ -138,6 +160,8 @@ app.whenReady().then(async () => {
   session.defaultSession.setPermissionRequestHandler((_wc, perm, cb) => cb(perm === 'media' || perm === 'protected-media-identifier'));
   session.defaultSession.setPermissionCheckHandler((_wc, perm) => perm === 'media' || perm === 'protected-media-identifier');
   ipcMain.handle('app:drm', wrap(() => DRM));
+  ipcMain.handle('app:audible', wrap(() => !!(win && !win.isDestroyed() && win.webContents.isCurrentlyAudible())));   /* 1.9.10: is the Regis page playing sound? */
+  ipcMain.handle('app:memory', wrap(() => memwatch.info()));
   ipcMain.handle('app:linkMode', wrap((inApp) => { linkInApp = !!inApp; return linkInApp; }));
   /* a site's icon for a shortcut: fetched here (pages can't, because of web security rules); images only, small, http(s) sites only */
   ipcMain.handle('app:favicon', wrap(async (u) => {
@@ -236,11 +260,14 @@ app.whenReady().then(async () => {
   const dl = new Downloads({ dir: app.getPath('downloads'), load: () => { try { return JSON.parse(store.getMeta('downloads', '[]') || '[]'); } catch (_) { return []; } }, save: (l) => store.setMeta('downloads', JSON.stringify(l)), onChange: (l) => send('browser:downloads', l), onDone: (d) => send('browser:dldone', d) });
   dl.attach(session.fromPartition(PARTITION));
   const bw = browserHost;
+  /* 1.9.10 memory housekeeping, once a minute: tabs follow their sleeping rules (lib/browser.js), unused chat apps close, idle Office helpers stop */
+  bw.pressure = memwatch.pressure;
+  setInterval(() => { const hot = memwatch.pressure(); try { if (commHost) commHost.idle(hot); } catch (_) {} try { if (officeDock) officeDock.idle(10 * 60000); } catch (_) {} try { if (plDock) plDock.idle(10 * 60000); } catch (_) {} }, +process.env.REGIS_HOUSEKEEP_MS || 60000);
   /* 1.9.0: if the graphics process restarts, the page redraws its backgrounds (pre-drawn layers are lost otherwise) */
   app.on('child-process-gone', (_e, d) => {
     /* a small log so a crash can be confirmed later: <userData>/regis-events.log (type, reason, exit code; nothing personal) */
-    try { require('fs').appendFileSync(path.join(app.getPath('userData'), 'regis-events.log'), new Date().toISOString() + ' ' + (d && d.type) + ' ' + (d && d.reason) + ' ' + (d && d.exitCode) + '\n'); } catch (_) {}
-    if (d && d.type === 'GPU') setTimeout(() => send('app:gpuReset', true), 1200);
+    evlog((d && d.type) + ' ' + (d && d.reason) + ' ' + (d && d.exitCode) + (d && d.type === 'GPU' ? ' ' + screenState() : ''));
+    if (d && d.type === 'GPU') { setTimeout(() => send('app:gpuReset', true), 1200); setTimeout(() => repaintAll('gpu'), 1500); setTimeout(() => repaintAll('gpu-late'), 5000); }
   });
   bw.onActive = () => { try { if (win && !win.isDestroyed() && win.isVisible() && !win.isMinimized()) win.webContents.send('win:vis', true); } catch (_) {} };
   /* 1.8.5 Chrome extensions, loaded into the browser's session only (never into Regis's own pages) */

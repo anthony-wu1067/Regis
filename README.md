@@ -84,6 +84,25 @@ Appearance now has Home screen, Home clock, Browser, Layout & density, Panels & 
 - **Browser (desktop app)**: signing in to a site offers to save it; matching sign-in pages fill from the unlocked Vault. Bookmarks can live in folders; tabs can be grouped (the ⊞ on a tab) and collapsed. Sidebar names are off by default, hover shows them.
 - Updating the desktop app: install `Regis-app.zip` once, because `main.js`, `preload.js` and the new `lib/bw-preload.js` changed.
 
+## 1.9.10 Uses less memory
+
+Measured in a clean test copy: Regis starts at about 730 MB instead of 1,080 MB (4 processes instead of 6), and is about 300 MB lighter with tabs open too.
+
+- **Spotify player only when used.** The player is no longer loaded at start-up. It loads when you open Music or press play, and the embedded player goes away when you leave Music, unless it is playing. This also stops the DRM (Widevine) process from starting at launch.
+- **Hidden tabs slow down, like in Chrome.** Before, every tab you weren't looking at kept running at full speed. The Regis window itself still runs at full speed, so music keeps playing when it is minimised.
+- **Fewer awake tabs.** At most 4 hidden tabs stay awake; older ones sleep after 2 minutes (they stay in the tab strip and reload when you open them). When the laptop is short of memory (under 1 GB free), every hidden tab sleeps after 3 minutes. A tab playing sound never sleeps.
+- **Chat apps:** each app's menu now shows how much memory it uses. Turn off "Keep running for notifications" for an app you don't need notifications from, and it closes 5 minutes after you leave it, then opens again when you go back. Your Discord, Instagram and Teams are all set to keep running, so nothing changes for them until you switch one off.
+- **Small things:** the alert window closes a minute after there is nothing to show, the site-icon cache is smaller, and the Office and Phone Link helpers stop after 10 idle minutes.
+- **Update the desktop app once** (`Regis-app.zip`).
+
+## 1.9.9 White-screen safety net
+
+- **What the white screen was:** your laptop's Intel graphics driver (version 32.0.101.5763, from July 2024) keeps failing. Windows recorded 223 graphics-driver failures ("live dumps") in ten days, starting before Regis was first run on this laptop, and Regis's own graphics process crashed 92 times in three days. Last night's white screen lines up with one of them (12:31 AM). It is not caused by a page or a tab.
+- **The real fix is on your side: update the Intel graphics driver** (Intel Driver & Support Assistant, or the laptop maker's support page). Regis cannot do that for you.
+- **What Regis now does when it happens:** after the graphics process restarts, Regis makes the window, the tab you are looking at and any chat app on screen draw themselves again, so a blank window should come back by itself within a few seconds. If the Regis page itself ever crashes, it reloads instead of staying blank.
+- **Better evidence next time:** `regis-events.log` (in your Regis data folder) now also notes what was on screen when the graphics process crashed, and when the window stops or starts responding. No addresses or content are written.
+- **Update the desktop app once** (`Regis-app.zip`).
+
 ## 1.9.8 AI teams, Phase 2: team dashboards, task and run history, personas, soul.md, the Office
 
 - **Every team has a full dashboard**, and all four use the same one, filled with that team's data. Sections: Overview, Tasks, Members, Tools & workflows, Memory, Activity, AI usage & limits. The header shows the team, its mission, the lead, whether it is working, its routing rule and today's Claude spend.

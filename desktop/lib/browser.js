@@ -6,6 +6,7 @@ const { WebContentsView, session, Menu, clipboard } = require('electron');
 const path = require('path');
 
 const PARTITION = 'persist:regis-browser';
+const KEEP_AWAKE = 4, SCALE = +process.env.REGIS_SLEEP_SCALE || 1;   /* SCALE only speeds the sleeping rules up in tests */
 const AD_HOSTS = ['doubleclick.net', 'googlesyndication.com', 'googleadservices.com', 'adservice.google.com', 'adnxs.com', 'taboola.com', 'outbrain.com', 'criteo.com', 'criteo.net',
   'scorecardresearch.com', 'quantserve.com', 'moatads.com', 'adsrvr.org', 'pubmatic.com', 'rubiconproject.com', 'openx.net', 'amazon-adsystem.com', 'hotjar.com', 'adform.net', 'smartadserver.com', 'casalemedia.com', 'advertising.com', 'yieldmo.com'];
 const AD_SET = new Set(AD_HOSTS);
@@ -91,7 +92,7 @@ class BrowserHost {
       if (!host) return false; const k = d && d.mediaType === 'video' ? 'video' : d && d.mediaType === 'audio' ? 'audio' : '';
       return !(s && (k ? s[k] === 'block' : (s.audio === 'block' && s.video === 'block')));
     });
-    clearInterval(this.sleepT); this.sleepT = setInterval(() => this._sleepIdle(), 60000);
+    clearInterval(this.sleepT); this.sleepT = setInterval(() => this._sleepIdle(), 60000 / SCALE);
     ses.webRequest.onBeforeRequest((d, cb) => {
       if (this.shield && d.resourceType !== 'mainFrame') { try { if (hostBlocked(new URL(d.url).hostname)) { this.blocked++; this._emitSoon(); return cb({ cancel: true }); } } catch (_) {} }
       cb({});
@@ -234,13 +235,20 @@ class BrowserHost {
   /* site icon for the tab strip: fetched with the tab's own session, small images only, kept per address */
   async _icon(t, url) { if (!url || !/^https?:|^data:image\//i.test(url)) return; if (this.icons.has(url)) { t.icon = this.icons.get(url); this._emitSoon(); return; }
     if (/^data:image\//i.test(url)) { if (url.length < 120000) { this.icons.set(url, url); t.icon = url; this._emitSoon(); } return; }
-    try { const r = await this.ses.fetch(url); if (!r.ok) return; const ty = String(r.headers.get('content-type') || '').split(';')[0]; if (!/^image\//.test(ty)) return; const b = Buffer.from(await r.arrayBuffer()); if (b.length > 90000) return;
-      const d = 'data:' + ty + ';base64,' + b.toString('base64'); if (this.icons.size > 200) this.icons.clear(); this.icons.set(url, d); t.icon = d; this._emitSoon(); } catch (_) {} }
+    try { const r = await this.ses.fetch(url); if (!r.ok) return; const ty = String(r.headers.get('content-type') || '').split(';')[0]; if (!/^image\//.test(ty)) return; const b = Buffer.from(await r.arrayBuffer()); if (b.length > 40000) return;
+      const d = 'data:' + ty + ';base64,' + b.toString('base64'); if (this.icons.size > 80) this.icons.clear(); this.icons.set(url, d); t.icon = d; this._emitSoon(); } catch (_) {} }
   /* sleeping tabs: a tab you haven't looked at for a while (and that isn't playing sound) gives its memory back; it reloads when you open it */
   sleep(id) { const t = this._tab(id); if (!t || !t.view || t.id === this.active || !isWeb(t.url)) return false; t.asleep = true; t.audible = false; t.loading = false; this._drop(t); this._emit(); return true; }
   _wake(t) { t.asleep = false; t.quiet = true; if (isWeb(t.url)) { const v = this._ensureView(t); v.webContents.loadURL(t.url).catch(() => {}); } }
-  _sleepIdle() { if (!this.sleepMin) return; const lim = Date.now() - this.sleepMin * 60000; let n = 0;
-    for (const t of this.tabs) { if (t.id !== this.active && t.view && !t.audible && !t.asleep && (t.last || t.born || 0) < lim) { if (this.sleep(t.id)) n++; } } return n; }
+  /* sleeping rules (checked every minute): a hidden tab sleeps after the owner's time (Settings); 1.9.10 adds two more:
+     no more than KEEP_AWAKE hidden tabs stay awake (the least recently seen sleep first, after 2 minutes unseen), and when the
+     computer is short of memory every hidden tab sleeps after 3 minutes. A tab that is playing sound, loading or shown never sleeps. */
+  _sleepIdle() { const now = Date.now(), seen = (t) => t.last || t.born || 0, hot = this.pressure && this.pressure(); let n = 0;
+    const cand = this.tabs.filter((t) => t.id !== this.active && t.view && !t.audible && !t.asleep && !t.loading);
+    for (const t of cand) { const idle = now - seen(t); if ((this.sleepMin && idle > this.sleepMin * 60000 / SCALE) || (hot && idle > 180000 / SCALE)) { if (this.sleep(t.id)) n++; } }
+    const awake = cand.filter((t) => !t.asleep).sort((a, b) => seen(b) - seen(a));
+    awake.slice(KEEP_AWAKE).forEach((t) => { if (now - seen(t) > 120000 / SCALE && this.sleep(t.id)) n++; });
+    return n; }
   setSleep(min) { this.sleepMin = Math.max(0, Math.min(720, +min || 0)); this._emit(); return this.sleepMin; }
   move(id, to) { const i = this.tabs.findIndex((t) => t.id === id); if (i < 0) return false; const t = this.tabs.splice(i, 1)[0]; to = Math.max(0, Math.min(this.tabs.length, +to || 0)); this.tabs.splice(to, 0, t); this._emit(); return true; }
   duplicate(id) { const t = this._tab(id); if (!t || !isWeb(t.url)) return false; const n = this.open(t.url); const i = this.tabs.findIndex((x) => x.id === id); this.move(n, i + 1); return n; }
@@ -292,6 +300,16 @@ class BrowserHost {
   }
   async fill(id, user, pass) { const wc = this._wc(id); if (!wc || !secureUrl(wc.getURL())) return { user: false, pass: false, insecure: !!wc }; try { return await wc.executeJavaScript(fillJS(user, pass)); } catch (_) { return { user: false, pass: false }; } }
   setShield(on) { this.shield = !!on; this._emit(); return this.shield; }
+  /* 1.9.9: after the graphics process restarts, make the visible tab draw a fresh frame. invalidate() asks for a repaint; the 1 px
+     resize and back makes Windows rebuild the view's surface, which a driver-level failure can leave blank (the owner saw a plain
+     white/grey window). Hidden and sleeping tabs are left alone: they redraw when shown. Returns what was on screen, for the log. */
+  repaint() {
+    const v = this.attached; if (!v || !this.visible) return { tab: false };
+    const t = this.tabs.find((x) => x.view === v);
+    try { v.webContents.invalidate(); } catch (_) {}
+    try { const b = v.getBounds(); if (b.width > 2) { v.setBounds(Object.assign({}, b, { width: b.width - 1 })); setTimeout(() => { if (this.attached === v) { if (this.vfs && t && this.vfs.tab === t.id) this._vfsFit(); else v.setBounds(this.bounds); } }, 80); } } catch (_) {}
+    return { tab: true, loading: !!(t && t.loading), videoFullScreen: !!this.vfs };
+  }
   destroy() { this.flush(); clearInterval(this.sleepT); this.tabs.slice().forEach((t) => { try { t.view && t.view.webContents.close(); } catch (_) {} }); this.tabs = []; this.attached = null; }
 }
 module.exports = { BrowserHost, resolveInput, hostBlocked, fillJS, keyAction, secureUrl, errPage, isSignIn, PARTITION };

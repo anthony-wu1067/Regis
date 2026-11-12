@@ -1,4 +1,4 @@
-# Regis handoff (written 2026-11-10, updated for version 1.9.8)
+# Regis handoff (written 2026-11-10, updated for version 1.9.10)
 
 Start a new session with: **"Read HANDOFF.md, then …your request…"**.
 `CLAUDE.md` is loaded automatically in every session and holds the per-version technical notes, so this file does not repeat them. It covers the current state, how to release, how to test, what is still open, and the mistakes not to repeat.
@@ -12,7 +12,7 @@ The owner's personal command centre: mail, calendar, tasks, a built-in browser, 
 The owner is not a developer. Explain in plain words, test everything, and never screenshot their real screen.
 
 ## 2. Current state
-- **Version 1.9.7** is installed on the owner's PC and pushed to GitHub. **Version 1.9.8** (AI teams, Phase 2) is built in this folder with both zips in `release/`; it is **not installed or pushed** until the owner says so.
+- **Version 1.9.9** is installed on the owner's PC (not pushed). **Version 1.9.10** (memory savings) is built in this folder with both zips in `release/`; not installed or pushed until the owner says so.
 - Install source folder: `C:\Users\godsp\Downloads\Regis-app` (holds `node_modules` with the castlabs Electron; never delete it).
 - User data: `%APPDATA%\Regis` (`regis-data.json`, `regis-secrets.json`, `regis-events.log` = crash log).
 - Machine: Windows 11, i5-1335U, 12 GB RAM, Intel Iris Xe. Python is `py` (not `python`). `gh` is not installed.
@@ -20,6 +20,8 @@ The owner is not a developer. Explain in plain words, test everything, and never
 ### What exists (newest first)
 | Version | What it added |
 |---|---|
+| 1.9.10 | Memory: Spotify player on demand, hidden tabs throttled, at most 4 awake hidden tabs, memory-pressure sleeping, unused chat apps close, alert window and Office helpers cleaned up (start-up 1.08 GB -> 0.73 GB) |
+| 1.9.9 | White-screen safety net: repaint after GPU restarts, Regis page reloads if its renderer dies, richer events log. Root cause is the Intel driver (see CLAUDE.md) |
 | 1.9.8 | AI teams Phase 2 (spec: the owner's "phase 2 implementation.pdf"): persistent tasks and run history in the app, usage reporting, one reusable team dashboard, named members with personas, soul.md upload, approval foundation, the Office tab in the left rail driven by real state; extension icons only when pinned |
 | 1.9.7 | AI teams Phase 1 (see `AI_TEAM_ARCHITECTURE.md`): team model under the four leads, specialists, team memory, tool and workflow registries, deterministic local-first router for queued tasks, Claude ledger with hard per-task / per-team / global caps on every Claude path, team card on the dashboard |
 | 1.9.6 | The base (five rooms, terrace, hallways, lift), the owner's own character pictures with blinks, walking and desk work, Luna renamed Alicia, rail icons, "/" on a new tab, no autoplay in reopened tabs, in-place "Add to Regis" on the Web Store |
@@ -55,7 +57,7 @@ Run a UI suite with its output in a file (from `desktop/`):
 ```bash
 timeout 420 node_modules/electron/dist/electron.exe ../tools/rt.js test/teams.test.js /path/to/log.txt; grep -E '^FAIL| passed' /path/to/log.txt
 ```
-Suites and expected counts: `orch` 35, `guild` 36, `teams` 64, `localai` 16, `browser` 67, `tabs` 29, `browser-ui` 16, `comm` 18, `fullscreen` 11, `extensions` 21 (needs network), `youtube` 9, `spotify` 10, `music` 30 (slow, about 6 minutes; give it `timeout 900`), `office` 14 (opens desktop PowerPoint: skip unless needed). Unit tests: `cd desktop && npm test` (22 + 35 + 11 + 50 + 79). The web tests need Playwright, which is not installed.
+Suites and expected counts: `memory` 22, `gpu` 12, `orch` 35, `guild` 36, `teams` 64, `localai` 16, `browser` 67, `tabs` 29, `browser-ui` 16, `comm` 18, `fullscreen` 11, `extensions` 21 (needs network), `youtube` 9, `spotify` 10, `music` 30 (slow, about 6 minutes; give it `timeout 900`), `office` 14 (opens desktop PowerPoint: skip unless needed). Unit tests: `cd desktop && npm test` (22 + 35 + 11 + 50 + 79). The web tests need Playwright, which is not installed.
 
 Known test quirks:
 - Each suite uses its own temp profile, so the owner's running Regis is not touched. Several suites can run one after another in the background.
